@@ -1,6 +1,6 @@
 import Pkg
 using Dates
-Pkg.activate("..")
+Pkg.activate(".")
 include("../Shared Code/ExperimentUtilities.jl")
 
 # cli args
