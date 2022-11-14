@@ -23,13 +23,14 @@ if test
 else
     NBPARAMS = Dict(
         # The product of these two numbers will be the total number of tests. (10000000)
-        "squares_to_test" => 1000,
-        "samples_per_square" => 10000,
+        "squares_to_test" => 100000,
+        "samples_per_square" => 1000,
     )
 end
 
 progress_update("Checking reachability function to build figure fig:NoRecovery...")
-progress_update("Time to complete is approximately ?? minutes. (less than 1 with argument --test)")
+estimated_time = (1.24e-6)*NBPARAMS["squares_to_test"]*NBPARAMS["samples_per_square"]*19 + 60
+progress_update("Estimated time: $(estimated_time) seconds")
 
 
 include("Reliability of Barbaric Method.jl")
