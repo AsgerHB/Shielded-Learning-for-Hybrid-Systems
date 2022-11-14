@@ -1,4 +1,5 @@
 import Pkg
+using Dates
 Pkg.activate("..")
 include("../Shared Code/ExperimentUtilities.jl")
 
@@ -24,6 +25,9 @@ else
         "samples_per_axis" => 20
     )
 end
+
+progress_update("Synthesizing safe strategies to build figure fig:NoRecovery.")
+progress_update("Time to complete is approximately 50 minutes. (2 minutes with argument --test)")
     
 
 include("BB No Recovery.jl")
@@ -35,4 +39,4 @@ savefig(p1, "$fig_norecovery.png")
 savefig(p1, "$fig_norecovery.svg")
 display(p1)
 
-println("Saved $fig_norecovery to $(abspath(fig_norecovery)).png")
+progress_update("Saved $fig_norecovery to $(abspath(fig_norecovery)).png")
