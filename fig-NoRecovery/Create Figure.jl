@@ -1,3 +1,7 @@
+import Pkg
+Pkg.activate("..")
+
+
 include("../Shared Code/ExperimentUtilities.jl")
 
 fig_norecovery = "fig-NoRecovery"
