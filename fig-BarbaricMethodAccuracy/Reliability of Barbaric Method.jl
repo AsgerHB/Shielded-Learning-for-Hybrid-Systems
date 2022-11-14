@@ -16,7 +16,6 @@ end
 
 # ╔═╡ 80e9500c-3367-11ed-3083-0d3c4e19390c
 begin
-	using ReachabilityAnalysis
 	using Plots
 	using PlutoUI
 	include("../Shared Code/ExperimentUtilities.jl")
