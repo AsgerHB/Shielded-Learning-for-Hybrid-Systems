@@ -52,9 +52,13 @@ savefig(p2, joinpath(results_dir, "$(figure_name)2.svg"))
 progress_update("Saved $(figure_name)1")
 progress_update("Saved $(figure_name)2")
 
-progress_update("Raw Data:")
-progress_update("spa_values: $spa_values")
-progress_update("accuracies: $accuracies")
+open(joinpath(results_dir, "rawdata.txt"), "a") do file
+    println(file, "spa_values: $spa_values")
+    println(file, "accuracies: $accuracies")
+ end
+
+
+progress_update("Saved rawdata.txt")
 
 progress_update("Done with $figure_name.")
 progress_update("====================================")
