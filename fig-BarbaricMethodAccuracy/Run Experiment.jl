@@ -9,10 +9,16 @@ if haskey(args, "help")
     print("""
     --help              Display this help and exit.
     --test              Test-mode. Produce potentially useless results, but fast. Useful for testing if everything is set up.
+    --results-dir       Results will be saved in an appropriately named subdirectory. Directory will be created if it does not exist.
+                        Default: '~/Results'
     """)
     exit()
 end
 test = haskey(args, "test")
+results_dir = get(args, "results-dir", "$(homedir())/Results")
+figure_name = "fig-BarbaricMethodAccuracy"
+results_dir = joinpath(results_dir, figure_name)
+mkpath(results_dir)
 
 if test
     NBPARAMS = Dict(
@@ -35,13 +41,20 @@ progress_update("Estimated time: $(estimated_time) seconds")
 
 include("Reliability of Barbaric Method.jl")
 
-fig_barbaricmethodaccuracy = "fig-BarbaricMethodAccuracy"
+progress_update("Computation done.")
+progress_update("Saving  to $results_dir")
 
 # Figure saved in notebook as p1 etc...
-savefig(p1, "$(fig_barbaricmethodaccuracy)1.png")
-savefig(p1, "$(fig_barbaricmethodaccuracy)1.svg")
-savefig(p2, "$(fig_barbaricmethodaccuracy)2.png")
-savefig(p2, "$(fig_barbaricmethodaccuracy)2.svg")
+savefig(p1, joinpath(results_dir, "$(figure_name)1.png"))
+savefig(p1, joinpath(results_dir, "$(figure_name)1.svg"))
+savefig(p2, joinpath(results_dir, "$(figure_name)2.png"))
+savefig(p2, joinpath(results_dir, "$(figure_name)2.svg"))
+progress_update("Saved $(figure_name)1")
+progress_update("Saved $(figure_name)2")
 
-progress_update("Saved $(fig_barbaricmethodaccuracy)1 to $(abspath(fig_barbaricmethodaccuracy))1.png")
-progress_update("Saved $(fig_barbaricmethodaccuracy)2 to $(abspath(fig_barbaricmethodaccuracy))2.png")
+progress_update("Raw Data:")
+progress_update("spa_values: $spa_values")
+progress_update("accuracies: $accuracies")
+
+progress_update("Done with $figure_name.")
+progress_update("====================================")

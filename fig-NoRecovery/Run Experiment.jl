@@ -9,10 +9,16 @@ if haskey(args, "help")
     print("""
     --help              Display this help and exit.
     --test              Test-mode. Produce potentially useless results, but fast. Useful for testing if everything is set up.
+    --results-dir       Results will be saved in an appropriately named subdirectory. Directory will be created if it does not exist.
+                        Default: '~/Results'
     """)
     exit()
 end
 test = haskey(args, "test")
+results_dir = get(args, "results-dir", "$(homedir())/Results")
+figure_name = "fig-NoRecovery"
+results_dir = joinpath(results_dir, figure_name)
+mkpath(results_dir)
 
 if test
     NBPARAMS = Dict(
@@ -32,11 +38,13 @@ progress_update("Time to complete is approximately 50 minutes. (2 minutes with a
 
 include("BB No Recovery.jl")
 
-fig_norecovery = "fig-NoRecovery"
+progress_update("Saving to $results_dir")
 
 # Figure saved in notebook as p1 etc...
-savefig(p1, "$fig_norecovery.png")
-savefig(p1, "$fig_norecovery.svg")
-display(p1)
+savefig(p1, joinpath(results_dir, "$figure_name.png"))
+savefig(p1, joinpath(results_dir, "$figure_name.svg"))
 
-progress_update("Saved $fig_norecovery to $(abspath(fig_norecovery)).png")
+progress_update("Saved $figure_name")
+
+progress_update("Done with $figure_name.")
+progress_update("=========================")

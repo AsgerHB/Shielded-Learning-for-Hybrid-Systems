@@ -32,9 +32,3 @@ docs/site/
 
 # This is a temporary measure. Shared Code provided by a symlink to MyLibrary in the ShieldingCode repo
 Shared Code
-
-# Ignore outputs
-fig-*.png
-fig-*.svg
-tab-*.tex
-tab-*.csv
