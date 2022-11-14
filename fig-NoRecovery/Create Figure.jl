@@ -1,13 +1,16 @@
 import Pkg
 Pkg.activate("..")
-
-
 include("../Shared Code/ExperimentUtilities.jl")
 
-fig_norecovery = "fig-NoRecovery"
-
+# cli args
 args = parse_args(ARGS)
-
+if haskey(args, "help")
+    print("""
+    --help              Display this help and exit.
+    --test              Test-mode. Produce potentially useless results, but fast. Useful for testing if everything is set up.
+    """)
+    exit()
+end
 test = haskey(args, "test")
 
 if test
@@ -24,6 +27,8 @@ end
     
 
 include("BB No Recovery.jl")
+
+fig_norecovery = "fig-NoRecovery"
 
 # Figure saved in notebook as p1 etc...
 savefig(p1, "$fig_norecovery.png")
