@@ -1,3 +1,6 @@
+import Pkg
+using Dates
+Pkg.activate(".")
 include("../Shared Code/ExperimentUtilities.jl")
 
 #########
