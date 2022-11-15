@@ -91,6 +91,7 @@ end
 ##############
 
 if make_barbaric_shields
+    progress_update("Estimated time: $(test ? 60 : 3863) seconds")
     make_and_save_barbaric_shields(samples_per_axiss, barbaric_gridargss, shields_dir)
 else
     progress_update("Skipping synthesis of shields using sampling-based reachability analysis.")
