@@ -1,6 +1,6 @@
 # ReporducibilityPackage
 
-This package was developed and tested on Ubuntu 22.04.1 LTS. These instructions will apply to that operating system.
+This package was developed and tested on Ubuntu 22.04.1 LTS. These instructions apply to that operating system.
 
 Install julia 1.8.2:
 
@@ -11,6 +11,15 @@ Install julia 1.8.2:
 	echo export PATH="$PATH:/home/sammy/julia-1.8.1/bin"
 	echo 'export PATH="$PATH:$HOME/julia-1.8.2/bin"' >> .bashrc 
 	source .bashrc
+
+Install python 3.10:
+
+	sudo apt install python3.10
+
+Create figures by running their corresponding experiment. Shown here for fig-BarbaricMethodAccuracy
+
+	cd path/to/ReproducibilityPackage
+	julia "fig-BarbaricMethodAccuracy/Run Experiment.jl --results-dir ~/Results"
 
 # Scratchpad and remarks
 
