@@ -1,8 +1,19 @@
 # ReporducibilityPackage
 
+## Installation Instructions
+
 This package was developed and tested on Ubuntu 22.04.1 LTS. These instructions apply to that operating system.
 
-Install julia 1.8.2:
+### Install wget
+(or download the things manually idc)
+
+	sudo apt install wget
+
+### Install gcc
+
+	sudo apt install gcc
+
+### Install julia 1.8.2
 
 	cd ~/Downloads
 	wget https://julialang-s3.julialang.org/bin/linux/x64/1.8/julia-1.8.2-linux-x86_64.tar.gz
@@ -12,9 +23,19 @@ Install julia 1.8.2:
 	echo 'export PATH="$PATH:$HOME/julia-1.8.2/bin"' >> .bashrc 
 	source .bashrc
 
-Install python 3.10:
+### Install python 3.10
 
 	sudo apt install python3.10
+	
+### Install UPPAAL STRATEGO 10
+If the following wget request is denied, please visit uppaal.org and follow download instructions.
+
+	mkdir ~/opt
+	cd ~/opt
+	wget https://uppaal.org/dl/uppaal-4.1.20-stratego-10-linux64.zip
+	unzip uppaal-4.1.20-stratego-10-linux64.zip
+
+## How to run
 
 Create figures by running their corresponding experiment. Shown here for fig-BarbaricMethodAccuracy
 

@@ -1,0 +1,154 @@
+using ArgParse
+using Glob
+using Dates
+include("../Shared Code/ExperimentUtilities.jl")
+include("Get libbbshield.jl")
+
+# infix operator "\join" redefined to signify joinpath
+⨝ = joinpath
+
+figure_name = "fig-BBShieldingResultsGroup"
+
+s = ArgParseSettings()
+
+@add_arg_table s begin
+    "--test"
+        help="""Test-mode. Produce potentially useless results, but fast.
+                Useful for testing if everything is set up."""
+        action=:store_true
+
+        "--results-dir"
+            help="""Results will be saved in an appropriately named subdirectory.
+                    Directory will be created if it does not exist."""
+            default=homedir() ⨝ "Results" ⨝ figure_name
+
+        "--shield"
+            help="""Shield file to use for the experiment. 
+                    If the file does not exist, a new shield will be generated and saved in the results dir.
+                    If the value is "nothing", the following file will be checked: 
+                    <results-dir>/../tab-BBSynthesis/Exported Strategies/400 Samples 0.01 G.shield"""
+            default=nothing
+
+        "--uppaal-dir"
+            help="""Root directory of the UPPAAL STRATEGO 10 install."""
+            default=homedir() ⨝ "opt/uppaal-4.1.20-stratego-10-linux64/"
+
+        "--skip-experiment"
+            help="""Yea I know. But figures will still be created from <results-dir>/Query Results/Results.csv
+                    If nothing else I need this for testing."""
+            action=:store_true
+end
+
+args = parse_args(s)
+
+results_dir = args["results-dir"]
+
+queries_models_dir = results_dir ⨝ "UPPAAL Queries and Models"
+mkpath(queries_models_dir)
+
+query_results_dir = results_dir ⨝ "Query Results"
+mkpath(query_results_dir)
+
+libbbshield_dir = results_dir ⨝ "libbshield"
+mkpath(libbbshield_dir)
+
+possible_shield_file = something(args["shield"], results_dir ⨝ "../tab-BBSynthesis/Exported Strategies/400 Samples 0.01 G.shield")
+
+if !args["skip-experiment"]
+    # Get the nondeterministic safe strategy that will be used for shielding.
+    # Or just the "shield" for short.
+    progress_update("Looking for shield in $possible_shield_file")
+    libbbshield_file = libbbshield_dir ⨝ "libbbshield.so"
+    get_libbbshield(possible_shield_file, "Shared Code/libbbshield/", libbbshield_file, working_dir=libbbshield_dir, test=args["test"])
+
+
+    # Create UPPAAL models and queries from blueprints, by doing search and replace on the placeholders.
+    # This is similar to templating, but the word blueprint was choseen to avoid a name clash with UPPAAL templates. 
+    blueprints_dir = pwd() ⨝ figure_name ⨝ "Blueprints" # TODO: $figure_name/Blueprints
+
+    if !isdir(blueprints_dir)
+        throw(error("Blueprints folder not found. Make sure this script is exectued from the root of the code folder.\nCurrent directory: $(pwd())\nContents: $(readdir())"))
+    end
+
+    replacements = Dict(
+        "%resultsdir%" => query_results_dir,
+        "%shieldfile%" => libbbshield_file
+    )
+
+    search_and_replace(blueprints_dir, queries_models_dir, replacements)
+
+    # I don't recall why I wrote this particular code in python.
+    # I think it was because I knew how to use python's os.system() but not julia's run().
+    # And as you can see, Julia's run() is kind of strange. https://docs.julialang.org/en/v1/manual/running-external-programs/
+
+    cmd = [
+        "python3", figure_name ⨝ "All Queries.py", 
+        "--results-dir", query_results_dir,
+        "--queries-models-dir", queries_models_dir,
+        "--uppaal-dir", args["uppaal-dir"],
+    ]
+
+    if args["test"]
+        push!(cmd, "--test")
+    end
+
+    cmd = Cmd(cmd)
+
+    progress_update("Starting up Python script 'All Queries.py'")
+
+    run(`echo $cmd`)
+
+    Base.exit_on_sigint(false)
+
+    try
+        run(cmd)
+    catch ex
+        if isa(ex, InterruptException)
+            # Couldn't figure out how to kill by handle lol
+            # If you're using other python apps or something, that's tough.
+            println("Interrupt Handling: Killing child processes using killall. \n(And whichever other process are unlucky enough to share their names 💀)")
+            killcommand = `killall python3`
+            run(`echo $killcommand`)
+            run(killcommand, wait=false)
+            killcommand = `killall verifyta`
+            run(`echo $killcommand`)
+            run(killcommand, wait=false)
+        end
+        throw(ex)
+    end
+end
+
+progress_update("Computation done.")
+progress_update("Saving  to $results_dir")
+
+NBPARAMS = Dict(
+    "selected_file" => results_dir ⨝ "Query Results/Results.csv",
+    "layabout" => false
+)
+
+include("ReadResults.jl")
+
+average_cost_name = "fig-BBShieldingResults"
+savefig(average_cost, results_dir ⨝ "$average_cost_name.png")
+savefig(average_cost, results_dir ⨝ "$average_cost_name.svg")
+progress_update("Saved $average_cost_name")
+
+average_interventions_name = "fig-BBShieldingInterventions"
+savefig(average_interventions, results_dir ⨝ "$average_interventions_name.png")
+savefig(average_interventions, results_dir ⨝ "$average_interventions_name.svg")
+progress_update("Saved $average_interventions_name")
+
+average_deaths_name = "fig-BBShieldingDeaths"
+savefig(average_deaths, results_dir ⨝ "$average_deaths_name.png")
+savefig(average_deaths, results_dir ⨝ "$average_deaths_name.svg")
+progress_update("Saved $average_deaths_name")
+
+write(results_dir ⨝ "SafetyNotice.md", safety_violations_message)
+if safety_violations !== nothing
+    progress_update("WARNING: Safety violation observed in shielded configuration. This is unexpected.")
+else
+    progress_update("No deaths observed in pre-shielded or post-shielded models.")
+end
+
+progress_update("Done with $figure_name.")
+progress_update("====================================")
