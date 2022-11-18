@@ -7,7 +7,7 @@ include("../Shared Code/ExperimentUtilities.jl")
 # Args  #
 #########
 
-args = parse_args(ARGS)
+args = my_parse_args(ARGS)
 if haskey(args, "help")
     print("""
     --help              Display this help and exit.
