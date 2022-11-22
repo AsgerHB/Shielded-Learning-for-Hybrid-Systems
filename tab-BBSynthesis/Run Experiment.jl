@@ -48,7 +48,7 @@ include("Statistical Checking of Shield.jl")
 if !test
     # HARDCODED: Parameters to generate shield. All variations will be used.
     samples_per_axiss = [1, 2, 3, 4, 8, 16, 20]
-    barbaric_gridargss = [(0.02, -13, 13, 0, 8), (0.01, -13, 13, 0, 8)]
+    barbaric_gridargss = [(0.02, -15, 15, 0, 12), (0.01, -15, 15, 0, 12)]
 
     # HARDCODED: Parameters to generate shield. All variations will be used.
     # algorithms = [
@@ -61,7 +61,7 @@ if !test
 	# 	AlgorithmInfo(GLGM06(δ=0.002, max_order=10, approx_model=Forward()), 11,
 	# 		"GLGM06 0.002"),
     # ]
-    # rigorous_gridargss = [(0.02, -15, 15, 0, 14), (0.01, -13, 13, 0, 8)]
+    # rigorous_gridargss = [(0.02, -15, 15, 0, 14), (0.01, -15, 15, 0, 12)]
     # Here is a set of parameters that should be able to finish over night
     algorithms = [
         AlgorithmInfo(BOX(δ=0.002), 20, "BOX 0.002"),
@@ -75,7 +75,7 @@ if !test
 else 
     # Test params that produce uninteresting results quickly
     samples_per_axiss = [5]
-    barbaric_gridargss = [(0.1, -13, 13, 0, 8), (0.02, -13, 13, 0, 8)]
+    barbaric_gridargss = [(0.1, -15, 15, 0, 12), (0.02, -15, 15, 0, 12)]
 
     algorithms = [
 		AlgorithmInfo(BOX(δ=0.01), 4, 
@@ -83,7 +83,7 @@ else
         #AlgorithmInfo(GLGM06(δ=0.01, max_order=10, approx_model=Forward()), 9,
         #    "GLGM06 0.01"), 
     ]
-    rigorous_gridargss = [(0.5, -13, 13, 0, 8)]
+    rigorous_gridargss = [(0.5, -15, 15, 0, 12)]
 
     random_agents_hit_chances = [1/4, 1/5, 1/8, 1/10, 0]
     runs_per_shield = 1000
