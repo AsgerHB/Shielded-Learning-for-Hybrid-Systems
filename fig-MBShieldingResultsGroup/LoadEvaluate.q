@@ -1,7 +1,7 @@
 //Load a strategy for cost of death in {1000, 100, 10}, then evaluate it.
 
 /* formula 1 */
-strategy DeathCosts1000 = loadStrategy {} -> {p, v}("/home/asger/Experiments/B3/DeathCosts1000.strategy.json")
+strategy DeathCosts1000 = loadStrategy {} -> {p[0], v[0], p[1], v[1], p[2], v[2]}("/home/asger/Experiments/F1/DeathCosts1000.strategy.json")
 
 /* formula 2 */
 E[<=120;1000] (max:LearnerPlayer.fired) under DeathCosts1000
@@ -13,7 +13,7 @@ E[<=120;1000] (max:number_deaths) under DeathCosts1000
 E[<=120;1000] (max:interventions) under DeathCosts1000
 
 /* formula 5 */
-strategy DeathCosts100 = loadStrategy {} -> {p, v}("/home/asger/Experiments/B3/DeathCosts100.strategy.json")
+strategy DeathCosts100 = loadStrategy {} -> {p[0], v[0], p[1], v[1], p[2], v[2]}("/home/asger/Experiments/F1/DeathCosts100.strategy.json")
 
 /* formula 6 */
 E[<=120;1000] (max:LearnerPlayer.fired) under DeathCosts100
@@ -25,7 +25,7 @@ E[<=120;1000] (max:number_deaths) under DeathCosts100
 E[<=120;1000] (max:interventions) under DeathCosts100
 
 /* formula 9 */
-strategy DeathCosts10 = loadStrategy {} -> {p, v}("/home/asger/Experiments/B3/DeathCosts10.strategy.json")
+strategy DeathCosts10 = loadStrategy {} -> {p[0], v[0], p[1], v[1], p[2], v[2]}("/home/asger/Experiments/F1/DeathCosts10.strategy.json")
 
 /* formula 10 */
 E[<=120;1000] (max:LearnerPlayer.fired) under DeathCosts10
@@ -35,4 +35,6 @@ E[<=120;1000] (max:number_deaths) under DeathCosts10
 
 /* formula 12 */
 E[<=120;1000] (max:interventions) under DeathCosts10
+
+
 

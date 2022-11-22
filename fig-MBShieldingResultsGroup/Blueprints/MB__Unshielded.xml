@@ -1,0 +1,298 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.5//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_5.dtd'>
+<nta>
+	<declaration>
+
+/* Simulation-specific stuff */
+urgent broadcast chan bounce;
+
+const int NUMBER_OF_BALLS = 3;
+typedef int[0, NUMBER_OF_BALLS - 1] ball_id;
+broadcast chan hit;
+clock time;
+int number_deaths = 0;
+
+clock v[NUMBER_OF_BALLS];
+clock p[NUMBER_OF_BALLS];
+
+
+/**
+Added shielding
+*/
+
+import "%shieldfile%"
+{
+    bool must_hit(double v, double p);
+    int get_value(double v, double p);
+};
+
+/* Config */
+const bool shield_enabled = false;
+const bool layabout = false;
+
+/* Shielding Function */
+
+const int NOHIT = 0;
+const int HIT = 1;
+
+const int RED = 114;   // ASCII value small letter 'r'
+const int BLUE = 98;   // ... 'b' 
+const int WHITE = 119; // etc.
+
+int next_action = NOHIT;    // (potentially) shielded action 
+
+int interventions = 0; // Total number of times the shield intervened
+int bad_interventions = 0; // Number of times where this was due to touching the red part
+
+// If the shield is enabled, returns the shielded action.
+// Otherwise, action is simply returned unaltered.
+// Counts how many times the shield differed from the proposed action.
+int shield(int action) {
+    if (!shield_enabled) {
+        return action;
+    } else if (action == HIT) {
+        return action;
+    } else {
+        int i;
+        for (i=0; i &lt; NUMBER_OF_BALLS; i++) {
+            int color = get_value(v[i], p[i]);
+            if (color == RED) {
+                ++interventions; 
+                ++bad_interventions;
+                return HIT;
+            } else if (color == BLUE) {
+                ++interventions;
+                return HIT;
+            } else {
+                //continue;
+            }
+        }
+        
+        return action;
+    }
+}</declaration>
+	<template>
+		<name x="5" y="5">Ball</name>
+		<parameter>ball_id id</parameter>
+		<declaration>// Place local declarations here.</declaration>
+		<location id="id0" x="297" y="-34">
+			<name x="314" y="42">Location2</name>
+			<label kind="invariant" x="263" y="-93">v[id]' == -9.81 &amp;&amp;
+p[id]' == v[id]</label>
+			<label kind="exponentialrate" x="289" y="-110">1</label>
+		</location>
+		<location id="id1" x="-110" y="-34">
+			<name x="-120" y="-68">Location1</name>
+			<urgent/>
+		</location>
+		<location id="id2" x="-110" y="246">
+			<name x="-119" y="263">Location3</name>
+			<committed/>
+		</location>
+		<init ref="id1"/>
+		<transition id="id3" controllable="false">
+			<source ref="id2"/>
+			<target ref="id1"/>
+			<label kind="guard" x="-102" y="68">v[id] &lt;= 1</label>
+			<label kind="assignment" x="-102" y="85">number_deaths++, 
+v[id] = 0, p[id] = 0</label>
+		</transition>
+		<transition id="id4" controllable="false">
+			<source ref="id2"/>
+			<target ref="id0"/>
+			<label kind="guard" x="68" y="85">v[id]&gt;1</label>
+		</transition>
+		<transition id="id5">
+			<source ref="id0"/>
+			<target ref="id0"/>
+			<label kind="guard" x="467" y="-108">p[id] &gt;= 4 &amp;&amp; v[id] &gt;= 0</label>
+			<label kind="synchronisation" x="467" y="-92">hit?</label>
+			<label kind="assignment" x="467" y="-76">v[id] = -4 - (0.95 - 0.05 + random(2*0.05))*v[id]</label>
+			<nail x="459" y="-110"/>
+			<nail x="459" y="-34"/>
+		</transition>
+		<transition id="id6">
+			<source ref="id0"/>
+			<target ref="id0"/>
+			<label kind="guard" x="467" y="10">p[id] &gt;= 4 &amp;&amp; v[id] &gt;= -4 &amp;&amp; v[id] &lt; 0</label>
+			<label kind="synchronisation" x="467" y="26">hit?</label>
+			<label kind="assignment" x="467" y="42">v[id] = -4.0</label>
+			<nail x="459" y="85"/>
+			<nail x="459" y="10"/>
+		</transition>
+		<transition id="id7" controllable="false">
+			<source ref="id0"/>
+			<target ref="id2"/>
+			<label kind="guard" x="34" y="204">p[id] &lt;= 0 &amp;&amp; v[id] &lt;= 0</label>
+			<label kind="synchronisation" x="68" y="187">bounce!</label>
+			<label kind="assignment" x="-68" y="221">v[id] = -(0.91 - 0.06 + random(2*0.06))*v[id], p[id] = 0</label>
+			<nail x="297" y="246"/>
+		</transition>
+		<transition id="id8" controllable="false">
+			<source ref="id1"/>
+			<target ref="id0"/>
+			<label kind="assignment" x="-25" y="-25">p[id] = 7 + random(3.0), v[id] = 0</label>
+		</transition>
+	</template>
+	<template>
+		<name>LearnerPlayer</name>
+		<declaration>clock x;
+int fired;</declaration>
+		<location id="id9" x="0" y="8">
+			<name x="-8" y="68">Location6</name>
+			<label kind="invariant" x="-8" y="25">x &lt;= 1 &amp;&amp;
+x' == 10</label>
+		</location>
+		<location id="id10" x="0" y="-93">
+			<name x="93" y="-102">Location5</name>
+			<committed/>
+		</location>
+		<location id="id11" x="0" y="-272">
+			<name x="-10" y="-306">Location4</name>
+			<committed/>
+		</location>
+		<init ref="id9"/>
+		<transition id="id12" controllable="false">
+			<source ref="id11"/>
+			<target ref="id9"/>
+			<label kind="guard" x="-289" y="-8">next_action != HIT</label>
+			<nail x="-119" y="8"/>
+		</transition>
+		<transition id="id13" controllable="false">
+			<source ref="id11"/>
+			<target ref="id9"/>
+			<label kind="guard" x="127" y="-8">next_action == HIT</label>
+			<label kind="synchronisation" x="127" y="-42">hit!</label>
+			<label kind="assignment" x="127" y="-25">++fired</label>
+			<nail x="119" y="8"/>
+		</transition>
+		<transition id="id14">
+			<source ref="id10"/>
+			<target ref="id11"/>
+			<label kind="guard" x="68" y="-289">!layabout</label>
+			<label kind="assignment" x="68" y="-272">next_action = shield(HIT)</label>
+			<nail x="51" y="-272"/>
+		</transition>
+		<transition id="id15">
+			<source ref="id10"/>
+			<target ref="id11"/>
+			<label kind="assignment" x="-289" y="-272">next_action = shield(NOHIT)</label>
+			<nail x="-51" y="-272"/>
+		</transition>
+		<transition id="id16" controllable="false">
+			<source ref="id9"/>
+			<target ref="id10"/>
+			<label kind="guard" x="8" y="-51">x &gt;= 1</label>
+			<label kind="assignment" x="8" y="-68">x = 0</label>
+		</transition>
+	</template>
+	<system>system Ball, LearnerPlayer;</system>
+	<queries>
+		<option key="--total-runs" value="12000"/>
+		<option key="--max-iterations" value="1"/>
+		<option key="--good-runs" value="12000"/>
+		<option key="--eval-runs" value="12000"/>
+		<option key="--max-reset-learning" value="1"/>
+		<option key="--runs-pr-state" value="12000"/>
+		<query>
+			<formula>simulate[&lt;=40;1] { p[0], p[1], p[2] }</formula>
+			<comment/>
+		</query>
+		<query>
+			<formula>strategy ImportedStrategy = loadStrategy {} -&gt; {p[0], v[0], p[1], v[1], p[2], v[2]} ("%resultsdir%/2/NoShield/12000Runs/DeathCosts1000.strategy.json")</formula>
+			<comment/>
+		</query>
+		<query>
+			<formula>simulate[&lt;=40;1] { p[0], p[1], p[2] } under ImportedStrategy</formula>
+			<comment/>
+		</query>
+		<query>
+			<formula/>
+			<comment/>
+		</query>
+		<query>
+			<formula>E[&lt;=120; 1000] (max:LearnerPlayer.fired + number_deaths*1000)</formula>
+			<comment>3 minutes</comment>
+		</query>
+		<query>
+			<formula>Pr[&lt;=120] (&lt;&gt; number_deaths &gt; 0)</formula>
+			<comment>10 seconds</comment>
+		</query>
+		<query>
+			<formula>E[&lt;=120;%checks%] (max:interventions)</formula>
+			<comment>120 seconds</comment>
+		</query>
+		<query>
+			<formula/>
+			<comment/>
+		</query>
+		<query>
+			<formula>strategy HitWell1000 = minE (LearnerPlayer.fired + number_deaths*1000 ) [&lt;=120] {} -&gt; {p[0], v[0], p[1], v[1], p[2], v[2]}: &lt;&gt; time &gt;= 120</formula>
+			<comment>3 minutes</comment>
+		</query>
+		<query>
+			<formula>saveStrategy("./HitWell1000.strategy.json", HitWell1000)</formula>
+			<comment/>
+		</query>
+		<query>
+			<formula>E[&lt;=120;%checks%] (max:LearnerPlayer.fired) under HitWell1000</formula>
+			<comment/>
+		</query>
+		<query>
+			<formula>Pr[&lt;=120] (&lt;&gt; number_deaths &gt; 0) under HitWell1000</formula>
+			<comment/>
+		</query>
+		<query>
+			<formula>E[&lt;=120;%checks%] (max:interventions) under HitWell1000</formula>
+			<comment/>
+		</query>
+		<query>
+			<formula/>
+			<comment/>
+		</query>
+		<query>
+			<formula>strategy HitWell100 = minE (LearnerPlayer.fired + number_deaths*100 ) [&lt;=120] {} -&gt; {p, v}: &lt;&gt; time &gt;= 120</formula>
+			<comment/>
+		</query>
+		<query>
+			<formula>saveStrategy("./HitWell100.strategy.json", HitWell100)</formula>
+			<comment/>
+		</query>
+		<query>
+			<formula>E[&lt;=120;%checks%] (max:LearnerPlayer.fired) under HitWell100</formula>
+			<comment/>
+		</query>
+		<query>
+			<formula>Pr[&lt;=120] (&lt;&gt; number_deaths &gt; 0) under HitWell100</formula>
+			<comment/>
+		</query>
+		<query>
+			<formula>E[&lt;=120;%checks%] (max:interventions) under HitWell100</formula>
+			<comment/>
+		</query>
+		<query>
+			<formula/>
+			<comment/>
+		</query>
+		<query>
+			<formula>saveStrategy("/home/asger/Documents/Files/Arbejde/AAU/TacasPaper/Code/Exported.strategy.json", HitWell1000)</formula>
+			<comment/>
+		</query>
+		<query>
+			<formula/>
+			<comment/>
+		</query>
+		<query>
+			<formula>E[&lt;=120;%checks%] (max:LearnerPlayer.fired) under ImportedStrategy</formula>
+			<comment/>
+		</query>
+		<query>
+			<formula>Pr[&lt;=120] (&lt;&gt; number_deaths &gt; 0) under ImportedStrategy</formula>
+			<comment/>
+		</query>
+		<query>
+			<formula>E[&lt;=120;%checks%] (max:interventions) under ImportedStrategy</formula>
+			<comment/>
+		</query>
+	</queries>
+</nta>
