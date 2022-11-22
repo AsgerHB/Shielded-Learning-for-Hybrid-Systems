@@ -1,4 +1,4 @@
-# ReporducibilityPackage
+# ReproducibilityPackage
 
 ## Installation Instructions
 
