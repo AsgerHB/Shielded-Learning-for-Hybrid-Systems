@@ -65,7 +65,7 @@ if !test
     # Here is a set of parameters that should be able to finish over night
     algorithms = [
         AlgorithmInfo(BOX(δ=0.002), 20, "BOX 0.002"),
-        AlgorithmInfo(BOX(δ=0.001), 30, "BOX 0.002"),
+        AlgorithmInfo(BOX(δ=0.001), 30, "BOX 0.001"),
     ]
     rigorous_gridargss = [(0.01, -15, 15, 0, 12)]
 
