@@ -23,48 +23,14 @@ begin
 	using Statistics
 	using StatsPlots
 	using NaturalSort
+	include("../Shared Code/FlatUI.jl")
 	include("../Shared Code/ExperimentUtilities.jl")
 end
 
 # ╔═╡ 5a20bd30-e279-11ec-3f5e-ed9714dfcd32
 call(f) = f()
 
-# ╔═╡ 0299e856-d756-46fa-8a98-e9127daec70f
-md"""
-## Color shceme
 
-Colors by [Flat UI](https://flatuicolors.com/palette/defo)
-"""
-
-# ╔═╡ 7a2864d6-ff32-40d8-89ae-799366b79ac8
-begin
-	colors = 
-	(TURQUOISE = colorant"#1abc9c", 
-	EMERALD = colorant"#2ecc71", 
-	PETER_RIVER = colorant"#3498db", 
-	AMETHYST = colorant"#9b59b6", 
-	WET_ASPHALT = colorant"#34495e",
-	
-	GREEN_SEA   = colorant"#16a085", 
-	NEPHRITIS   = colorant"#27ae60", 
-	BELIZE_HOLE  = colorant"#2980b9", 
-	WISTERIA     = colorant"#8e44ad", 
-	MIDNIGHT_BLUE = colorant"#2c3e50", 
-	
-	SUNFLOWER = colorant"#f1c40f",
-	CARROT   = colorant"#e67e22",
-	ALIZARIN = colorant"#e74c3c",
-	CLOUDS   = colorant"#ecf0f1",
-	CONCRETE = colorant"#95a5a6",
-	
-	ORANGE = colorant"#f39c12",
-	PUMPKIN = colorant"#d35400",
-	POMEGRANATE = colorant"#c0392b",
-	SILVER = colorant"#bdc3c7",
-	ASBESTOS = colorant"#7f8c8d")
-	
-	[colors...]
-end
 
 # ╔═╡ e8653f6f-19df-40ba-9633-82726b6b57a8
 colortheme=[colors.GREEN_SEA colors.WISTERIA colors.SUNFLOWER colors.PUMPKIN colors.NEPHRITIS colors.MIDNIGHT_BLUE]
@@ -488,6 +454,9 @@ average_deaths = call(() -> begin
 		title="No Shield")
 end)
 
+# ╔═╡ 8d9b7625-4b4c-4dbc-837e-f4afebd26c0c
+checks = @nbparam "checks" 1000
+
 # ╔═╡ dfca2665-01aa-48e1-92b4-f6663eb07105
 safety_violations_message = call() do
 	shielded = filter(:Experiment => e -> e ∉ ["NoShield"] ,
@@ -499,7 +468,7 @@ safety_violations_message = call() do
 
 			Safety violations observed for **$(nrow(safety_violations))** shielded configuration(s). This should not happen; is the shield quite working?
 
-			This was over the course of $shielded_configurations_count shielded configurations. Assuming the safety of each one was tested for 1000 runs, that is $(shielded_configurations_count * 1000) safe runs in total.
+			This was over the course of $shielded_configurations_count shielded configurations. Assuming the safety of each one was tested for 1000 runs, that is $(shielded_configurations_count * checks) safe runs in total.
 		""")
 	else
 		("""
@@ -507,7 +476,7 @@ safety_violations_message = call() do
 
 			No crash was observed for any of the $(length(unique(shielded[!, :Experiment]))) shielded configurations. 
 
-			This is out of $(shielded_configurations_count * 1000) traces tested.
+			This is out of $(shielded_configurations_count * checks) traces tested.
 		""")
 	end
 end;
@@ -1814,8 +1783,6 @@ version = "0.9.1+5"
 # ╔═╡ Cell order:
 # ╠═6f5f5e08-199f-41a1-b477-fbd537885fd6
 # ╠═5a20bd30-e279-11ec-3f5e-ed9714dfcd32
-# ╟─0299e856-d756-46fa-8a98-e9127daec70f
-# ╟─7a2864d6-ff32-40d8-89ae-799366b79ac8
 # ╟─e8653f6f-19df-40ba-9633-82726b6b57a8
 # ╟─d4cac18b-1bf1-477d-84e1-ace714fc9967
 # ╟─e0c5c3e6-7fbc-449a-96b2-aadd647728d9
@@ -1843,7 +1810,8 @@ version = "0.9.1+5"
 # ╟─4fd405a2-ef9e-4590-8af1-6f806724ef2c
 # ╟─61bd91fc-6b0f-4fa5-a3dc-ea0f87c06cf1
 # ╟─439297f0-8945-43c8-9141-e04dac3e94ee
-# ╟─dfca2665-01aa-48e1-92b4-f6663eb07105
+# ╠═8d9b7625-4b4c-4dbc-837e-f4afebd26c0c
+# ╠═dfca2665-01aa-48e1-92b4-f6663eb07105
 # ╟─1b1089d9-fc40-45ce-9ee5-b95698473550
 # ╟─ac54a7f0-2062-4814-9d5b-34801c994afa
 # ╟─00000000-0000-0000-0000-000000000001

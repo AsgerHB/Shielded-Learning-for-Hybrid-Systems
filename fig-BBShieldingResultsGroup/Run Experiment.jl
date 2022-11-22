@@ -26,13 +26,11 @@ s = ArgParseSettings()
         "--results-dir"
             help="""Results will be saved in an appropriately named subdirectory.
                     Directory will be created if it does not exist."""
-            default=homedir() ⨝ "Results" ⨝ figure_name
+            default=homedir() ⨝ "Results"
 
         "--shield"
             help="""Shield file to use for the experiment. 
-                    If the file does not exist, a new shield will be generated and saved in the results dir.
-                    If the value is "nothing", the following file will be checked: 
-                    <results-dir>/../tab-BBSynthesis/Exported Strategies/400 Samples 0.01 G.shield"""
+                    If no file is provided, a new shield will be synthesised and saved in the results dir."""
             default=nothing
 
         "--uppaal-dir"
@@ -48,6 +46,8 @@ end
 args = parse_args(s)
 
 results_dir = args["results-dir"]
+figure_name = "fig-BBShieldingResultsGroup"
+results_dir = results_dir ⨝ figure_name
 
 queries_models_dir = results_dir ⨝ "UPPAAL Queries and Models"
 mkpath(queries_models_dir)
@@ -58,12 +58,13 @@ mkpath(query_results_dir)
 libbbshield_dir = results_dir ⨝ "libbshield"
 mkpath(libbbshield_dir)
 
-possible_shield_file = something(args["shield"], results_dir ⨝ "../tab-BBSynthesis/Exported Strategies/400 Samples 0.01 G.shield")
+possible_shield_file = args["shield"] #results_dir ⨝ "../tab-BBSynthesis/Exported Strategies/400 Samples 0.01 G.shield"
+
+checks = args["test"] ? 10 : 1000 # Number of checks to use for estimating½ expected outcomes in the UPPAAL queries
 
 if !args["skip-experiment"]
     # Get the nondeterministic safe strategy that will be used for shielding.
     # Or just the "shield" for short.
-    progress_update("Looking for shield in $possible_shield_file")
     libbbshield_file = libbbshield_dir ⨝ "libbbshield.so"
     get_libbbshield(possible_shield_file, "Shared Code/libbbshield/", libbbshield_file, working_dir=libbbshield_dir, test=args["test"])
 
@@ -78,7 +79,8 @@ if !args["skip-experiment"]
 
     replacements = Dict(
         "%resultsdir%" => query_results_dir,
-        "%shieldfile%" => libbbshield_file
+        "%shieldfile%" => libbbshield_file,
+        "%checks%" => checks
     )
 
     search_and_replace(blueprints_dir, queries_models_dir, replacements)
@@ -122,14 +124,15 @@ if !args["skip-experiment"]
         end
         throw(ex)
     end
+    progress_update("Computation done.")
 end
 
-progress_update("Computation done.")
 progress_update("Saving  to $results_dir")
 
 NBPARAMS = Dict(
     "selected_file" => results_dir ⨝ "Query Results/Results.csv",
-    "layabout" => false
+    "layabout" => false,
+    "checks" => checks
 )
 
 include("ReadResults.jl")

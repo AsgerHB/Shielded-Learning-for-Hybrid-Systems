@@ -1,11 +1,25 @@
-# How BB Reinforcement Learning is Affected by Shielding
+# How Reinforcement Learning for Bouncing Ball is Affected by Shielding
+
+This experiment applies to the regular Bouncing Ball problem. A safe nondeterministic strategy is used to provide shielding in UPPAAL, as strategies are learned. The experiment has the following configurations:
+
+- **Shielded Layabout** The shield is applied to a basic "agent", which simply takes the most unsafe action no matter the input. For the Random Walk, this simply entails always going slow. This creates a strategy fully dictated by the shield. 
+- **No Shield** An agent is trained with no shield applied, receiving a penalty d on runs that violate the safety property. 
+- **Post-shielded** A shield is applied to the same learning agents, that were trained and evaluated in the No Shield model. This means that the agents have been trained without a shield, but are subsequently being shielded during the evaluation phase. 
+- **Pre-shielded** The Q-learning agents were trained with the shield in place. If the shield intervenes, it apppears to the agent that it’s suggested action has the outcome of the shielded action.
 
 Run from parent directory as 
 
 	julia "fig-BBShieldingResultsGroup/Run Experiment"
-	
+
+
+
+It is possible to use the command line argument `--shield` to provide a specific nondeterministic strategy, to use for shielding in the experiment. 
+This also shaves 50 minutes off the runtime, since a new shield will have to be synthesised and saved otherwise. 
+Example: `--shield ~/Results/tab-BBSynthesis/Exported Strategies/400 Samples 0.01 G.shield`
+
 !!! info "Tips:"
-	Some cli args supported. View with `--help`.
+
+	Some additional cli args are supported. View with `--help`.
 	
 	View progress using `tree` by doing `sudo apt install tree && tree %resultsdir%`. 
 

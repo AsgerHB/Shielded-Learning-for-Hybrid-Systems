@@ -15,11 +15,13 @@ include("../Shared Code/BBShieldSynthesis.jl")
     get_shield(possible_shield_file, working_dir, [test])
 
  Retrieve a shield, put a copy in working_dir and return its absolute path.
- This is done by first checking if a shield exists in possible_shield_file 
- and otherwise by synthesising it from scratch."""
+ If `possible_shield_file` is `nothing`, a new shield will be synthesised. 
+ Otherwise, the file at that path will be used."""
 function get_shield(possible_shield_file, working_dir; test)
-    # If we can save the trouble, then why not?
-    if isfile(possible_shield_file)
+    if possible_shield_file !== nothing
+        if !isfile(possible_shield_file)
+            error("File not found: $possible_shield_file")
+        end
         progress_update("Using existing shield found at $possible_shield_file")
         shield_dir = working_dir ⨝ basename(possible_shield_file)
         cp(possible_shield_file, shield_dir, force=true)
@@ -27,8 +29,8 @@ function get_shield(possible_shield_file, working_dir; test)
     end
 
     # If you want something done...
-    progress_update("Not found. Synthesising a new shield instead.")
-    
+    progress_update("No shield was provided. Synthesising a new shield instead.")
+
     if test
         grid = Grid(0.02, -13, 13, 0, 8) 
         samples_per_axis = 5
@@ -38,7 +40,7 @@ function get_shield(possible_shield_file, working_dir; test)
     end
     
     progress_update("Synthesising shield: $(samples_per_axis^2) samples $(grid.G) G")
-    progress_update("Estimated time: 50 minutes (5 minutes if run with --test)")
+    progress_update("Estimated time to synthesise: 50 minutes (3 minutes if run with --test)")
 
     shield_dir = working_dir ⨝ "$(samples_per_axis^2) samples $(grid.G) G.shield"
     
@@ -63,7 +65,10 @@ function compile_libbbshield(working_dir, shield_dir, lib_source_code_dir)
 
     # Bake it into the C-library. 
     # Make a copy first so we don't overwrite the original files
-    cp(abspath(lib_source_code_dir), working_dir, force=true)
+    for file in glob(lib_source_code_dir ⨝ "*")
+        cp(file, working_dir ⨝ basename(file), force=true)
+    end
+    
     # Write to shield dump
     write(working_dir ⨝ "shield_dump.c", get_c_library_header(shield, "Retrieved with get_libbbshield"))'
     
@@ -93,7 +98,7 @@ if abspath(PROGRAM_FILE) == @__FILE__
     possible_shield_file = "/home/asger/Results/tab-BBSynthesis/Exported Strategies/25 Samples 0.02 G.shield"
     test = true
     lib_destination_dir = "/home/asger/libbbshield.2.so"
-    lib_source_code_dir = "/home/asger/Insync/OQ82YK@cs.aau.dk/OneDrive Biz - SharePoint/DEIS - Shielded AI - TACAS Paper - Dokumenter/Shielded AI - TACAS Paper/ReproducibilityPackage/Shared Code/libbbshield"
+    lib_source_code_dir = "/home/asger/Insync/OQ82YK@cs.aau.dk/OneDrive Biz - SharePoint/DEIS - Shielded AI - TACAS Paper - Dokumenter/Shielded AI - TACAS Paper/Code/My Library/libbbshield"
     println("Running as standalone script. This is suitable for testing.")
     result = get_libbbshield(possible_shield_file, lib_source_code_dir, lib_destination_dir; test)
 

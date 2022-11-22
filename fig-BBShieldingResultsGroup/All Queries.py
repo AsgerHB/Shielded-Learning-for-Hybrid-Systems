@@ -108,7 +108,7 @@ if __name__ == "__main__":
         # HARDCODED: The number of iterations it re-runs the experiment.
         repeats = 1
         # HARDCODED: The number of training runs used to produce each strategy.
-        learning_runs = [100]
+        learning_runs = [100, 200]
     else:
         # HARDCODED: The number of iterations it re-runs the experiment.
         repeats = 10
