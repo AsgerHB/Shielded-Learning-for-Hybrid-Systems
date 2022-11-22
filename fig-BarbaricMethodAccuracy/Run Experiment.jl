@@ -1,7 +1,11 @@
+if !isfile("Project.toml")
+    error("Project.toml not found. Try running this script from the root of the ReproducibilityPackage folder.")
+end
+
 import Pkg
-using Dates
 Pkg.activate(".")
 include("../Shared Code/ExperimentUtilities.jl")
+using Dates
 
 # cli args
 args = my_parse_args(ARGS)

@@ -1,3 +1,9 @@
+if !isfile("Project.toml")
+    error("Project.toml not found. Try running this script from the root of the ReproducibilityPackage folder.")
+end
+
+using Pkg
+Pkg.activate(".")
 using ArgParse
 using Glob
 using Dates
