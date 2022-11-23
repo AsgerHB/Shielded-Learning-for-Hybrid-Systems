@@ -218,13 +218,19 @@ begin
 	
 	function get_algorithm(filename::AbstractString)
 		# match example: 100 samples 0.02 G.shield
-		m = match(r"(\d+) Samples ([0-9.]+) G.shield", filename)
+		m = match(r"(\d+) Samples ([0-9.]+) G", filename)
 		if m != nothing
 			return "barbaric with N=$(Int(sqrt(parse(Int, m[1]))))"
 		else
 			# match example: BOX 0.01 with G of 0.02.shield
-			m = match(r"(\w+) ([0-9.]+) with G of ([0-9.]+).shield", filename)
-			return "Julia Reach $(m[1])(δ=$(m[2]))"
+			m = match(r"(\w+) ([0-9.]+) with G of ([0-9.]+)", filename)
+			if m != nothing
+				return "Julia Reach $(m[1])(δ=$(m[2]))"
+			else
+				best_effort = replace(filename, ".shield" => "")
+				@warn "Unexpected filename: $filename\nCould not determine algorithm type. Using placeholder: $best_effort"
+				return best_effort
+			end
 		end
 	end
 end
@@ -236,12 +242,17 @@ begin
 	
 	function get_granularity(filename::AbstractString)
 		#filename = string(filename)
-		m = match(r"(\d+) Samples ([0-9.]+) G.shield", filename)
+		m = match(r"(\d+) Samples ([0-9.]+) G", filename)
 		if m != nothing
 			return m[2]
 		else
-			m = match(r"(\w+) ([0-9.]+) with G of ([0-9.]+).shield", filename)
-			return m[3]
+			m = match(r"(\w+) ([0-9.]+) with G of ([0-9.]+)", filename)
+			if m != nothing
+				return m[3]
+			else
+				@warn "Unexpected filename: $filename\nCould not determine granularity. Using placeholder: \"??\""
+				return "??"
+			end
 		end
 	end
 end

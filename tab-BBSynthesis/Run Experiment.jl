@@ -86,7 +86,7 @@ else
     rigorous_gridargss = [(0.5, -15, 15, 0, 12)]
 
     random_agents_hit_chances = [1/4, 1/5, 1/8, 1/10, 0]
-    runs_per_shield = 1000
+    runs_per_shield = 100
 end
 
 ##############
