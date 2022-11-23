@@ -4,6 +4,7 @@ end
 
 import Pkg
 Pkg.activate(".")
+Pkg.instantiate()
 include("../Shared Code/ExperimentUtilities.jl")
 using Dates
 

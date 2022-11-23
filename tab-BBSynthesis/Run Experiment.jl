@@ -3,6 +3,7 @@ if !isfile("Project.toml")
 end
 import Pkg
 Pkg.activate(".")
+Pkg.instantiate()
 using Dates
 include("../Shared Code/ExperimentUtilities.jl")
 
