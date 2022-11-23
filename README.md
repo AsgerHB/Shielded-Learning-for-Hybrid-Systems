@@ -4,14 +4,10 @@
 
 This package was developed and tested on Ubuntu 22.04.1 LTS. These instructions apply to that operating system.
 
-### Install wget
-(or download the things manually idc)
+### Packages
+Make sure you have the following packages installed on your system:
 
-	sudo apt install wget
-
-### Install gcc
-
-	sudo apt install gcc
+	sudo apt install gcc wget python3.10 default-jre
 
 ### Install julia 1.8.2
 
@@ -23,17 +19,21 @@ This package was developed and tested on Ubuntu 22.04.1 LTS. These instructions 
 	echo 'export PATH="$PATH:$HOME/julia-1.8.2/bin"' >> .bashrc 
 	source .bashrc
 
-### Install python 3.10
-
-	sudo apt install python3.10
 	
-### Install UPPAAL STRATEGO 10
+	
+### Install UPPAAL STRATEGO 10 and Activate License
 If the following wget request is denied, please visit uppaal.org and follow download instructions.
 
 	mkdir ~/opt
 	cd ~/opt
 	wget https://uppaal.org/dl/uppaal-4.1.20-stratego-10-linux64.zip
 	unzip uppaal-4.1.20-stratego-10-linux64.zip
+
+Retrieve a license from uppaal.veriaal.dk/academic.html or alternatively visit uppaal.org for more info. Once you have your license, activate it by running 
+
+	~/opt/uppaal-4.1.20-stratego-10-linux64/uppaal
+
+Enter your license when prompted.
 
 ## How to run
 
