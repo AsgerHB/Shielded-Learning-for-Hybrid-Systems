@@ -99,9 +99,11 @@ progress_update("Saving  to $results_dir")
 
 include("Table from CSVs.jl")
 
-CSV.write(joinpath(results_dir, "$table_name.csv"), joint_report)
-write(joinpath(results_dir, "$table_name.txt"), "$joint_report")
-write(joinpath(results_dir, "$table_name.tex"), "$resulting_latex_table")
+exported_table_name = "CCSynthesis"
+
+CSV.write(joinpath(results_dir, "$exported_table_name.csv"), joint_report)
+write(joinpath(results_dir, "$exported_table_name.txt"), "$joint_report")
+write(joinpath(results_dir, "$exported_table_name.tex"), "$resulting_latex_table")
 
 # Oh god this is so hacky. These macros are used in the paper so I have to define them here also.
 write(joinpath(results_dir, "macros.tex"), 
@@ -109,7 +111,7 @@ write(joinpath(results_dir, "macros.tex"),
 \\newcommand{\\state}{s}""")
 
 
-progress_update("Saved $(table_name)")
+progress_update("Saved $(exported_table_name)")
 
 progress_update("Done with $table_name.")
 progress_update("====================================")

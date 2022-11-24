@@ -135,17 +135,17 @@ NBPARAMS = Dict(
 
 include("ReadResults.jl")
 
-average_cost_name = "fig-BBShieldingResults"
+average_cost_name = "BBShieldingResults"
 savefig(average_cost, results_dir ⨝ "$average_cost_name.png")
 savefig(average_cost, results_dir ⨝ "$average_cost_name.svg")
 progress_update("Saved $average_cost_name")
 
-average_interventions_name = "fig-BBShieldingInterventions"
+average_interventions_name = "BBShieldingInterventions"
 savefig(average_interventions, results_dir ⨝ "$average_interventions_name.png")
 savefig(average_interventions, results_dir ⨝ "$average_interventions_name.svg")
 progress_update("Saved $average_interventions_name")
 
-average_deaths_name = "fig-BBShieldingDeaths"
+average_deaths_name = "BBShieldingDeaths"
 savefig(average_deaths, results_dir ⨝ "$average_deaths_name.png")
 savefig(average_deaths, results_dir ⨝ "$average_deaths_name.svg")
 progress_update("Saved $average_deaths_name")
