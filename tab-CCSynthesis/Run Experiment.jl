@@ -65,6 +65,8 @@ end
 # Mainmatter #
 ##############
 
+progress_update("Estimated total time to complete: 3 hours. (2 minutes if run with --test.)")
+
 if make_barbaric_shields
     make_and_save_barbaric_shields(samples_per_axiss, Gs, shields_dir)
 else

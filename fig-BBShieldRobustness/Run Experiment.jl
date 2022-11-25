@@ -54,6 +54,7 @@ include("Get libbbshield.jl")
 
 results_dir = args["results-dir"]
 results_dir = results_dir ⨝ figure_name
+mkpath(results_dir)
 
 possible_shield_file = args["shield"] #results_dir ⨝ "../tab-BBSynthesis/Exported Strategies/400 Samples 0.01 G.shield"
 
@@ -61,6 +62,7 @@ shield_file = get_shield(possible_shield_file, results_dir, test=args["test"])
 
 
 progress_update("Testing the shield's robustness...")
+progress_update("Estimated total time to complete: 13 hours. (5 minutes if run with --test)")
 
 NBPARAMS = Dict(
     "results_dir" => results_dir,

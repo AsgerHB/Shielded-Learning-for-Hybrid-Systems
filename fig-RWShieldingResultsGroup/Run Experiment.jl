@@ -61,6 +61,8 @@ possible_shield_file = args["shield"] #results_dir ⨝ "../tab-BBSynthesis/Expor
 
 checks = args["test"] ? 10 : 1000 # Number of checks to use for estimating expected outcomes in the UPPAAL queries
 
+progress_update("Estimated total time to complete: 10 minutes. (1 minute if run with --test)")
+
 if !args["skip-experiment"]
     # Get the nondeterministic safe strategy that will be used for shielding.
     # Or just the "shield" for short.

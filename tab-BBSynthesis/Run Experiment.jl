@@ -46,6 +46,8 @@ test_shields = !haskey(args, "skip-evaluation")
 include("Synthesize Set of Shields.jl")
 include("Statistical Checking of Shield.jl")
 
+progress_update("Estimated total time to complete: 75 hours. (5 minutes if run with --test. 4 hours if run with --skip-rigorous, 71 hours if run with --skip-barbaric)")
+
 if !test
     # HARDCODED: Parameters to generate shield. All variations will be used.
     samples_per_axiss = [1, 2, 3, 4, 8, 16, 20]
