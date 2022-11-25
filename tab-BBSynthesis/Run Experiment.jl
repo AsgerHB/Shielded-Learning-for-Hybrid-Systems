@@ -51,7 +51,7 @@ progress_update("Estimated total time to complete: 75 hours. (5 minutes if run w
 if !test
     # HARDCODED: Parameters to generate shield. All variations will be used.
     samples_per_axiss = [1, 2, 3, 4, 8, 16, 20]
-    barbaric_gridargss = [(0.02, -15, 15, 0, 12), (0.01, -15, 15, 0, 12)]
+    barbaric_gridargss = [(0.05, -15, 15, 0, 12), (0.02, -15, 15, 0, 12), (0.01, -15, 15, 0, 12)]
 
     # HARDCODED: Parameters to generate shield. All variations will be used.
     # algorithms = [
@@ -82,9 +82,7 @@ else
 
     algorithms = [
 		AlgorithmInfo(BOX(δ=0.01), 4, 
-			"BOX 0.01"),
-        #AlgorithmInfo(GLGM06(δ=0.01, max_order=10, approx_model=Forward()), 9,
-        #    "GLGM06 0.01"), 
+			"BOX 0.01")
     ]
     rigorous_gridargss = [(0.5, -15, 15, 0, 12)]
 
