@@ -141,8 +141,8 @@ if isfile(rigorous_file)
         end
 end
 
-joint_df = append!(something(barbric_df, DataFrame),
-                 something(rigorous_df, DataFrame),
+joint_df = append!(something(barbric_df, DataFrame()),
+                 something(rigorous_df, DataFrame()),
                  cols=:union)
 
 joint_df |> CSV.write(joinpath(shields_dir, "Joint Shields Synthesis Report.csv"))
