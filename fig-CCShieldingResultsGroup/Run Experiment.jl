@@ -36,6 +36,10 @@ s = ArgParseSettings()
             help="""Root directory of the UPPAAL STRATEGO 10 install."""
             default=homedir() ⨝ "opt/uppaal-4.1.20-stratego-10-linux64/"
 
+        "--julia-dir"
+            help="""Root directory of the julia install. Used to locate the file <julia-dir>/share/julia/julia_config.jl"""
+            default=dirname(Base.julia_cmd()[1]) ⨝ ".."
+
         "--skip-experiment"
             help="""Yea I know. But figures will still be created from <results-dir>/Query Results/Results.csv
                     If nothing else I need this for testing."""
@@ -56,6 +60,14 @@ mkpath(query_results_dir)
 
 libccshield_working_dir = results_dir ⨝ "libcc"
 mkpath(libccshield_working_dir)
+
+# julia-config.jl provides args to gcc for when the julia library is a dependency.
+# See https://docs.julialang.org/en/v1/manual/embedding/
+julia_config_dir=args["julia-dir"] ⨝ "share/julia/julia-config.jl"
+
+if !isfile(julia_config_dir)
+    error("Not found: julia-config.jl\nLooked in: $julia_config_dir\nPlease provide a vallid --julia-dir")
+end
 
 possible_shield_file = args["shield"] #results_dir ⨝ "../tab-BBSynthesis/Exported Strategies/400 Samples 0.01 G.shield"
 
@@ -79,6 +91,7 @@ if !args["skip-experiment"]
                         preshield_destination=libccpreshield_file, 
                         postshield_destination=libccpostshield_file, 
                         working_dir=libccshield_working_dir, 
+                        julia_config_dir=julia_config_dir,
                         test=args["test"])
 
     # Create UPPAAL models and queries from blueprints, by doing search and replace on the placeholders.

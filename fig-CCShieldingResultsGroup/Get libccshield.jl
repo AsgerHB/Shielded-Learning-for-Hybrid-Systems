@@ -64,7 +64,7 @@ The C source code is copied from `source_dir` into `working_dir`
 where the given shield is written to `shield_dump.c` and compilation takes place.
 Returns the path to `liccpreshield.so` and `libccpostshield.so` which will be somewhere within `working_dir`.
 """
-function compile_libccshield(working_dir, shield_dir, source_dir)
+function compile_libccshield(working_dir, shield_dir, source_dir, julia_config_dir)
     shield = robust_grid_deserialization(shield_dir)
 
     # Bake it into the C-library. 
@@ -80,29 +80,36 @@ function compile_libccshield(working_dir, shield_dir, source_dir)
     cd(working_dir)
     
     # Good luck.
+
+    # preshield
     run(`gcc -c -fPIC preshield.c -o preshield.o`)
     run(`gcc -shared -o libccpreshield.so preshield.o`)
 
+    # postshield
+    # Command to get compiler flags for gcc
+    cmd_julia_config = Cmd([julia_config_dir, "--cflags", "--ldflags", "--ldlibs"])
+
     run(pipeline(
-        `/opt/julia-1.8.0/share/julia/julia-config.jl --cflags --ldflags --ldlibs`, 
+        cmd_julia_config, 
         `xargs gcc -c -fPIC  postshield.c -o postshield.o`)
     )
 
     run(pipeline(
-        `/opt/julia-1.8.0/share/julia/julia-config.jl --cflags --ldflags --ldlibs`, 
+        cmd_julia_config,
         `xargs gcc -shared -o libccpostshield.so postshield.o`)
     )
 
     cd(previous_working_dir)
-    working_dir ⨝ "libccpreshield.so", working_dir ⨝ "libccpostshield.so"
+
+    return (working_dir ⨝ "libccpreshield.so", working_dir ⨝ "libccpostshield.so")
 end
 
-function get_libccshield(possible_shield_file, source_dir; preshield_destination, postshield_destination, working_dir, test=false)
+function get_libccshield(possible_shield_file, source_dir; preshield_destination, postshield_destination, working_dir, julia_config_dir, test=false)
     
     # Getting shield
     shield_dir = get_shield(possible_shield_file, working_dir; test)
 
-    preshield_location, postshield_location = compile_libccshield(working_dir, shield_dir, source_dir)
+    preshield_location, postshield_location = compile_libccshield(working_dir, shield_dir, source_dir, julia_config_dir)
 
     if preshield_destination != preshield_location
         cp(preshield_location, preshield_destination, force=true)
