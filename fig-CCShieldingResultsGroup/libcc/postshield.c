@@ -24,7 +24,7 @@ The platform-independent way of including the julia-to-c library is to pull the 
 #define JULIA(str) \
     jl_eval_string(str);\
     if (jl_exception_occurred())\
-        fprintf(stderr, "Julia Exception:\t%s \nWhile running command:\t%s", jl_typeof_str(jl_exception_occurred()), str);
+        fprintf(stderr, "Julia Exception:\t%s \nWhile running command:\t%s\n", jl_typeof_str(jl_exception_occurred()), str);
 
 #define GENEROUS_STRING_LENGTH  511
 
