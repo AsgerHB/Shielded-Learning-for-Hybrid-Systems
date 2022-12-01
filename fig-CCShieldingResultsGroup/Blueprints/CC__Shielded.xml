@@ -1,0 +1,779 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.5//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_5.dtd'>
+<nta>
+	<declaration>/** 
+Two changes have been made to this file.
+   - minVelocityFront changed from -10 to -8
+   - Code and guards have been added to shield the system.
+   
+Following  is the original header of the file. 
+*/
+
+/**
+This case study has been published at "Correct System Design"
+Symposium in Honor of Ernst-Rüdiger Olderog on the Occasion of
+His 60th Birthday Oldenburg, Germany, September 8–9, 2015.
+
+The paper "Safe and Optimal Adaptive Cruise Control" by 
+Kim Guldstrand Larsen, Marius Mikucionis, Jakob Haahr Taankvist.
+
+@incollection{cruise,
+    year={2015},
+    isbn={978-3-319-23505-9},
+    booktitle={Correct System Design},
+    volume={9360},
+    series={Lecture Notes in Computer Science},
+    editor={Meyer, Roland and Platzer, André and Wehrheim, Heike},
+    doi={10.1007/978-3-319-23506-6_17},
+    title={Safe and Optimal Adaptive Cruise Control},
+    url={http://dx.doi.org/10.1007/978-3-319-23506-6_17},
+    publisher={Springer International Publishing},
+    author={Larsen, Kim Guldstrand and Miku\v{c}ionis, Marius and Taankvist, Jakob Haahr},
+    pages={260-277},
+    language={English}
+}
+*/
+
+// Place global declarations here.
+clock time;
+const int maxVelocityEgo = 20;
+const int maxVelocityFront = 20;
+const int minVelocityEgo = -10;
+/** This value has been changed from -10 to -8 */
+const int minVelocityFront = -8;
+
+const int maxSensorDistance = 200;
+
+clock waitTimer;
+
+int distance = 10;
+
+int velocityEgo;
+int[-2,2] accelerationEgo;
+broadcast chan chooseEgo;
+
+int velocityFront;
+int[-2,2] accelerationFront;
+broadcast chan chooseFront;
+
+void updateDiscrete(){
+    int oldVel, newVel;
+    oldVel = velocityFront - velocityEgo;
+
+    velocityEgo = velocityEgo + accelerationEgo;
+    velocityFront = velocityFront + accelerationFront;
+
+    newVel = velocityFront - velocityEgo;
+    
+    if (distance &gt; maxSensorDistance) {
+        distance = maxSensorDistance + 1;
+    } else {
+        distance += (oldVel + newVel)/2;
+    }
+}
+
+broadcast chan update;
+
+// Hybrid stuff
+hybrid clock rVelocityEgo;
+hybrid clock rVelocityFront;
+hybrid clock rDistance = 10.0;
+hybrid clock D;
+
+/**
+Added code for Shielding 
+*/
+
+import "%libccpreshield_path%"
+{
+    int get_value(double v_ego, double v_front, double distance);
+};
+
+typedef struct {
+    bool backwards;
+    bool neutral;
+    bool forwards;
+} allowedActions;
+
+allowedActions intToActions(int bitarray) {
+    allowedActions result = { 
+        (0 != (bitarray &amp; (1 &lt;&lt; 0))),
+        (0 != (bitarray &amp; (1 &lt;&lt; 1))),
+        (0 != (bitarray &amp; (1 &lt;&lt; 2)))
+    };
+    return result;
+}
+
+double clamp(double x, double lower, double upper) {
+    if (x &lt; lower) {
+        return lower;
+    }
+    
+    if (x &gt; upper) {
+        return upper;
+    }
+    
+    return x;
+}
+
+allowedActions getAllowedActions(double v_ego, double v_front, double distance) {
+    // UPPAAL has a habit of estimating the hybrid clocks to be slightly outside the allowed range. 
+    // For example, it is possible to reach velocityFront = -8.0000034
+    // which is outside the bounds of the shield and therefore allows any action.
+    double v_ego2 = clamp(v_ego, minVelocityEgo, maxVelocityEgo);
+    double v_front2 = clamp(v_front, minVelocityFront - 1, maxVelocityFront + 1); // Bug: guards do not account for odd velocity returning from sensor range
+    // Furthermore, the distance can exceed the sensor range by quite a bit
+    // in the moment where Front disappears. 
+    // Only in the next time-step is it reduced to maxSensorDistance + 1.
+    double distance2 = fmin(distance, maxSensorDistance + 1);
+    
+    int bitarray = get_value(v_ego2, v_front2, distance2);
+    
+    if (bitarray == 0) {
+        // Since the barbaric method is an under-approximation of behaviour
+        // Red areas may sometimes be entered.
+        // Yes, this is extremely interesting and worth examining further.
+        return intToActions(1 + 2 + 4);
+    }
+    return intToActions(bitarray);
+}
+
+int outOfBounds = 0;
+int noSafeActions = 0;
+int safetyViolations = 0;
+
+// Variant of getAllowedActions that mutate the state of some global variables.
+// Such functions are not allowed for initialization.
+allowedActions shieldingDebug(double v_ego, double v_front, double distance) {
+    // UPPAAL has a habit of estimating the hybrid clocks to be slightly outside the allowed range. 
+    // For example, it is possible to reach velocityFront = -8.0000034
+    // which is outside the bounds of the shield and therefore allows any action.
+    double v_ego2 = clamp(v_ego, minVelocityEgo, maxVelocityEgo);
+    double v_front2 = clamp(v_front, minVelocityFront - 1, maxVelocityFront + 1); // Bug: guards do not account for odd velocity returning from sensor range
+    // Furthermore, the distance can exceed the sensor range by quite a bit
+    // in the moment where Front disappears. 
+    // Only in the next time-step is it reduced to maxSensorDistance + 1.
+    double distance2 = fmin(distance, maxSensorDistance + 1);
+    
+    int bitarray = get_value(v_ego2, v_front2, distance2);
+    
+    if (bitarray == -1) {
+        ++outOfBounds;
+    }
+    
+    if (distance &lt;= 0) {
+        ++safetyViolations;
+    }
+      
+    if (bitarray == 0) {
+        // Since the barbaric method is an under-approximation of behaviour
+        // Red areas may sometimes be entered.
+        // Yes, this is extremely interesting and worth examining further.
+        
+        ++noSafeActions;
+        return intToActions(1 + 2 +4);
+    }
+    return intToActions(bitarray);
+}
+
+allowedActions allowed = getAllowedActions(0, 0, 10);
+
+/** Tested on CC 192 samples with G of 0.5.shield * /
+allowedActions debug1 = getAllowedActions(3, 10, 20);   //111
+allowedActions debug2 = getAllowedActions(-3, 0, 8);    //110
+allowedActions debug3 = getAllowedActions(-3, 5, 8);    //111
+allowedActions debug4 = getAllowedActions(-4, -8, 17.7);//110
+allowedActions debug5 = getAllowedActions(5, -8, 10);   //111 (no safe actions)
+allowedActions debug6 = getAllowedActions(-8, -9, 6);//110
+/* */
+</declaration>
+	<template>
+		<name x="5" y="5">Ego</name>
+		<location id="id0" x="86" y="51">
+			<name x="119" y="42">Negative_acc</name>
+		</location>
+		<location id="id1" x="-204" y="-68">
+			<name x="-272" y="-76">No_acc</name>
+		</location>
+		<location id="id2" x="-34" y="-68">
+			<name x="-17" y="-76">Choose</name>
+			<committed/>
+		</location>
+		<location id="id3" x="85" y="-187">
+			<name x="75" y="-221">Positive_acc</name>
+		</location>
+		<init ref="id1"/>
+		<transition id="id4">
+			<source ref="id0"/>
+			<target ref="id2"/>
+			<label kind="synchronisation" x="-59" y="34">chooseEgo?</label>
+			<nail x="-8" y="25"/>
+		</transition>
+		<transition id="id5">
+			<source ref="id3"/>
+			<target ref="id2"/>
+			<label kind="synchronisation" x="-59" y="-187">chooseEgo?</label>
+			<nail x="-8" y="-161"/>
+		</transition>
+		<transition id="id6">
+			<source ref="id1"/>
+			<target ref="id2"/>
+			<label kind="synchronisation" x="-170" y="-119">chooseEgo?</label>
+			<nail x="-119" y="-102"/>
+		</transition>
+		<transition id="id7">
+			<source ref="id2"/>
+			<target ref="id0"/>
+			<label kind="guard" x="76" y="-51">allowed.backwards &amp;&amp;
+velocityEgo &gt; minVelocityEgo</label>
+			<label kind="assignment" x="76" y="-17">accelerationEgo = -2</label>
+			<nail x="59" y="-42"/>
+		</transition>
+		<transition id="id8">
+			<source ref="id2"/>
+			<target ref="id3"/>
+			<label kind="guard" x="85" y="-161">allowed.forwards &amp;&amp;
+velocityEgo &lt; maxVelocityEgo</label>
+			<label kind="assignment" x="85" y="-127">accelerationEgo = 2</label>
+			<nail x="59" y="-102"/>
+		</transition>
+		<transition id="id9">
+			<source ref="id2"/>
+			<target ref="id1"/>
+			<label kind="guard" x="-340" y="-42">allowed.neutral</label>
+			<label kind="assignment" x="-340" y="-25">accelerationEgo = 0</label>
+			<nail x="-119" y="-25"/>
+		</transition>
+	</template>
+	<template>
+		<name>Front</name>
+		<location id="id10" x="-340" y="-306">
+			<name x="-331" y="-331">Faraway</name>
+		</location>
+		<location id="id11" x="102" y="-136">
+			<name x="92" y="-170">Positive_acc</name>
+		</location>
+		<location id="id12" x="102" y="68">
+			<name x="59" y="85">Negative_acc</name>
+		</location>
+		<location id="id13" x="-102" y="68">
+			<name x="-153" y="85">No_acceleration</name>
+		</location>
+		<location id="id14" x="0" y="-34">
+			<name x="17" y="-42">Choose</name>
+			<committed/>
+		</location>
+		<location id="id15" x="-340" y="-238">
+			<committed/>
+		</location>
+		<location id="id16" x="-340" y="-153">
+			<committed/>
+		</location>
+		<branchpoint id="id17" x="-340" y="-195"/>
+		<init ref="id13"/>
+		<transition id="id18" controllable="false">
+			<source ref="id16"/>
+			<target ref="id10"/>
+			<label kind="guard" x="-398" y="-187">velocityEgo &lt; minVelocityFront</label>
+			<nail x="-416" y="-153"/>
+			<nail x="-416" y="-306"/>
+		</transition>
+		<transition id="id19">
+			<source ref="id17"/>
+			<target ref="id10"/>
+			<nail x="-374" y="-195"/>
+			<nail x="-374" y="-306"/>
+		</transition>
+		<transition id="id20">
+			<source ref="id17"/>
+			<target ref="id16"/>
+		</transition>
+		<transition id="id21" controllable="false">
+			<source ref="id15"/>
+			<target ref="id17"/>
+		</transition>
+		<transition id="id22" controllable="false">
+			<source ref="id12"/>
+			<target ref="id10"/>
+			<label kind="guard" x="-178" y="-323">distance &gt; maxSensorDistance</label>
+			<label kind="synchronisation" x="-178" y="-306">update?</label>
+			<label kind="assignment" x="-178" y="-289">distance = maxSensorDistance+1, accelerationFront = 0</label>
+			<nail x="263" y="68"/>
+			<nail x="263" y="-306"/>
+		</transition>
+		<transition id="id23" controllable="false">
+			<source ref="id11"/>
+			<target ref="id10"/>
+			<label kind="guard" x="-204" y="-246">distance &gt; maxSensorDistance</label>
+			<label kind="synchronisation" x="-204" y="-229">update?</label>
+			<label kind="assignment" x="-204" y="-212">distance = maxSensorDistance+1,
+accelerationFront = 0</label>
+			<nail x="102" y="-229"/>
+			<nail x="-204" y="-229"/>
+			<nail x="-246" y="-280"/>
+		</transition>
+		<transition id="id24" controllable="false">
+			<source ref="id13"/>
+			<target ref="id10"/>
+			<label kind="guard" x="-382" y="17">distance &gt; maxSensorDistance</label>
+			<label kind="synchronisation" x="-382" y="34">update?</label>
+			<label kind="assignment" x="-382" y="51">distance = maxSensorDistance+1,
+accelerationFront = 0</label>
+			<nail x="-391" y="68"/>
+			<nail x="-391" y="-306"/>
+		</transition>
+		<transition id="id25" controllable="false">
+			<source ref="id12"/>
+			<target ref="id14"/>
+			<label kind="synchronisation" x="-25" y="68">chooseFront?</label>
+			<nail x="0" y="68"/>
+		</transition>
+		<transition id="id26" controllable="false">
+			<source ref="id11"/>
+			<target ref="id14"/>
+			<label kind="synchronisation" x="-17" y="-153">chooseFront?</label>
+			<nail x="0" y="-136"/>
+		</transition>
+		<transition id="id27" controllable="false">
+			<source ref="id13"/>
+			<target ref="id14"/>
+			<label kind="synchronisation" x="-93" y="17">chooseFront?</label>
+		</transition>
+		<transition id="id28" controllable="false">
+			<source ref="id14"/>
+			<target ref="id12"/>
+			<label kind="guard" x="25" y="8">velocityFront &gt; minVelocityFront</label>
+			<label kind="assignment" x="25" y="25">accelerationFront = -2</label>
+		</transition>
+		<transition id="id29" controllable="false">
+			<source ref="id14"/>
+			<target ref="id11"/>
+			<label kind="guard" x="25" y="-102">velocityFront &lt; maxVelocityFront</label>
+			<label kind="assignment" x="25" y="-85">accelerationFront = 2</label>
+		</transition>
+		<transition id="id30" controllable="false">
+			<source ref="id14"/>
+			<target ref="id13"/>
+			<label kind="assignment" x="-204" y="-8">accelerationFront = 0</label>
+			<nail x="-102" y="-8"/>
+		</transition>
+		<transition id="id31" controllable="false">
+			<source ref="id10"/>
+			<target ref="id15"/>
+			<label kind="synchronisation" x="-365" y="-280">chooseFront?</label>
+		</transition>
+		<transition id="id32" controllable="false">
+			<source ref="id16"/>
+			<target ref="id14"/>
+			<label kind="select" x="-331" y="-136">i:int[minVelocityFront, maxVelocityFront]</label>
+			<label kind="guard" x="-331" y="-119">i &lt;= velocityEgo</label>
+			<label kind="assignment" x="-331" y="-102">velocityFront = i,
+distance = maxSensorDistance,
+rVelocityFront = i * 1.0,
+rDistance = 1.0*maxSensorDistance</label>
+			<nail x="-340" y="-34"/>
+		</transition>
+	</template>
+	<template>
+		<name>Monitor</name>
+		<declaration>
+double distanceRate(double velFront, double velEgo, double dist){
+    if (dist &gt; maxSensorDistance)
+        return 0.0;
+    else 
+        return velFront - velEgo;
+}
+</declaration>
+		<location id="id33" x="-153" y="-144">
+			<label kind="invariant" x="-315" y="-127">rVelocityEgo' == accelerationEgo &amp;&amp;
+rVelocityFront' == accelerationFront &amp;&amp;
+rDistance'  == distanceRate(rVelocityFront,rVelocityEgo, rDistance) &amp;&amp;
+D' == rDistance</label>
+		</location>
+		<init ref="id33"/>
+	</template>
+	<template>
+		<name>System</name>
+		<location id="id34" x="-68" y="-238">
+			<name x="-85" y="-272">Done</name>
+			<urgent/>
+		</location>
+		<location id="id35" x="-238" y="-238">
+			<name x="-272" y="-272">FrontNext</name>
+			<urgent/>
+		</location>
+		<location id="id36" x="-238" y="-187">
+			<name x="-255" y="-170">Wait</name>
+			<label kind="invariant" x="-280" y="-153">waitTimer &lt;= 1</label>
+		</location>
+		<location id="id37" x="-408" y="-238">
+			<name x="-433" y="-272">EgoNext</name>
+			<urgent/>
+		</location>
+		<init ref="id37"/>
+		<transition id="id38" controllable="false">
+			<source ref="id36"/>
+			<target ref="id37"/>
+			<label kind="guard" x="-536" y="-144">waitTimer &gt;= 1</label>
+			<label kind="assignment" x="-535" y="-127">updateDiscrete(),
+allowed = shieldingDebug(velocityEgo, velocityFront, distance)</label>
+			<nail x="-357" y="-144"/>
+			<nail x="-536" y="-144"/>
+			<nail x="-535" y="-238"/>
+		</transition>
+		<transition id="id39" controllable="false">
+			<source ref="id34"/>
+			<target ref="id36"/>
+			<label kind="synchronisation" x="-144" y="-195">update!</label>
+			<label kind="assignment" x="-144" y="-212">waitTimer = 0</label>
+		</transition>
+		<transition id="id40" controllable="false">
+			<source ref="id35"/>
+			<target ref="id34"/>
+			<label kind="synchronisation" x="-204" y="-255">chooseFront!</label>
+		</transition>
+		<transition id="id41" controllable="false">
+			<source ref="id37"/>
+			<target ref="id35"/>
+			<label kind="synchronisation" x="-365" y="-255">chooseEgo!</label>
+		</transition>
+	</template>
+	<system>
+system Ego, Front, System, Monitor;
+    </system>
+	<queries>
+		<query>
+			<formula>simulate [&lt;=120;1000] { accelerationEgo, velocityEgo, accelerationFront, velocityFront, rVelocityEgo, rVelocityFront, distance, rDistance, 0, 200 }</formula>
+			<comment/>
+		</query>
+		<query>
+			<formula>simulate [&lt;=120;10] { distance, rDistance, 0, 200 }</formula>
+			<comment/>
+		</query>
+		<query>
+			<formula>E[&lt;=120;1000] (max: D/10000)</formula>
+			<comment/>
+		</query>
+		<query>
+			<formula>E[&lt;=120;1000] (max: D/10000 + (distance &lt;= 0)*1000.0)</formula>
+			<comment/>
+		</query>
+		<query>
+			<formula>E[&lt;=120;10000] (max: distance &lt;= 0)</formula>
+			<comment/>
+			<result outcome="success" type="quantity" value="≈ 0" timestamp="2022-11-03 13:31:37 +0100">
+				<details>≈ 0</details>
+				<plot title="Probability Density Distribution" xaxis="max: distance &lt;= 0" yaxis="probability density">
+					<series title="density" type="b(1.000000)" color="0x0000ff" encoding="csv">0.0,1.0
+					</series>
+					<series title="average" type="pl" color="0x00dd00" encoding="csv">0.0,0.0
+0.0,1.0
+					</series>
+					<comment>Parameters: α=0.05, ε=0.05, bucket width=1, bucket count=1
+Runs: 10000 in total, 10000 (100%) displayed, 0 (0%) remaining
+Span of displayed sample: [0, 0]
+Mean estimate of displayed sample: ≈ 0</comment>
+				</plot>
+				<plot title="Probability Distribution" xaxis="max: distance &lt;= 0" yaxis="probability">
+					<series title="probability" type="b(1.000000)" color="0x0000ff" encoding="csv">0.0,1.0
+					</series>
+					<series title="average" type="pl" color="0x00dd00" encoding="csv">0.0,0.0
+0.0,1.0
+					</series>
+					<comment>Parameters: α=0.05, ε=0.05, bucket width=1, bucket count=1
+Runs: 10000 in total, 10000 (100%) displayed, 0 (0%) remaining
+Span of displayed sample: [0, 0]
+Mean estimate of displayed sample: ≈ 0</comment>
+				</plot>
+				<plot title="Cumulative Probability Distribution" xaxis="max: distance &lt;= 0" yaxis="probability">
+					<series title="cumulative" type="l" color="0x000000" encoding="csv">0.0,0.0
+					</series>
+					<series title="average" type="pl" color="0x00dd00" encoding="csv">0.0,0.0
+0.0,1.0
+					</series>
+					<comment>Parameters: α=0.05, ε=0.05, bucket width=1, bucket count=1
+Runs: 10000 in total, 10000 (100%) displayed, 0 (0%) remaining
+Span of displayed sample: [0, 0]
+Mean estimate of displayed sample: ≈ 0</comment>
+				</plot>
+				<plot title="Cumulative Probability Confidence Intervals" xaxis="max: distance &lt;= 0" yaxis="probability">
+					<series title="upper limit" type="k" color="0x0000dd" encoding="csv">0.0,3.688199146187623E-4
+					</series>
+					<series title="lower limit" type="k" color="0xdd0000" encoding="csv">0.0,0.0
+					</series>
+					<series title="cumulative" type="l" color="0x000000" encoding="csv">0.0,0.0
+					</series>
+					<series title="average" type="pl" color="0x00dd00" encoding="csv">0.0,0.0
+0.0,1.0
+					</series>
+					<comment>Parameters: α=0.05, ε=0.05, bucket width=1, bucket count=1
+Runs: 10000 in total, 10000 (100%) displayed, 0 (0%) remaining
+Span of displayed sample: [0, 0]
+Mean estimate of displayed sample: ≈ 0</comment>
+				</plot>
+				<plot title="Frequency Histogram" xaxis="max: distance &lt;= 0" yaxis="count">
+					<series title="count" type="b(1.000000)" color="0x0000ff" encoding="csv">0.0,10000.0
+					</series>
+					<series title="average" type="pl" color="0x00dd00" encoding="csv">0.0,0.0
+0.0,10000.0
+					</series>
+					<comment>Parameters: α=0.05, ε=0.05, bucket width=1, bucket count=1
+Runs: 10000 in total, 10000 (100%) displayed, 0 (0%) remaining
+Span of displayed sample: [0, 0]
+Mean estimate of displayed sample: ≈ 0</comment>
+				</plot>
+			</result>
+		</query>
+		<query>
+			<formula>strategy DeathCosts1000 = minE (D/1000 + (distance &lt;= 0)*1000.0) [&lt;=120] {} -&gt; {rVelocityEgo, rVelocityFront, rDistance}: &lt;&gt; time &gt;= 120</formula>
+			<comment/>
+		</query>
+		<query>
+			<formula>simulate [&lt;=120;10] { rDistance, 0, 200 }            under DeathCosts1000</formula>
+			<comment/>
+		</query>
+		<query>
+			<formula>E[&lt;=120;1000] (max: D/1000)                           under DeathCosts1000</formula>
+			<comment/>
+		</query>
+		<query>
+			<formula>E[&lt;=120;1000] (max:(distance &lt;= 0))                  under DeathCosts1000</formula>
+			<comment/>
+		</query>
+		<query>
+			<formula>E[&lt;=120;1000] (max: rDistance &lt; 0)                   under DeathCosts1000</formula>
+			<comment/>
+		</query>
+		<query>
+			<formula>saveStrategy("%resultsdir%/DeathCosts1000.strategy.json", DeathCosts1000)</formula>
+			<comment/>
+		</query>
+		<query>
+			<formula>strategy DeathCosts1000 = loadStrategy {} -&gt; {rVelocityEgo, rVelocityFront, rDistance}("%resultsdir%/DeathCosts1000.strategy.json")</formula>
+			<comment/>
+		</query>
+		<query>
+			<formula/>
+			<comment/>
+		</query>
+		<query>
+			<formula/>
+			<comment/>
+		</query>
+		<query>
+			<formula>/** Original Queries: */</formula>
+			<comment/>
+		</query>
+		<query>
+			<formula>simulate [&lt;=100] { accelerationFront - accelerationEgo, rVelocityFront-rVelocityEgo, rDistance}</formula>
+			<comment>Validate the state dynamics: the trajectories of relative acceleration, speed and distance between cars.
+Click "Check", then right-click the property and inspect the plot.</comment>
+		</query>
+		<query>
+			<formula/>
+			<comment/>
+		</query>
+		<query>
+			<formula>// Safety issues with completely stochastic behavior:</formula>
+			<comment/>
+		</query>
+		<query>
+			<formula>A[] distance &gt; 5                                              // false</formula>
+			<comment>Is the distance between cars always greater than 5m? i.e. there are no colisions?
+Expect false in seconds</comment>
+		</query>
+		<query>
+			<formula>Pr[&lt;=100] (&lt;&gt; distance &lt;= 5)                                  // ~0.90</formula>
+			<comment>What is the probability of cars crashing?
+Expect 0.9 in 15s, i.e. the cars crash almost surely.</comment>
+		</query>
+		<query>
+			<formula>simulate [&lt;=100] {rDistance, distance, 5, 200}</formula>
+			<comment>Inspect the rDistance and distance trajectories, 
+where distance approximates the dynamics of rDistance.</comment>
+		</query>
+		<query>
+			<formula>simulate [&lt;=100; 100] {rDistance, distance, 5, 200}</formula>
+			<comment>Inspect 100 trajectories of distance variables over time.
+Expect the values to vary widely between -2000 and +200.
+Lower values then 5 correspond to crash.</comment>
+		</query>
+		<query>
+			<formula>simulate [&lt;=100] {rVelocityFront, velocityFront}</formula>
+			<comment>Inspect that velocityFront approximates the dynamics of rVelocityFront.</comment>
+		</query>
+		<query>
+			<formula>simulate [&lt;=100; 100] {rVelocityFront, velocityFront}</formula>
+			<comment>Inspect the speed trajectories of the front car.
+The velocityFront approximates rVelocityFront.</comment>
+		</query>
+		<query>
+			<formula>simulate [&lt;=100] {rVelocityEgo, velocityEgo}</formula>
+			<comment>Inspect that velocityEgo approximates the dynamics of rVelocityEgo.</comment>
+		</query>
+		<query>
+			<formula>simulate [&lt;=100; 100] {rVelocityEgo, velocityEgo}</formula>
+			<comment>Inspect the speed trajectories of the ego car.</comment>
+		</query>
+		<query>
+			<formula>simulate [&lt;=100; 100] {rVelocityFront-rVelocityEgo}</formula>
+			<comment>Inspect the speed difference between cars.
+Negative speed means the ego car is approaching the front car (unsafe).
+Observe that the relative speed varies a lot, especially that it can become very negative.</comment>
+		</query>
+		<query>
+			<formula/>
+			<comment/>
+		</query>
+		<query>
+			<formula>// Compute and inspect the safe strategy (restricts behavior to safe states):</formula>
+			<comment/>
+		</query>
+		<query>
+			<formula>strategy safe = control: A[] distance &gt; 5 </formula>
+			<comment>Find a safe strategy where the distance is kept greater than 5m.
+Expect success within 30s.</comment>
+		</query>
+		<query>
+			<formula>simulate [&lt;=100] { accelerationFront - accelerationEgo, rVelocityFront-rVelocityEgo, rDistance} under safe</formula>
+			<comment>Validate the state dynamics of the safe strategy: the trajectories of relative acceleration, speed and distance between cars.</comment>
+		</query>
+		<query>
+			<formula>simulate [&lt;=100; 100] {rDistance, distance, 5, 200} under safe</formula>
+			<comment>Inspect 100 trajectories of distance variables over time while using the safe strategy.
+Expect trajectories to vary between 5 and 200, i.e. no crashes.</comment>
+		</query>
+		<query>
+			<formula>Pr[&lt;=100] (&lt;&gt; distance &lt;= 5) under safe                       // &lt;0.01</formula>
+			<comment>What is the probability of cars crashing while using safe strategy?
+Expect &lt;0.01 in 15s (cannot find a single counter-exmple)</comment>
+		</query>
+		<query>
+			<formula>A[] distance &gt; 5 under safe                                   // true</formula>
+			<comment>Is the safe strategy really safe?
+Prove by exhaustive exploration.
+Expect true (satisfied).</comment>
+		</query>
+		<query>
+			<formula>inf: distance under safe                                      // &gt;=6</formula>
+			<comment>Find the smallest distance between cars by exhaustive search.
+Expect the distance to be greater than 6, i.e. no crash.</comment>
+		</query>
+		<query>
+			<formula>simulate [&lt;=100; 100] {rVelocityFront-rVelocityEgo} under safe</formula>
+			<comment>Inspect the speed difference between cars of the safe strategy.
+Negative speed means the ego car is approaching the front car (dangerous).
+Observe that the speed does not go below -16 and stays mostly balanced between -6 and 6.</comment>
+		</query>
+		<query>
+			<formula/>
+			<comment/>
+		</query>
+		<query>
+			<formula>// Optimize (refine) the safe strategy into safeFast and inspect:</formula>
+			<comment/>
+		</query>
+		<query>
+			<formula>strategy safeFast = minE(D) [&lt;=105] {}-&gt;{}: &lt;&gt; time &gt;= 100 under safe
+			</formula>
+			<comment>Maximize the progress by minimizing the cumulative distance between cars while driving safely.
+Takes up to 3mins with the Discretization step size set to 0.1 (in Options-&gt;Statistical parameters).</comment>
+		</query>
+		<query>
+			<formula>simulate [&lt;=100] { accelerationFront - accelerationEgo, rVelocityFront-rVelocityEgo, rDistance} under safeFast</formula>
+			<comment>Validate the state dynamics of the safeFast strategy: the trajectories of relative acceleration, speed and distance between cars.</comment>
+		</query>
+		<query>
+			<formula>simulate [&lt;=100; 100] {rDistance, distance, 5, 200} under safeFast</formula>
+			<comment>Inspect the distances of the safeFast strategy:
+the distance is always greater than 5 (safe),
+and it does not allow the front car to go further than ~50m ahead 
+(does not reach the limit 200), making the most possible progress.</comment>
+		</query>
+		<query>
+			<formula/>
+			<comment/>
+		</query>
+		<query>
+			<formula>// Compute minimum safe distances for each relative speed value:</formula>
+			<comment/>
+		</query>
+		<query>
+			<formula>inf{velocityFront - velocityEgo == -18}: distance under safe  // &gt;=MAXINT, no such states</formula>
+			<comment>Find the minimum safe distance when the relative speed is -18 (ego is approaching front)</comment>
+		</query>
+		<query>
+			<formula>inf{velocityFront - velocityEgo == -16}: distance under safe  // &gt;=70</formula>
+			<comment>Find the minimum safe distance when the relative speed is -16 (ego is approaching ego)</comment>
+		</query>
+		<query>
+			<formula>inf{velocityFront - velocityEgo == -14}: distance under safe  // &gt;=55</formula>
+			<comment/>
+		</query>
+		<query>
+			<formula>inf{velocityFront - velocityEgo == -12}: distance under safe  // &gt;=42</formula>
+			<comment/>
+		</query>
+		<query>
+			<formula>inf{velocityFront - velocityEgo == -10}: distance under safe  // &gt;=31</formula>
+			<comment/>
+		</query>
+		<query>
+			<formula>inf{velocityFront - velocityEgo ==  -8}: distance under safe  // &gt;=22</formula>
+			<comment/>
+		</query>
+		<query>
+			<formula>inf{velocityFront - velocityEgo ==  -6}: distance under safe  // &gt;=15</formula>
+			<comment/>
+		</query>
+		<query>
+			<formula>inf{velocityFront - velocityEgo ==  -4}: distance under safe  // &gt;=10</formula>
+			<comment/>
+		</query>
+		<query>
+			<formula>inf{velocityFront - velocityEgo ==  -2}: distance under safe  // &gt;= 7</formula>
+			<comment/>
+		</query>
+		<query>
+			<formula>inf{velocityFront - velocityEgo ==   0}: distance under safe  // &gt;= 6</formula>
+			<comment/>
+		</query>
+		<query>
+			<formula>inf{velocityFront - velocityEgo ==   2}: distance under safe  // &gt;= 7
+			</formula>
+			<comment/>
+		</query>
+		<query>
+			<formula>inf{velocityFront - velocityEgo ==   4}: distance under safe  // &gt;=10</formula>
+			<comment/>
+		</query>
+		<query>
+			<formula>inf{velocityFront - velocityEgo ==   6}: distance under safe  // &gt;=13</formula>
+			<comment/>
+		</query>
+		<query>
+			<formula>inf{velocityFront - velocityEgo ==   8}: distance under safe  // &gt;=18</formula>
+			<comment/>
+		</query>
+		<query>
+			<formula>inf{velocityFront - velocityEgo ==  10}: distance under safe  // &gt;=23</formula>
+			<comment/>
+		</query>
+		<query>
+			<formula>inf{velocityFront - velocityEgo ==  12}: distance under safe  // &gt;=40</formula>
+			<comment/>
+		</query>
+		<query>
+			<formula>inf{velocityFront - velocityEgo ==  14}: distance under safe  // &gt;=49</formula>
+			<comment/>
+		</query>
+		<query>
+			<formula>inf{velocityFront - velocityEgo ==  16}: distance under safe  // &gt;=60</formula>
+			<comment/>
+		</query>
+		<query>
+			<formula>inf{velocityFront - velocityEgo ==  18}: distance under safe  // &gt;=MAXINT, no such states</formula>
+			<comment/>
+		</query>
+	</queries>
+</nta>
