@@ -11,13 +11,15 @@ Make sure you have the following packages installed on your system:
 
 ### Install julia 1.8.2
 
+The following commands assumes a bash shell. It will need to be altered if another shell environment is used.
+
 	cd ~/Downloads
 	wget https://julialang-s3.julialang.org/bin/linux/x64/1.8/julia-1.8.2-linux-x86_64.tar.gz
 	tar zxvf julia-1.8.2-linux-x86_64.tar.gz
-	mv julia-1.8.2/ ~/bin/julia-1.8.2
-	echo export PATH="$PATH:/home/sammy/julia-1.8.1/bin"
-	echo 'export PATH="$PATH:$HOME/julia-1.8.2/bin"' >> .bashrc 
-	source .bashrc
+	mv julia-1.8.2/ ~/julia-1.8.2
+	echo '\n# Julia' >> ~/.bashrc
+	echo 'export PATH="$PATH:$HOME/julia-1.8.2/bin"' >> ~/.bashrc
+	source ~/.bashrc
 
 	
 	
