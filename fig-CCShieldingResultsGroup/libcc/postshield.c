@@ -30,10 +30,11 @@ The platform-independent way of including the julia-to-c library is to pull the 
 
 
 // Consts for testing only
-#define CODE_PATH "/home/asger/Insync/OQ82YK@cs.aau.dk/OneDrive Biz - SharePoint/DEIS - Shielded AI - TACAS Paper - Dokumenter/Shielded AI - TACAS Paper/Code/"
+#define CODE_PATH "/home/asger/Insync/OQ82YK@cs.aau.dk/OneDrive Biz - SharePoint/DEIS - Shielded AI - TACAS Paper - Dokumenter/Shielded AI - TACAS Paper/ReproducibilityPackage"
 # define POSTSHIELD_NOTEBOOK_PATH CODE_PATH "fig-CCShieldingResultsGroup/PostShield Strategy.jl"
 #define STRATEGY_PATH CODE_PATH "/Export/CC-shielded.json"
 #define SHIELD_PATH CODE_PATH "/Export/CCShields/old testshield CC 192 samples with G of 0.5.shield"
+#define PKG_PROJECT_PATH CODE_PATH
 
 bool already_running = false;
 
@@ -50,25 +51,29 @@ int my_concat3(char out[], int maxsize, const char s1[], const char s2[], const 
 }
 
 // Spin up jl runtime and load functions shielded_strategy and intervened
-int initialize_julia_context(const char postshield_notebook_path[], const char strategy_path[], const char shield_path[])
+int initialize_julia_context(const char postshield_notebook_path[], const char strategy_path[], const char shield_path[], const char pkg_project_path[])
 {
     if (already_running){
         return 0;
     }
 
     jl_init();
+    
+    JULIA("using Pkg");
 
     const int L = GENEROUS_STRING_LENGTH;
-    char statement1[L], statement2[L], statement3[L];
+    char statement1[L], statement2[L], statement3[L], statement4[L];
 
-    my_concat3(statement1, L, "include(\"", postshield_notebook_path, "\")");
-    my_concat3(statement2, L, "strategy_path = \"", strategy_path, "\"");
-    my_concat3(statement3, L, "shield_path = \"", shield_path, "\"");
+    my_concat3(statement1, L, "Pkg.activate(\"", pkg_project_path, "\", io=devnull)");
+    my_concat3(statement2, L, "include(\"", postshield_notebook_path, "\")");
+    my_concat3(statement3, L, "strategy_path = \"", strategy_path, "\"");
+    my_concat3(statement4, L, "shield_path = \"", shield_path, "\"");
 
     //JULIA("Activate .");  //TODO: This should be uncommented upon migration to ReproducibilityPackage.
     JULIA(statement1);
     JULIA(statement2);
     JULIA(statement3);
+    JULIA(statement4);
 
     // In cases where the shield intervenes, the allowed action is chosen by the policy from remaining safe actions.
     JULIA("deterministic_shielded_strategy = get_shielded_strategy_int(strategy_path, shield_path, true)");
@@ -187,7 +192,7 @@ int main()
     printf("%s", concat_result);
     /**/
     
-    initialize_julia_context(POSTSHIELD_NOTEBOOK_PATH, STRATEGY_PATH, SHIELD_PATH);
+    initialize_julia_context(POSTSHIELD_NOTEBOOK_PATH, STRATEGY_PATH, SHIELD_PATH, PKG_PROJECT_PATH);
 
     printf("intervened((3, 3, 37)):\t%d\t(should be: 1)\n", intervened(3, 3, 37));
     printf("intervened((3, 3, 41)):\t%d\t(should be: 1)\n", intervened(3, 3, 41));

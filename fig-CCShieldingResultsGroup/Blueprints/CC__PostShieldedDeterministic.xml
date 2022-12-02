@@ -86,10 +86,11 @@ Post Shielding
 const string POSTSHIELD_NOTEBOOK_PATH = "%postshield_notebook_path%";
 const string STRATEGY_PATH = "%strategy_for_postshield%";
 const string SHIELD_PATH = "%shield_for_postshield%";
+const string PKG_PROJECT_PATH = "%pkg_project_path%";
 
 import "%libccpostshield_path%"
 {
-    int initialize_julia_context(const string&amp; postshield_notebook_path, const string&amp; strategy_path, const string&amp; shield_path);
+    int initialize_julia_context(const string&amp; postshield_notebook_path, const string&amp; strategy_path, const string&amp; shield_path, const string&amp; pkg_project_path);
     bool intervened(double v_ego, double v_front, double distance);
     int deterministic_shielded_strategy(double v_ego, double v_front, double distance);
     int nondeterministic_shielded_strategy(double v_ego, double v_front, double distance);
@@ -181,7 +182,7 @@ allowedActions shieldingDebug(double v_ego, double v_front, double distance) {
     return intToActions(bitarray);
 }
 
-int initializedExitCode = initialize_julia_context(POSTSHIELD_NOTEBOOK_PATH, STRATEGY_PATH, SHIELD_PATH);
+int initializedExitCode = initialize_julia_context(POSTSHIELD_NOTEBOOK_PATH, STRATEGY_PATH, SHIELD_PATH, PKG_PROJECT_PATH);
 
 allowedActions allowed = getAllowedActions(0, 0, 10);
 

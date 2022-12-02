@@ -2,7 +2,8 @@ if !isfile("Project.toml")
     error("Project.toml not found. Try running this script from the root of the ReproducibilityPackage folder.")
 end
 import Pkg
-Pkg.activate(".")
+pkg_project_path = abspath(".")
+Pkg.activate(pkg_project_path)
 Pkg.instantiate()
 
 using ArgParse
@@ -107,9 +108,12 @@ if !args["skip-experiment"]
         "%libccpreshield_path%" => libccpreshield_file,     # Where the libccpreshield.so file is located
         "%libccpostshield_path%" => libccpostshield_file,   # Where the libccposthield.so file is located
         "%checks%" => checks,                               # Used in queries: E[<=120;checks] (max:...)
+        
+        # These are passed from the PostShielded UPPAAL models to postshield.c
         "%postshield_notebook_path%" => postshield_notebook_path,   # Location of the Pluto Notebook that contains the post-shielding code
         "%strategy_for_postshield%" => strategy_for_postshield,     # Where said notebook should load the strategy from
         "%shield_for_postshield%" => shield_file,                   # Where said notebook should load the shield from
+        "%pkg_project_path%" => pkg_project_path,                   # Path to the julia packages "project" to ensure that PostShield Strategy.jl is loaded with the correct packages.
     )
 
     search_and_replace(blueprints_dir, queries_models_dir, replacements)
