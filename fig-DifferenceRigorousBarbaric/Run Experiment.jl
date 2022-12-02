@@ -30,12 +30,17 @@ shield2_default = homedir() ⨝ "Results/tab-BBSynthesis/Exported Strategies/BOX
         default=shield2_default
 
     "--color-mode"
-        help="""Color theme to use for the differences. One of [transparent, distinctive]."""
+        help="""Color theme to use for the differences. One of {transparent, distinctive}."""
         default="transparent"
 end
 
 args = parse_args(s)
 
+results_dir = args["results-dir"]
+const figure_name = "fig-DifferenceRigorousBarbaric"
+results_dir = results_dir ⨝ figure_name
+
+mkpath(results_dir)
 
 using Plots
 using Dates
@@ -49,18 +54,18 @@ diffcolors = args["color-mode"] == "distinctive" ? [
 	colors.PETER_RIVER, # {hit} ~ {}
 	colors.AMETHYST,    # {hit, nohit} ~ {hit}
 	colors.WET_ASPHALT, # {hit, nohit} ~ {hit}
-    colors.EMERALD,     # ???
-    colors.WET_ASPHALT, # ???
-    colors.ASBESTOS,    # ???
-    colors.ORANGE,      # ???
+    colors.EMERALD,     # should not be used. included to prevent overflow
+    colors.WET_ASPHALT, # should not be used. included to prevent overflow
+    colors.ASBESTOS,    # should not be used. included to prevent overflow
+    colors.ORANGE,      # should not be used. included to prevent overflow
 ] : args["color-mode"] == "transparent" ? [
 	colorant"#ffc8bf", # {hit, nohit} ~ {}
 	colorant"#dfbdbf", # {hit} ~ {}
 	colorant"#cff2fe", # {hit, nohit} ~ {hit}
-	colorant"#cff2fe", # ???
-	colorant"#dfbdbf", # ???
-	colorant"#ffc8bf", # ???
-] : error()
+	colorant"#cff2fe", # should not be used. included to prevent overflow
+	colorant"#dfbdbf", # should not be used. included to prevent overflow
+	colorant"#ffc8bf", # should not be used. included to prevent overflow
+] : error("--color-mode should be one of {distinctive, transparent}")
 
 function error_on_missing(file::AbstractString)
     if !isfile(file)
@@ -93,4 +98,11 @@ p1 = draw_diff(shield1, shield2, diffcolors, bbshieldcolors, bbshieldlabels; nam
     xlabel="v", ylabel="p", legend_position=(0.72, 0.93),
     size=(1200, 900))
 
-display(p1)
+
+const name = "DifferenceRigorousBarbaric"
+
+savefig(p1, results_dir ⨝ "$name.png")
+savefig(p1, results_dir ⨝ "$name.svg")
+progress_update("Saved $name")
+
+
