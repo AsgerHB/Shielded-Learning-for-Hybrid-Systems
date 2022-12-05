@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.14
+# v0.19.16
 
 using Markdown
 using InteractiveUtils
@@ -466,11 +466,14 @@ get_shielded_strategy_int(selected_file, shield_file, false)((3, 3, 41))
   ╠═╡ =#
 
 # ╔═╡ 1f52f4a4-6bcb-4e63-91a5-bd04ee9aa94c
+# ╠═╡ skip_as_script = true
+#=╠═╡
 get_shielded_strategy(
 	"/home/asger/Insync/OQ82YK@cs.aau.dk/OneDrive Biz - SharePoint/DEIS - Shielded AI - TACAS Paper - Dokumenter/Shielded AI - TACAS Paper/Code/Export/CC-shielded.json",
 	"/home/asger/Insync/OQ82YK@cs.aau.dk/OneDrive Biz - SharePoint/DEIS - Shielded AI - TACAS Paper - Dokumenter/Shielded AI - TACAS Paper/Code/Export/CCShields/old testshield CC 192 samples with G of 0.5.shield",
 	false
 )([10, 10, 100])
+  ╠═╡ =#
 
 # ╔═╡ 789cf5c3-12b1-4902-b802-97fe60718972
 md"""
@@ -754,9 +757,9 @@ StatsBase = "~0.33.21"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.8.0"
+julia_version = "1.8.2"
 manifest_format = "2.0"
-project_hash = "7b06eaf8c1f65bc3a105d44945052cc66b3eebd7"
+project_hash = "32f8df8dfed94b0885775a029335517efd6acad7"
 
 [[deps.AbstractPlutoDingetjes]]
 deps = ["Pkg"]
@@ -1438,7 +1441,7 @@ version = "1.0.0"
 [[deps.Tar]]
 deps = ["ArgTools", "SHA"]
 uuid = "a4e569a6-e804-4fa4-b0f3-eef7a1d5b13e"
-version = "1.10.0"
+version = "1.10.1"
 
 [[deps.TensorCore]]
 deps = ["LinearAlgebra"]
