@@ -38,6 +38,8 @@ mkpath(evaluations_dir)
 make_barbaric_shields = !haskey(args, "skip-barbaric")
 test_shields = !haskey(args, "skip-evaluation")
 
+progress_update("Estimated total time to commplete: 2 hours. (5 minutes if run with --test)")
+
 
 #########
 # Setup #

@@ -48,7 +48,7 @@ This notebook is called in UPPAAL using a bridge written in C. The C code makes 
 
 It is by far the most brittle code of all my experiments, and that says a lot. UPPAAL is required to load both this bridging C code, *and* the associated julia-to-c library, `<julia.h>`. I simply got lucky that on my machine, DLL hell was avoided by calling the `verifyta` binary directly. 
 
-When a post-shielded model picks an unsafe action, there will in so cases be two safe actions remaining. For example, picking *forwards* might be potentially unsafe, but both *neutral* and *backwards* are okay. In this instance, which of the two should be picked? The model tries several options.
+When a post-shielded strategy picks an unsafe action, there will in some cases be two safe actions remaining. For example, picking *forwards* might be potentially unsafe, but both *neutral* and *backwards* are okay. In this instance, which of the two should be picked? The experiment tries several options.
 
 - **PostShieldedRandomChoice** : Choose randomly between remaining options.
 - **PostShieldedPolicyPreferred** : Choose whichever remaining option gives the best expected outcome, according to the strategy. 
