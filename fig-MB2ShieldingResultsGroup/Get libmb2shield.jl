@@ -34,23 +34,23 @@ function get_shield(possible_shield_file, working_dir; test)
     progress_update("No shield was provided. Synthesising a new shield instead.")
 
     if test
-        grid = Grid(0.02, -13, 13, 0, 8) 
+        grid = Grid(0.02, -15, 15, 0, 10) 
         samples_per_axis = 5
     else
-        grid = Grid(0.01, -13, 13, 0, 8)
+        grid = Grid(0.01, -15, 15, 0, 10)
         samples_per_axis = 20
     end
     
     progress_update("Synthesising shield: $(samples_per_axis^2) samples $(grid.G) G")
     progress_update("Estimated time to synthesise: 50 minutes (3 minutes if run with --test)")
 
-    shield_dir = working_dir ⨝ "$(samples_per_axis^2) samples $(grid.G) G.shield"
+    mechanics = merge(bbmechanics, (;t_hit=bbmechanics.t_hit*number_of_balls))
+
+    shield_dir = working_dir ⨝ "$(round(mechanics.t_hit, digits=1)) t_hit $(samples_per_axis^2) samples $(grid.G) G .shield"
     
     initialize!(grid, standard_initialization_function)
 
-    mechanics = merge(bbmechanics, (;t_hit=bbmechanics.t_hit*number_of_balls))
-
-    reachability_function = get_barbaric_reachability_function(samples_per_axis, bbmechanics)
+    reachability_function = get_barbaric_reachability_function(samples_per_axis, mechanics)
     shield, terminated_early, animation = make_shield(reachability_function, grid)
     robust_grid_serialization(shield_dir, shield)
     return shield_dir

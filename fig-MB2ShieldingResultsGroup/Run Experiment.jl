@@ -43,6 +43,8 @@ end
 
 args = parse_args(s)
 
+progress_update("Estimated total time to commplete: 19 hours. (30 minutes if run with --test)")
+
 results_dir = args["results-dir"]
 const figure_name = "fig-MB2ShieldingResultsGroup"
 results_dir = results_dir ⨝ figure_name
