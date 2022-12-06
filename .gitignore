@@ -27,8 +27,12 @@ docs/site/
 # Manifest.toml
 
 
+## C ##
+
+*.o
+*.so
+
+
 ## Additional Ignores ##
 
-
-# This is a temporary measure. Shared Code provided by a symlink to MyLibrary in the ShieldingCode repo
-Shared Code
+shield_dump.c
