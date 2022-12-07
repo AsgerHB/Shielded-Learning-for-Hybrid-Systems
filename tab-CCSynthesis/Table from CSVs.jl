@@ -259,7 +259,7 @@ begin
 		# match example: 100 samples 0.02 G.shield
 		m = match(r"(\d+) Samples ([0-9.]+) G", filename)
 		if m != nothing
-			return "barbaric with N=$(n_from_grid_points(problem, m[1]))"
+			return "Barbaric with N=$(n_from_grid_points(problem, m[1]))"
 		else
 			# match example: BOX 0.01 with G of 0.02.shield
 			m = match(r"(\w+) ([0-9.]+) with G of ([0-9.]+)", filename)
@@ -513,7 +513,7 @@ StatsPlots = "~0.15.3"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.8.0"
+julia_version = "1.8.2"
 manifest_format = "2.0"
 project_hash = "d4d76951d123b5c63ba534413fe0512aa38746b2"
 
@@ -1487,7 +1487,7 @@ version = "1.8.1"
 [[deps.Tar]]
 deps = ["ArgTools", "SHA"]
 uuid = "a4e569a6-e804-4fa4-b0f3-eef7a1d5b13e"
-version = "1.10.0"
+version = "1.10.1"
 
 [[deps.TensorCore]]
 deps = ["LinearAlgebra"]

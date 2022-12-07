@@ -220,12 +220,12 @@ begin
 		# match example: 100 samples 0.02 G.shield
 		m = match(r"(\d+) Samples ([0-9.]+) G", filename)
 		if m != nothing
-			return "barbaric with N=$(Int(sqrt(parse(Int, m[1]))))"
+			return "Barbaric with N=$(Int(sqrt(parse(Int, m[1]))))"
 		else
 			# match example: BOX 0.01 with G of 0.02.shield
 			m = match(r"(\w+) ([0-9.]+) with G of ([0-9.]+)", filename)
 			if m != nothing
-				return "Julia Reach $(m[1])(δ=$(m[2]))"
+				return "JuliaReach $(m[1]) with time-step=$(m[2])"
 			else
 				best_effort = replace(filename, ".shield" => "")
 				@warn "Unexpected filename: $filename\nCould not determine algorithm type. Using placeholder: $best_effort"
@@ -242,11 +242,11 @@ begin
 	
 	function get_granularity(filename::AbstractString)
 		#filename = string(filename)
-		m = match(r"(\d+) Samples ([0-9.]+) G", filename)
+		m = match(r"(\d+) Samples ([0-9]+.?[0-9]*) G", filename)
 		if m != nothing
 			return m[2]
 		else
-			m = match(r"(\w+) ([0-9.]+) with G of ([0-9.]+)", filename)
+			m = match(r"(\w+) ([0-9.]+) with G of ([0-9].?[0-9]*)", filename)
 			if m != nothing
 				return m[3]
 			else
@@ -322,7 +322,7 @@ synthesis_report
 
 # ╔═╡ 8d952460-c8f2-4b66-8c25-5e4d543fdc63
 # headers
-saved_as, samples_per_axis, gridargs, valid, seconds_taken, bytes_used = :saved_as, :samples_per_axis, :gridargs, :valid, :seconds_taken, :bytes_used
+saved_as, samples_per_axis, gridargs, valid, seconds_taken, time_taken, bytes_used = :saved_as, :samples_per_axis, :gridargs, :valid, :seconds_taken, :time_taken, :bytes_used
 
 # ╔═╡ 677a73f0-9f42-434a-916f-febb8ab9f1bb
 # headers that I'm gonna use with select
@@ -331,26 +331,16 @@ description, minutes_taken, hours_taken, gigabytes_used = :description, :minutes
 # ╔═╡ e92acf3c-e07e-4b28-ae00-904b7b2ae025
 cleaned_synthesis_report = call(() -> begin
 
-	div60(s) = s./60
-	div3600(s) = s./3600
-	GiB(b) = b./1073741824 # Bytes to GiB
 	result = transform(synthesis_report, 
-		saved_as => get_granularity, 
-		saved_as => get_algorithm, 
-		seconds_taken => div60,
-		seconds_taken => div3600,
-		bytes_used => GiB)
-	
-	result = rename(result, 
-		:saved_as_get_granularity => granularity,
-		:saved_as_get_algorithm => algorithm,
-		:seconds_taken_div60 => minutes_taken,
-		:seconds_taken_div3600 => hours_taken,
-		:bytes_used_GiB => gigabytes_used)
+		saved_as => get_granularity => granularity, 
+		saved_as => get_algorithm => algorithm)
 	
 	result = sort(result, [granularity, algorithm], lt=natural, rev=false)
 	result = select(result, [granularity, algorithm, valid, seconds_taken])
 end)
+
+# ╔═╡ cc401bb8-f027-4f8b-bc8a-58d1dc1f94ab
+
 
 # ╔═╡ 21311e72-95f3-43bb-b4d0-099544d75469
 md"""
@@ -365,12 +355,12 @@ joint_report = innerjoin(clean_safety_report, cleaned_synthesis_report,
 joint_report_latexified = call() do
 	seconds_format(d::Float64) = @sprintf("%.0f", d)
 	percent_format(d::Float64) = @sprintf("%.1f", d)*"\\%"
-	wrap_math(str::String) = replace(
-			replace(str, r"δ=(\d+\.?\d*)" => s"$\\delta=\g<1>$"), 
-		r"N=(\d+)" => s"$N=\g<1>$")
+	wrap_math(str::String) = replace(str, 
+		r"time-step=([0-9.]+)" => s"time-step$\\:=\g<1>$", 
+		r"N=(\d+)" => s"$N=\g<1>$",)
 	
 	result = transform(joint_report,
-		seconds_taken => ByRow(seconds_format), 
+		#seconds_taken => ByRow(seconds_format), 
 		percent_safe => ByRow(percent_format), 
 		algorithm => ByRow(wrap_math),
 		renamecols=false)
@@ -468,7 +458,7 @@ StatsPlots = "~0.15.3"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.8.0"
+julia_version = "1.8.2"
 manifest_format = "2.0"
 project_hash = "d4d76951d123b5c63ba534413fe0512aa38746b2"
 
@@ -1442,7 +1432,7 @@ version = "1.8.1"
 [[deps.Tar]]
 deps = ["ArgTools", "SHA"]
 uuid = "a4e569a6-e804-4fa4-b0f3-eef7a1d5b13e"
-version = "1.10.0"
+version = "1.10.1"
 
 [[deps.TensorCore]]
 deps = ["LinearAlgebra"]
@@ -1743,7 +1733,7 @@ version = "1.4.1+0"
 # ╠═724b9379-a0e6-47a3-a211-29d9db4728e7
 # ╠═9c2cee19-3924-431c-bcae-37b00cdd05b6
 # ╟─953d3f41-38e1-45db-be2d-71889f9bf0c2
-# ╠═9f7d2852-4b9f-432c-bda7-b4aa40605a0e
+# ╟─9f7d2852-4b9f-432c-bda7-b4aa40605a0e
 # ╟─e66a6459-785b-4c11-a423-01dae4c545b7
 # ╠═a6b233df-14c1-4ba4-8bf3-0e87f6e9f8e7
 # ╟─c9a0c097-7c4e-4343-bcb2-a1dd89e047cf
@@ -1763,6 +1753,7 @@ version = "1.4.1+0"
 # ╠═8d952460-c8f2-4b66-8c25-5e4d543fdc63
 # ╠═677a73f0-9f42-434a-916f-febb8ab9f1bb
 # ╠═e92acf3c-e07e-4b28-ae00-904b7b2ae025
+# ╠═cc401bb8-f027-4f8b-bc8a-58d1dc1f94ab
 # ╟─21311e72-95f3-43bb-b4d0-099544d75469
 # ╠═00fa0da1-c3c4-4a3b-b516-a16e37f70785
 # ╠═29f585d2-21c9-4c53-8fc3-2b1ae8ddf713
