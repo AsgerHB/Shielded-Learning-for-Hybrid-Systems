@@ -110,7 +110,7 @@ begin
 	if problem == :BB
 		avg_cost_description = "Average swings per 120s"
 		avg_deaths_description = "Average deaths per 120s"
-		avg_interventions_description = "% interventions"
+		avg_interventions_description = "Percent interventions per run"
 	elseif problem == :RW
 		avg_cost_description = "Average cost per run"
 		avg_deaths_description = "% runs lost"
@@ -316,9 +316,7 @@ proper_experiment_name = Dict(
 
 # ╔═╡ b11d7a45-2e55-4ccb-82f8-d09cb669719b
 average_cost = call(() -> begin
-	legend_position = problem == :BB ? (0.7, 0.95) : 
-			          problem == :RW ? (0.7, 0.8) :
-					  problem == :CC ? :outertop : nothing
+	legend_position = :outertop
 	
 	plot(size=(600,700),
 		#xlims=(1500, 12000),
@@ -401,10 +399,7 @@ end)
 
 # ╔═╡ 61bd91fc-6b0f-4fa5-a3dc-ea0f87c06cf1
 average_interventions = call(() -> begin
-	lims = Nothing
-	if problem == :BB
-		lims = (0,6)
-	end
+	lims = :auto
 	df = DataFrame(medians)
 	filter!(:Experiment => ==(post_shield_type), df)
 	#df = transform(df, :Runs => ByRow(r -> "$r runs"), renamecols=false)
@@ -537,7 +532,7 @@ StatsPlots = "~0.14.34"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.8.0"
+julia_version = "1.8.2"
 manifest_format = "2.0"
 project_hash = "3457b3656572864929306c4b55ecc34f38d96ae0"
 
@@ -1497,7 +1492,7 @@ version = "1.7.0"
 [[deps.Tar]]
 deps = ["ArgTools", "SHA"]
 uuid = "a4e569a6-e804-4fa4-b0f3-eef7a1d5b13e"
-version = "1.10.0"
+version = "1.10.1"
 
 [[deps.TensorCore]]
 deps = ["LinearAlgebra"]
@@ -1806,9 +1801,9 @@ version = "0.9.1+5"
 # ╠═b9c5b5e8-7c3c-4cb1-850d-937e928c8090
 # ╟─cbc057c2-bdad-4131-a60f-d35c6f676fb7
 # ╠═b3b5a749-3c56-493c-8e80-d7b79f31e8fd
-# ╟─b11d7a45-2e55-4ccb-82f8-d09cb669719b
+# ╠═b11d7a45-2e55-4ccb-82f8-d09cb669719b
 # ╟─4fd405a2-ef9e-4590-8af1-6f806724ef2c
-# ╟─61bd91fc-6b0f-4fa5-a3dc-ea0f87c06cf1
+# ╠═61bd91fc-6b0f-4fa5-a3dc-ea0f87c06cf1
 # ╟─439297f0-8945-43c8-9141-e04dac3e94ee
 # ╠═8d9b7625-4b4c-4dbc-837e-f4afebd26c0c
 # ╠═dfca2665-01aa-48e1-92b4-f6663eb07105

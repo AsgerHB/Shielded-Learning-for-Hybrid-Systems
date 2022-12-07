@@ -172,6 +172,7 @@ cleandata = call() do
 	elseif problem == :CC
 		cleandata = rename(cleandata, :Avg_Crashes => :Avg_Deaths)
 
+		# Namefix is legacy. Should not be applicable for new results.
 		namefix(e) = replace(e, r"PostShielded(10+)(\w+)" => s"PostShielded\2")
 		
 		cleandata = transform(cleandata, 
@@ -190,7 +191,7 @@ cleandata = call() do
 		cleandata = transform(cleandata, :Avg_Interventions => x -> (x/1200)*100, renamecols=false)
 	elseif problem == :CC
 		# Turn number of interventions into % interventions
-		cleandata = transform(cleandata, :Avg_Interventions => x -> (x/1200)*100, renamecols=false)
+		cleandata = transform(cleandata, :Avg_Interventions => x -> (x/120)*100, renamecols=false)
 	end
 
 	cleandata
@@ -303,13 +304,16 @@ else
 end
 
 # ╔═╡ b3b5a749-3c56-493c-8e80-d7b79f31e8fd
-postshieldcolor = Dict(
+postshieldcolors = Dict(
 	"PostShielded" => colortheme[3],
 	"PostShieldedRandomChoice" => colors.SUNFLOWER,
 	"PostShieldedPolicyPreferred" => colors.PUMPKIN, 
 	"PostShieldedInterventionMinimized" => colors.CARROT, 
 	"PostShieldedCostMinimized" => colors.ORANGE
-)[post_shield_type]
+)
+
+# ╔═╡ 50f696fa-e0f2-4670-83c2-811331f379f8
+postshieldcolor = postshieldcolors[post_shield_type]
 
 # ╔═╡ 4fd405a2-ef9e-4590-8af1-6f806724ef2c
 proper_experiment_name = Dict(
@@ -558,6 +562,64 @@ post_shield_comparison = call() do
 	plot!(legend=:outertop)
 end
 
+# ╔═╡ dfcce060-ac1b-48a7-97c3-50aebb002c1a
+post_shield_cost_bar, post_shield_interventions_bar = call() do
+	df = medians
+	df = filter(:Experiment => e -> occursin("PostShield", e), df)
+	df = filter(:Runs => ==(12000), df)
+	df = filter(:Death_Costs => ==("10"), df)
+	
+	df = groupby(df, :Experiment)
+	
+	df = combine(df, 
+		:Avg_Cost => mean,
+		:Avg_Interventions => mean,
+		renamecols=false)
+
+	df = sort(df, :Experiment)
+
+	variantscolors = [postshieldcolors[e] for e in df[!, :Experiment]]
+
+	variants_names = Dict(
+	"PostShieldedRandomChoice" => "Random Choice",
+	"PostShieldedPolicyPreferred" => "Strategy Preferred",
+	"PostShieldedInterventionMinimized" => "Min Interventions",
+	"PostShieldedCostMinimized" => "Min Cost",
+	)
+	
+	df = transform(df, 
+		:Experiment => ByRow(e -> variants_names[e]),
+		renamecols=false)
+
+	p1 = @df df bar(:Experiment, :Avg_Cost,
+				color=variantscolors,
+				linewidth=0,
+				xrot=30,
+				size=(390,400),
+				label=nothing,
+				ylabel="Cost")
+
+	p2 = @df df bar(:Experiment, :Avg_Interventions,
+				color=variantscolors,
+				linewidth=0,
+				xrot=30,
+				size=(390,400),
+				label=nothing,
+				#series_annotations=:Experiment,
+				tick_direction=:in,
+				ylabel="Percent Interventions Per Run")
+
+	#plot(p1, p2, size=(800, 600))
+
+	p1, p2
+end
+
+# ╔═╡ 7ec370fa-4c45-4cc0-b973-d7184cebfe4b
+post_shield_interventions_bar
+
+# ╔═╡ 5c5e4c78-caea-4df7-a691-f95a50419662
+post_shield_cost_bar
+
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
@@ -582,7 +644,7 @@ StatsPlots = "~0.14.34"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.8.0"
+julia_version = "1.8.2"
 manifest_format = "2.0"
 project_hash = "3457b3656572864929306c4b55ecc34f38d96ae0"
 
@@ -1542,7 +1604,7 @@ version = "1.7.0"
 [[deps.Tar]]
 deps = ["ArgTools", "SHA"]
 uuid = "a4e569a6-e804-4fa4-b0f3-eef7a1d5b13e"
-version = "1.10.0"
+version = "1.10.1"
 
 [[deps.TensorCore]]
 deps = ["LinearAlgebra"]
@@ -1853,6 +1915,7 @@ version = "0.9.1+5"
 # ╟─cbc057c2-bdad-4131-a60f-d35c6f676fb7
 # ╠═0fcc5461-40a3-4291-afb4-a52322cd16cf
 # ╠═b3b5a749-3c56-493c-8e80-d7b79f31e8fd
+# ╠═50f696fa-e0f2-4670-83c2-811331f379f8
 # ╠═b11d7a45-2e55-4ccb-82f8-d09cb669719b
 # ╠═4fd405a2-ef9e-4590-8af1-6f806724ef2c
 # ╠═cc642bf5-aa5d-419b-b582-ca16042e07bd
@@ -1862,6 +1925,9 @@ version = "0.9.1+5"
 # ╠═dfca2665-01aa-48e1-92b4-f6663eb07105
 # ╟─1b1089d9-fc40-45ce-9ee5-b95698473550
 # ╟─ac54a7f0-2062-4814-9d5b-34801c994afa
-# ╠═a5d5f44f-232c-46d8-8e32-5975bd6095f4
+# ╟─a5d5f44f-232c-46d8-8e32-5975bd6095f4
+# ╠═dfcce060-ac1b-48a7-97c3-50aebb002c1a
+# ╠═7ec370fa-4c45-4cc0-b973-d7184cebfe4b
+# ╠═5c5e4c78-caea-4df7-a691-f95a50419662
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
