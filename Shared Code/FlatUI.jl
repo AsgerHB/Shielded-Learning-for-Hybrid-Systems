@@ -27,8 +27,8 @@ colors =
 
 
 
-transitioncolors = [colorant"#FFFFFF", colorant"#93d0ff", colorant"#93ffb4"]
-transitionlabels = ["Not reachable", "Initial", "Reachable"]
+transitioncolors = [colorant"#93d0ff", colorant"#93ffb4", colorant"#FFFFFF"]
+transitionlabels = ["Initial", "Reachable", "Not reachable"]
 
 bbshieldlabels = 	["{hit, nohit}", "{hit}", "{}"]
 bbshieldcolors = 	[colorant"#ffffff", colorant"#a1eaff", colorant"#ff9178"]
