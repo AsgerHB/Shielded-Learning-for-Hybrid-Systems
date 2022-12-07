@@ -29,7 +29,6 @@ begin
 	using Statistics
 	using ProgressLogging
 	include("StatisticalChecking.jl")
-	#plotlyjs() # TODO: Try this.
 	include("../Shared Code/FlatUI.jl")
 	include("../Shared Code/ExperimentUtilities.jl")
 	include("../Shared Code/BBSquares.jl")
@@ -64,7 +63,7 @@ bbmechanics
 # ╔═╡ 9f8ca58b-a8e9-49a4-bede-8e697c926ea2
 mechanicss = [
     merge(bbmechanics, (;β1=x)) 
-	for x in β1-0.1:0.005:β1+0.03
+	for x in β1-0.08:0.005:β1+0.03
 ]
 
 # ╔═╡ 103c39d0-f388-4d7d-8710-b741d392d53a
@@ -80,19 +79,8 @@ shield = robust_grid_deserialization(shield_file′)
 any_action, must_hit, bad = 0, 1, 2
 
 # ╔═╡ 85df6ffb-7c70-4f4f-9c53-d23d622dc65e
-# Force a hit only if it is in the "must hit" area. That is, let the policy decide in the "bad" area.
-function shielded(policy)
-    return (v, p) ->
-        if (v, p) ∈ shield && get_value(box(shield, v, p)) == must_hit
-            "hit"
-        else
-            policy(v, p)
-        end
-end
-
-# ╔═╡ 5b837985-9e2d-4fde-9a4b-bf597dee84fb
 # Force a hit in both the "must hit" area AND the "bad" area. Call this "strenthened" for short.
-function shielded_strengthened(policy)
+function shielded(policy)
     return (v, p) ->
         if (v, p) ∈ shield && get_value(box(shield, v, p)) ∈ (must_hit, bad)
             "hit"
@@ -100,6 +88,9 @@ function shielded_strengthened(policy)
             policy(v, p)
         end
 end
+
+# ╔═╡ 5b837985-9e2d-4fde-9a4b-bf597dee84fb
+
 
 # ╔═╡ 68786d2a-a83d-4a26-b60e-32455903fd1c
 begin 
@@ -122,30 +113,23 @@ function check_robustness_of_shields(mechanicss,
 	results = []
 	@progress for mechanics in mechanicss
 	    for hit_chance in random_agents_hit_chances
-	
-	        shielded_random_policy = shielded(random_policy(hit_chance))
-	        result1 = evaluate_safety(mechanics, shielded_random_policy, runs_per_configuration)
-	        result1 = merge(result1, (
-	            β1 = mechanics.β1,
-	            β2 = mechanics.β2,
-	            unsafe_state_handling="policy", 
-	            hit_chance=hit_chance, 
-	            fraction_unsafe=result1.safety_violations_observed/result1.number_of_runs
-	        ))
-	
-	        push!(results, result1)
-	
-	        shielded_strengthened_random_policy = shielded_strengthened(random_policy(hit_chance))
-	        result2 = evaluate_safety(mechanics, shielded_strengthened_random_policy, runs_per_configuration)
-	        result2 = merge(result2, (
-	            β1 = mechanics.β1,
+			
+	        result = evaluate_safety(mechanics, 
+				shielded(random_policy(hit_chance)), 
+				runs_per_configuration)
+
+			percent_unsafe = 100*
+				(result.safety_violations_observed/result.number_of_runs)
+			
+	        result = merge(result, 
+				(β1 = mechanics.β1,
 	            β2 = mechanics.β2,
 	            unsafe_state_handling="hit", 
 	            hit_chance=hit_chance, 
-	            fraction_unsafe=result2.safety_violations_observed/result2.number_of_runs
-	        ))
+	            percent_unsafe=percent_unsafe)
+			)
 	
-	        push!(results, result2)
+	        push!(results, result)
 	    end
 	    CSV.write(results_dir ⨝ "rawdata.csv", results)
 	end
@@ -167,15 +151,12 @@ function combine_hit_chances(df)
 		"number_of_runs" => sum,
 		"β1" => first, 
 		"β2" => first, 
-		"fraction_unsafe" => mean, renamecols=false)
+		"percent_unsafe" => mean, renamecols=false)
 	result = sort(result, "β1", rev=true)
 end
 
-# ╔═╡ fca7f4c3-aa88-4ff2-a365-2b91c87d0afe
-unstrengthened = combine_hit_chances(filter("unsafe_state_handling" => x -> x == "policy", df))
-
 # ╔═╡ 81de6d9f-2b87-4115-9ec8-031f3d487e37
-strengthened = combine_hit_chances(filter("unsafe_state_handling" => x -> x == "hit", df))
+combined = combine_hit_chances(filter("unsafe_state_handling" => x -> x == "hit", df))
 
 # ╔═╡ 149d1cce-8216-4952-a31d-f4e0aa27f9fc
 avg(x) = length(x)/sum(x)
@@ -201,44 +182,28 @@ end
 
 # ╔═╡ ca4a7fce-2873-4698-9ea7-db5e6b578160
 robustness_plot = call() do
-	xticks = [r.β1 for r in eachrow(unstrengthened)]
+	xticks = [r.β1 for r in eachrow(combined)]
 	
-	plot(
-		legend=:topleft,
+	plot(legend=:outertop,
 		xrotation=90,
-		xticks=xticks,
-		#ylims=(-0.05, 1),
-	)
+		xticks=xticks,)
 	
-	
-	@df unstrengthened plot!(:β1, :fraction_unsafe, 
-		xflip=true,
-		marker=:o,
-		markerstrokewidth=0,
-		markerstrokealpha=0,
-		markerstrokecolor=:transparent,
-		linewidth=2,
-		ylabel="Fraction unsafe",
-		xlabel="β1",
-		label="Policy chooses in unsafe areas",
-		color=colors.ALIZARIN)
-	
-	@df strengthened plot!(:β1, :fraction_unsafe, 
+	@df combined plot!(:β1, :percent_unsafe, 
 		xflip=true,
 		marker=:o,
 		markerstrokewidth=0,
 		markerstrokealpha=0,
 		linewidth=2,
-		ylabel="Fraction unsafe",
+		ylabel="Percentage of runs that are unsafe",
 		xlabel="β1",
-		label="Shield forces hit in unsafe areas",
+		label="Performance of safe strategy",
 		color=colors.EMERALD)
 	
 	vline!([β1], 
 		style=:dash,
 		color=colors.ASBESTOS,
 		linewidth=2,
-		label="Value assumed by shield")
+		label="Value of β1 used to synthesise safe strategy")
 end
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
@@ -272,7 +237,7 @@ StatsPlots = "~0.15.4"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.8.0"
+julia_version = "1.8.2"
 manifest_format = "2.0"
 project_hash = "75282f8c697bf7d63f20f07b7f3d600a838ce551"
 
@@ -1251,7 +1216,7 @@ version = "1.10.0"
 [[deps.Tar]]
 deps = ["ArgTools", "SHA"]
 uuid = "a4e569a6-e804-4fa4-b0f3-eef7a1d5b13e"
-version = "1.10.0"
+version = "1.10.1"
 
 [[deps.TensorCore]]
 deps = ["LinearAlgebra"]
@@ -1569,7 +1534,6 @@ version = "1.4.1+0"
 # ╠═27272ec3-7be2-409a-b3e3-e4e7c434d2c6
 # ╠═2f4bf626-1afa-42ff-a20d-3753253503b1
 # ╠═e83a568e-5dc3-4a9b-925d-8b9fa15f06b9
-# ╠═fca7f4c3-aa88-4ff2-a365-2b91c87d0afe
 # ╠═81de6d9f-2b87-4115-9ec8-031f3d487e37
 # ╠═149d1cce-8216-4952-a31d-f4e0aa27f9fc
 # ╠═ad2864a6-4770-4253-a2c4-4b815ef90d82

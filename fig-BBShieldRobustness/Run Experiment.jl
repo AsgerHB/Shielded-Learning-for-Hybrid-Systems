@@ -53,7 +53,7 @@ shield_file = get_shield(possible_shield_file, results_dir, test=args["test"])
 
 
 progress_update("Testing the shield's robustness...")
-progress_update("Estimated total time to complete: 13 hours. (5 minutes if run with --test)")
+progress_update("Estimated total time to complete: 5 hours. (1 minute if run with --test)")
 
 NBPARAMS = Dict(
     "results_dir" => results_dir,
