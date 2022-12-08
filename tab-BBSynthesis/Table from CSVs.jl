@@ -360,7 +360,7 @@ joint_report_latexified = call() do
 		r"N=(\d+)" => s"$N=\g<1>$",)
 	
 	result = transform(joint_report,
-		#seconds_taken => ByRow(seconds_format), 
+		seconds_taken => ByRow(seconds_format), 
 		percent_safe => ByRow(percent_format), 
 		algorithm => ByRow(wrap_math),
 		renamecols=false)
