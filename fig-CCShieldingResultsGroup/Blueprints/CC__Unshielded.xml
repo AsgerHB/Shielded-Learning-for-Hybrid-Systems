@@ -2,6 +2,16 @@
 <!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.5//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_5.dtd'>
 <nta>
 	<declaration>/**
+
+Changes have been made to this model.
+   - minVelocityFront changed from -10 to -8
+   - The discrete simulation has been removed. 
+
+Following is the original header:
+*/
+
+
+/**
 This case study has been published at "Correct System Design"
 Symposium in Honor of Ernst-Rüdiger Olderog on the Occasion of
 His 60th Birthday Oldenburg, Germany, September 8–9, 2015.
@@ -37,32 +47,11 @@ const int maxSensorDistance = 200;
 
 clock waitTimer;
 
-int distance = 10;
-
-int velocityEgo;
 int[-2,2] accelerationEgo;
 broadcast chan chooseEgo;
 
-int velocityFront;
 int[-2,2] accelerationFront;
 broadcast chan chooseFront;
-
-void updateDiscrete(){
-    int oldVel, newVel;
-    oldVel = velocityFront - velocityEgo;
-
-    velocityEgo = velocityEgo + accelerationEgo;
-    velocityFront = velocityFront + accelerationFront;
-
-    newVel = velocityFront - velocityEgo;
-    
-    if (distance &gt; maxSensorDistance) {
-        distance = maxSensorDistance + 1;
-    } else {
-        distance += (oldVel + newVel)/2;
-    }
-}
-
 broadcast chan update;
 
 // Hybrid stuff
@@ -107,14 +96,14 @@ hybrid clock D;</declaration>
 		<transition id="id7">
 			<source ref="id2"/>
 			<target ref="id0"/>
-			<label kind="guard" x="76" y="-34">velocityEgo &gt; minVelocityEgo</label>
+			<label kind="guard" x="76" y="-34">rVelocityEgo &gt; minVelocityEgo</label>
 			<label kind="assignment" x="76" y="-17">accelerationEgo = -2</label>
 			<nail x="59" y="-42"/>
 		</transition>
 		<transition id="id8">
 			<source ref="id2"/>
 			<target ref="id3"/>
-			<label kind="guard" x="68" y="-127">velocityEgo &lt; maxVelocityEgo</label>
+			<label kind="guard" x="68" y="-127">rVelocityEgo &lt; maxVelocityEgo</label>
 			<label kind="assignment" x="68" y="-110">accelerationEgo = 2</label>
 			<nail x="59" y="-102"/>
 		</transition>
@@ -154,7 +143,7 @@ hybrid clock D;</declaration>
 		<transition id="id18" controllable="false">
 			<source ref="id16"/>
 			<target ref="id10"/>
-			<label kind="guard" x="-697" y="-178">velocityEgo &lt; minVelocityFront</label>
+			<label kind="guard" x="-697" y="-178">rVelocityEgo &lt; minVelocityFront</label>
 			<nail x="-425" y="-153"/>
 			<nail x="-425" y="-306"/>
 		</transition>
@@ -175,18 +164,18 @@ hybrid clock D;</declaration>
 		<transition id="id22" controllable="false">
 			<source ref="id12"/>
 			<target ref="id10"/>
-			<label kind="guard" x="-178" y="-323">distance &gt; maxSensorDistance</label>
+			<label kind="guard" x="-178" y="-323">rDistance &gt; maxSensorDistance</label>
 			<label kind="synchronisation" x="-178" y="-306">update?</label>
-			<label kind="assignment" x="-178" y="-289">distance = maxSensorDistance+1, accelerationFront = 0</label>
+			<label kind="assignment" x="-178" y="-289">rDistance = maxSensorDistance+1, accelerationFront = 0</label>
 			<nail x="263" y="68"/>
 			<nail x="263" y="-306"/>
 		</transition>
 		<transition id="id23" controllable="false">
 			<source ref="id11"/>
 			<target ref="id10"/>
-			<label kind="guard" x="-204" y="-246">distance &gt; maxSensorDistance</label>
+			<label kind="guard" x="-204" y="-246">rDistance &gt; maxSensorDistance</label>
 			<label kind="synchronisation" x="-204" y="-229">update?</label>
-			<label kind="assignment" x="-204" y="-212">distance = maxSensorDistance+1,
+			<label kind="assignment" x="-204" y="-212">rDistance = maxSensorDistance+1,
 accelerationFront = 0</label>
 			<nail x="102" y="-229"/>
 			<nail x="-204" y="-229"/>
@@ -195,9 +184,9 @@ accelerationFront = 0</label>
 		<transition id="id24" controllable="false">
 			<source ref="id13"/>
 			<target ref="id10"/>
-			<label kind="guard" x="-382" y="17">distance &gt; maxSensorDistance</label>
+			<label kind="guard" x="-382" y="17">rDistance &gt; maxSensorDistance</label>
 			<label kind="synchronisation" x="-382" y="34">update?</label>
-			<label kind="assignment" x="-382" y="51">distance = maxSensorDistance+1,
+			<label kind="assignment" x="-382" y="51">rDistance = maxSensorDistance+1,
 accelerationFront = 0</label>
 			<nail x="-391" y="68"/>
 			<nail x="-391" y="-306"/>
@@ -222,13 +211,13 @@ accelerationFront = 0</label>
 		<transition id="id28" controllable="false">
 			<source ref="id14"/>
 			<target ref="id12"/>
-			<label kind="guard" x="25" y="8">velocityFront &gt; minVelocityFront</label>
+			<label kind="guard" x="25" y="8">rVelocityFront &gt; minVelocityFront</label>
 			<label kind="assignment" x="25" y="25">accelerationFront = -2</label>
 		</transition>
 		<transition id="id29" controllable="false">
 			<source ref="id14"/>
 			<target ref="id11"/>
-			<label kind="guard" x="25" y="-102">velocityFront &lt; maxVelocityFront</label>
+			<label kind="guard" x="25" y="-102">rVelocityFront &lt; maxVelocityFront</label>
 			<label kind="assignment" x="25" y="-85">accelerationFront = 2</label>
 		</transition>
 		<transition id="id30" controllable="false">
@@ -246,10 +235,8 @@ accelerationFront = 0</label>
 			<source ref="id16"/>
 			<target ref="id14"/>
 			<label kind="select" x="-331" y="-136">i:int[minVelocityFront, maxVelocityFront]</label>
-			<label kind="guard" x="-331" y="-119">i &lt;= velocityEgo</label>
-			<label kind="assignment" x="-331" y="-102">velocityFront = i,
-distance = maxSensorDistance,
-rVelocityFront = i * 1.0,
+			<label kind="guard" x="-331" y="-119">i &lt;= rVelocityEgo</label>
+			<label kind="assignment" x="-331" y="-102">rVelocityFront = i * 1.0,
 rDistance = 1.0*maxSensorDistance</label>
 			<nail x="-340" y="-34"/>
 		</transition>
@@ -295,7 +282,6 @@ D' == rDistance</label>
 			<source ref="id36"/>
 			<target ref="id37"/>
 			<label kind="guard" x="-450" y="-212">waitTimer == 1</label>
-			<label kind="assignment" x="-467" y="-195">updateDiscrete()</label>
 		</transition>
 		<transition id="id39" controllable="false">
 			<source ref="id34"/>
@@ -320,7 +306,7 @@ system Ego, Front, System, Monitor;
 	<queries>
 		<option key="--discretization" value="0.1"/>
 		<query>
-			<formula>simulate [&lt;=120;10] { distance, 0, 200 }</formula>
+			<formula>simulate [&lt;=20;1] { accelerationEgo, rVelocityEgo, accelerationFront, rVelocityFront, rDistance, 0, 200 }</formula>
 			<comment>Validate the state dynamics: the trajectories of relative acceleration, speed and distance between cars.
 Click "Check", then right-click the property and inspect the plot.</comment>
 		</query>
@@ -329,15 +315,15 @@ Click "Check", then right-click the property and inspect the plot.</comment>
 			<comment/>
 		</query>
 		<query>
-			<formula>E[&lt;=120;1000] (max: D/1000 + (distance &lt;= 0)*1000.0)</formula>
+			<formula>E[&lt;=120;1000] (max: D/1000 + (rDistance &lt;= 0)*1000.0)</formula>
 			<comment/>
 		</query>
 		<query>
-			<formula>Pr[&lt;=120] (&lt;&gt; distance &lt;= 0)</formula>
+			<formula>E[&lt;=120;100] (max:rDistance &lt;= 0)</formula>
 			<comment/>
 		</query>
 		<query>
-			<formula>strategy DriveWell1000 = minE (D/1000 + (distance &lt;= 0)*1000.0) [&lt;=120] {} -&gt; {rVelocityEgo, rVelocityFront, rDistance}: &lt;&gt; time &gt;= 120</formula>
+			<formula>strategy DriveWell1000 = minE (D/1000 + (rDistance &lt;= 0)*1000.0) [&lt;=120] {} -&gt; {rVelocityEgo, rVelocityFront, rDistance}: &lt;&gt; time &gt;= 120</formula>
 			<comment/>
 		</query>
 		<query>
@@ -349,233 +335,23 @@ Click "Check", then right-click the property and inspect the plot.</comment>
 			<comment/>
 		</query>
 		<query>
-			<formula>E[&lt;=120;1000] (max: D/1000 + (distance &lt;= 0)*1000.0)  under DriveWell1000</formula>
+			<formula>E[&lt;=120;1000] (max: D/1000 + (rDistance &lt;= 0)*1000.0)  under DriveWell1000</formula>
 			<comment/>
 		</query>
 		<query>
-			<formula>Pr[&lt;=120] (&lt;&gt; distance &lt;= 0)                         under DriveWell1000</formula>
+			<formula>Pr[&lt;=120] (&lt;&gt; rDistance &lt;= 0)                         under DriveWell1000</formula>
 			<comment/>
 		</query>
 		<query>
-			<formula>saveStrategy("%resultsdir%/UnshieldedDriveWell1000.strategy.json", DriveWell1000)</formula>
+			<formula>saveStrategy("/home/asger/Experiments/E1/UnshieldedDriveWell1000.strategy.json", DriveWell1000)</formula>
 			<comment/>
 		</query>
 		<query>
-			<formula>strategy DriveWell1000 = loadStrategy {} -&gt; {rVelocityEgo, rVelocityFront, rDistance}("%resultsdir%/UnshieldedDriveWell1000.strategy.json")</formula>
+			<formula>strategy DriveWell1000 = loadStrategy {} -&gt; {rVelocityEgo, rVelocityFront, rDistance}("/home/asger/Experiments/E1/UnshieldedDriveWell1000.strategy.json")</formula>
 			<comment/>
 		</query>
 		<query>
 			<formula/>
-			<comment/>
-		</query>
-		<query>
-			<formula>/** Original queries */</formula>
-			<comment/>
-		</query>
-		<query>
-			<formula>simulate [&lt;=100] { accelerationFront - accelerationEgo, rVelocityFront-rVelocityEgo, rDistance}</formula>
-			<comment/>
-		</query>
-		<query>
-			<formula>// Safety issues with completely stochastic behavior:</formula>
-			<comment/>
-		</query>
-		<query>
-			<formula>A[] distance &gt; 5                                              // false</formula>
-			<comment>Is the distance between cars always greater than 5m? i.e. there are no colisions?
-Expect false in seconds</comment>
-		</query>
-		<query>
-			<formula>Pr[&lt;=100] (&lt;&gt; distance &lt;= 5)                                  // ~0.90</formula>
-			<comment>What is the probability of cars crashing?
-Expect 0.9 in 15s, i.e. the cars crash almost surely.</comment>
-		</query>
-		<query>
-			<formula>simulate [&lt;=100] {rDistance, distance, 5, 200}</formula>
-			<comment>Inspect the rDistance and distance trajectories, 
-where distance approximates the dynamics of rDistance.</comment>
-		</query>
-		<query>
-			<formula>simulate [&lt;=100; 100] {rDistance, distance, 5, 200}</formula>
-			<comment>Inspect 100 trajectories of distance variables over time.
-Expect the values to vary widely between -2000 and +200.
-Lower values then 5 correspond to crash.</comment>
-		</query>
-		<query>
-			<formula>simulate [&lt;=100] {rVelocityFront, velocityFront}</formula>
-			<comment>Inspect that velocityFront approximates the dynamics of rVelocityFront.</comment>
-		</query>
-		<query>
-			<formula>simulate [&lt;=100; 100] {rVelocityFront, velocityFront}</formula>
-			<comment>Inspect the speed trajectories of the front car.
-The velocityFront approximates rVelocityFront.</comment>
-		</query>
-		<query>
-			<formula>simulate [&lt;=100] {rVelocityEgo, velocityEgo}</formula>
-			<comment>Inspect that velocityEgo approximates the dynamics of rVelocityEgo.</comment>
-		</query>
-		<query>
-			<formula>simulate [&lt;=100; 100] {rVelocityEgo, velocityEgo}</formula>
-			<comment>Inspect the speed trajectories of the ego car.</comment>
-		</query>
-		<query>
-			<formula>simulate [&lt;=100; 100] {rVelocityFront-rVelocityEgo}</formula>
-			<comment>Inspect the speed difference between cars.
-Negative speed means the ego car is approaching the front car (unsafe).
-Observe that the relative speed varies a lot, especially that it can become very negative.</comment>
-		</query>
-		<query>
-			<formula/>
-			<comment/>
-		</query>
-		<query>
-			<formula>// Compute and inspect the safe strategy (restricts behavior to safe states):</formula>
-			<comment/>
-		</query>
-		<query>
-			<formula>strategy safe = control: A[] distance &gt; 5 </formula>
-			<comment>Find a safe strategy where the distance is kept greater than 5m.
-Expect success within 30s.</comment>
-		</query>
-		<query>
-			<formula>simulate [&lt;=100] { accelerationFront - accelerationEgo, rVelocityFront-rVelocityEgo, rDistance} under safe</formula>
-			<comment>Validate the state dynamics of the safe strategy: the trajectories of relative acceleration, speed and distance between cars.</comment>
-		</query>
-		<query>
-			<formula>simulate [&lt;=100; 100] {rDistance, distance, 5, 200} under safe</formula>
-			<comment>Inspect 100 trajectories of distance variables over time while using the safe strategy.
-Expect trajectories to vary between 5 and 200, i.e. no crashes.</comment>
-		</query>
-		<query>
-			<formula>Pr[&lt;=100] (&lt;&gt; distance &lt;= 5) under safe                       // &lt;0.01</formula>
-			<comment>What is the probability of cars crashing while using safe strategy?
-Expect &lt;0.01 in 15s (cannot find a single counter-exmple)</comment>
-		</query>
-		<query>
-			<formula>A[] distance &gt; 5 under safe                                   // true</formula>
-			<comment>Is the safe strategy really safe?
-Prove by exhaustive exploration.
-Expect true (satisfied).</comment>
-		</query>
-		<query>
-			<formula>inf: distance under safe                                      // &gt;=6</formula>
-			<comment>Find the smallest distance between cars by exhaustive search.
-Expect the distance to be greater than 6, i.e. no crash.</comment>
-		</query>
-		<query>
-			<formula>simulate [&lt;=100; 100] {rVelocityFront-rVelocityEgo} under safe</formula>
-			<comment>Inspect the speed difference between cars of the safe strategy.
-Negative speed means the ego car is approaching the front car (dangerous).
-Observe that the speed does not go below -16 and stays mostly balanced between -6 and 6.</comment>
-		</query>
-		<query>
-			<formula/>
-			<comment/>
-		</query>
-		<query>
-			<formula>// Optimize (refine) the safe strategy into safeFast and inspect:</formula>
-			<comment/>
-		</query>
-		<query>
-			<formula>strategy safeFast = minE(D) [&lt;=105] {}-&gt;{}: &lt;&gt; time &gt;= 100 under safe
-			</formula>
-			<comment>Maximize the progress by minimizing the cumulative distance between cars while driving safely.
-Takes up to 3mins with the Discretization step size set to 0.1 (in Options-&gt;Statistical parameters).</comment>
-		</query>
-		<query>
-			<formula>simulate [&lt;=100] { accelerationFront - accelerationEgo, rVelocityFront-rVelocityEgo, rDistance} under safeFast</formula>
-			<comment>Validate the state dynamics of the safeFast strategy: the trajectories of relative acceleration, speed and distance between cars.</comment>
-		</query>
-		<query>
-			<formula>simulate [&lt;=100; 100] {rDistance, distance, 5, 200} under safeFast</formula>
-			<comment>Inspect the distances of the safeFast strategy:
-the distance is always greater than 5 (safe),
-and it does not allow the front car to go further than ~50m ahead 
-(does not reach the limit 200), making the most possible progress.</comment>
-		</query>
-		<query>
-			<formula/>
-			<comment/>
-		</query>
-		<query>
-			<formula>// Compute minimum safe distances for each relative speed value:</formula>
-			<comment/>
-		</query>
-		<query>
-			<formula>inf{velocityFront - velocityEgo == -18}: distance under safe  // &gt;=MAXINT, no such states</formula>
-			<comment>Find the minimum safe distance when the relative speed is -18 (ego is approaching front)</comment>
-		</query>
-		<query>
-			<formula>inf{velocityFront - velocityEgo == -16}: distance under safe  // &gt;=70</formula>
-			<comment>Find the minimum safe distance when the relative speed is -16 (ego is approaching ego)</comment>
-		</query>
-		<query>
-			<formula>inf{velocityFront - velocityEgo == -14}: distance under safe  // &gt;=55</formula>
-			<comment/>
-		</query>
-		<query>
-			<formula>inf{velocityFront - velocityEgo == -12}: distance under safe  // &gt;=42</formula>
-			<comment/>
-		</query>
-		<query>
-			<formula>inf{velocityFront - velocityEgo == -10}: distance under safe  // &gt;=31</formula>
-			<comment/>
-		</query>
-		<query>
-			<formula>inf{velocityFront - velocityEgo ==  -8}: distance under safe  // &gt;=22</formula>
-			<comment/>
-		</query>
-		<query>
-			<formula>inf{velocityFront - velocityEgo ==  -6}: distance under safe  // &gt;=15</formula>
-			<comment/>
-		</query>
-		<query>
-			<formula>inf{velocityFront - velocityEgo ==  -4}: distance under safe  // &gt;=10</formula>
-			<comment/>
-		</query>
-		<query>
-			<formula>inf{velocityFront - velocityEgo ==  -2}: distance under safe  // &gt;= 7</formula>
-			<comment/>
-		</query>
-		<query>
-			<formula>inf{velocityFront - velocityEgo ==   0}: distance under safe  // &gt;= 6</formula>
-			<comment/>
-		</query>
-		<query>
-			<formula>inf{velocityFront - velocityEgo ==   2}: distance under safe  // &gt;= 7
-			</formula>
-			<comment/>
-		</query>
-		<query>
-			<formula>inf{velocityFront - velocityEgo ==   4}: distance under safe  // &gt;=10</formula>
-			<comment/>
-		</query>
-		<query>
-			<formula>inf{velocityFront - velocityEgo ==   6}: distance under safe  // &gt;=13</formula>
-			<comment/>
-		</query>
-		<query>
-			<formula>inf{velocityFront - velocityEgo ==   8}: distance under safe  // &gt;=18</formula>
-			<comment/>
-		</query>
-		<query>
-			<formula>inf{velocityFront - velocityEgo ==  10}: distance under safe  // &gt;=23</formula>
-			<comment/>
-		</query>
-		<query>
-			<formula>inf{velocityFront - velocityEgo ==  12}: distance under safe  // &gt;=40</formula>
-			<comment/>
-		</query>
-		<query>
-			<formula>inf{velocityFront - velocityEgo ==  14}: distance under safe  // &gt;=49</formula>
-			<comment/>
-		</query>
-		<query>
-			<formula>inf{velocityFront - velocityEgo ==  16}: distance under safe  // &gt;=60</formula>
-			<comment/>
-		</query>
-		<query>
-			<formula>inf{velocityFront - velocityEgo ==  18}: distance under safe  // &gt;=MAXINT, no such states</formula>
 			<comment/>
 		</query>
 	</queries>

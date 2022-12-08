@@ -46,8 +46,19 @@ Create figures by running their corresponding experiment. Shown here for fig-Bar
 
 # Scratchpad and remarks
 
-The folder `Shared Code` is not committed at the time of writing. This is because I use a symlink to my other repo's folder My Library. This is to enable at least some code sharing. When I ship, this should no longer be the case.
+## Glossary of Code Abbreviations
 
-Packages: 
+I am a big fan of not having to remember how a variable has been abbreviated, but sometimes I have to make an exception. Additionally, I tried at one point to use the same notation as the paper. This I have come to regret, since the notation in the paper has been changing too rapidly, to keep up with in the code.
 
-	CSV DataFrames Dates Glob InteractiveUtils JSON Markdown ModelingToolkit NaturalSort Plots PlutoLinks PlutoSerialization PlutoUI Polyhedra PProf Printf Profile ProgressLogging Random ReachabilityAnalysis Serialization Statistics StatsBase StatsPlots Symbolics TimerOutputs Unzip XMLDict
+ - `shield` The term "shield" is used interchangably with "nondeterministic safety strategy". Shields should have type `Grid`.
+ - `grid` refers to a partitioning of the state space, plus an integer value associated with each partition. This integer is used in various ways to represent the set of allowable actions in that partition. Thus, a grid could have also been called a safety strategy. 
+ - `G` is the granularity of the grid, currently δ in the paper.
+ - `Ivl, Ivu, Ixl, Ixu ...` Are used to represeent upper and lower bounds for a partition. The `I` is short for _interval_, followed by the variable, and then either an `l` or an `u` depending on whether it is the lower or upper bound.
+ - `iv, ix ...` are used to represent indices into the matrix that is the underlying data structure of the grid. For example if a grid has `v_min=-8`, and `G=1` then `iv=9` would represent the square where `Ivl = iv*G + (v_min/G) = 9 - 8 = 1`
+ - `R` Reachability funciton. A function that given an initial square and an action, returns all squares reachable from the latter by that action. 
+ - `R̂` Approximated reachability function. Usually the barbaric reachability function.
+ - `grid_points` I believe this is also the term used in the paper. A cloud of evenly spaced points inside of a square, used to approximate reachability.
+ - `spa` Samples Per Axis, in the context of grid-points. Similar to N in the paper.
+ - `dir` This is an easy one. Short for directory. The (relative) path of a file or a folder.
+ - `t` Time. 
+ - `v, p` Velocity, Position. 
