@@ -6,10 +6,10 @@ strategy MinCost = minE (D/1000) [<=120] {} -> {rVelocityEgo, rVelocityFront, rD
 saveStrategy("%resultsdir%/MinCost.strategy.json", MinCost)
 
 /* formula 3 */
-E[<=120;1000] (max: D/1000)                          under MinCost
+E[<=120;%checks%] (max: D/1000)                          under MinCost
 
 /* formula 4 */
-E[<=120;1000] (max:(distance <= 0))                 under MinCost
+E[<=120;%checks%] (max:(rDistance <= 0))                 under MinCost
 
 /* formula 5 */
 E[<=120;2] (max: interventions)                     under MinCost

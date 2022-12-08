@@ -4,10 +4,10 @@
 strategy DeathCosts1000 = loadStrategy {} -> {rVelocityEgo, rVelocityFront, rDistance}("%resultsdir%/DeathCosts1000.strategy.json")
 
 /* formula 2 */
-E[<=120;1000] (max: D/1000)                          under DeathCosts1000
+E[<=120;%checks%] (max: D/1000)                          under DeathCosts1000
 
 /* formula 3 */
-E[<=120;1000] (max:(distance <= 0))                 under DeathCosts1000
+E[<=120;%checks%] (max:(rDistance <= 0))                 under DeathCosts1000
 
 /* formula 4 */
 E[<=120;2] (max: interventions)                     under DeathCosts1000
@@ -16,10 +16,10 @@ E[<=120;2] (max: interventions)                     under DeathCosts1000
 strategy DeathCosts100 = loadStrategy {} -> {rVelocityEgo, rVelocityFront, rDistance}("%resultsdir%/DeathCosts100.strategy.json")
 
 /* formula 6 */
-E[<=120;1000] (max: D/1000)                          under DeathCosts100
+E[<=120;%checks%] (max: D/1000)                          under DeathCosts100
 
 /* formula 7 */
-E[<=120;1000] (max:(distance <= 0))                 under DeathCosts100
+E[<=120;%checks%] (max:(rDistance <= 0))                 under DeathCosts100
 
 /* formula 8 */
 E[<=120;2] (max: interventions)                     under DeathCosts100
@@ -28,10 +28,10 @@ E[<=120;2] (max: interventions)                     under DeathCosts100
 strategy DeathCosts10 = loadStrategy {} -> {rVelocityEgo, rVelocityFront, rDistance}("%resultsdir%/DeathCosts10.strategy.json")
 
 /* formula 10 */
-E[<=120;1000] (max: D/1000)                          under DeathCosts10
+E[<=120;%checks%] (max: D/1000)                          under DeathCosts10
 
 /* formula 11 */
-E[<=120;1000] (max:(distance <= 0))                 under DeathCosts10
+E[<=120;%checks%] (max:(rDistance <= 0))                 under DeathCosts10
 
 /* formula 12 */
 E[<=120;2] (max: interventions)                     under DeathCosts10
