@@ -29,7 +29,6 @@ begin
 	include("../Shared Code/ExperimentUtilities.jl")
 	include("../Shared Code/BBSquares.jl")
 	include("../Shared Code/Ball.jl")
-	include("../Shared Code/ExperimentUtilities.jl")
 	TableOfContents()
 end
 
@@ -225,7 +224,7 @@ begin
 			# match example: BOX 0.01 with G of 0.02.shield
 			m = match(r"(\w+) ([0-9.]+) with G of ([0-9.]+)", filename)
 			if m != nothing
-				return "JuliaReach $(m[1]) with time-step=$(m[2])"
+				return "\\ JuliaReach $(m[1]) with time-step=$(m[2])"
 			else
 				best_effort = replace(filename, ".shield" => "")
 				@warn "Unexpected filename: $filename\nCould not determine algorithm type. Using placeholder: $best_effort"
@@ -286,7 +285,11 @@ clean_safety_report = call(() -> begin
 		:file_get_algorithm => algorithm,  
 		percent_safe)
 	
-	result = sort(result, [granularity, algorithm], lt=natural)
+	result = sort(
+		sort(result, algorithm, lt=natural),
+		granularity,
+		lt=natural,
+		rev=true)
 end)
 
 # ╔═╡ 075ea28e-faa3-4a30-bcc3-497814d170db
@@ -335,7 +338,12 @@ cleaned_synthesis_report = call(() -> begin
 		saved_as => get_granularity => granularity, 
 		saved_as => get_algorithm => algorithm)
 	
-	result = sort(result, [granularity, algorithm], lt=natural, rev=false)
+	result = sort(
+		sort(result, algorithm, lt=natural),
+		granularity,
+		lt=natural,
+		rev=true)
+	
 	result = select(result, [granularity, algorithm, valid, seconds_taken])
 end)
 
@@ -354,7 +362,7 @@ joint_report = innerjoin(clean_safety_report, cleaned_synthesis_report,
 # ╔═╡ 6c624e17-1f59-47e3-9192-9dbfb9c69a13
 joint_report_latexified = call() do
 	seconds_format(d::Float64) = @sprintf("%.0f", d)
-	percent_format(d::Float64) = @sprintf("%.1f", d)*"\\%"
+	percent_format(d::Float64) = "$d\\%"
 	wrap_math(str::String) = replace(str, 
 		r"time-step=([0-9.]+)" => s"time-step$\\:=\g<1>$", 
 		r"N=(\d+)" => s"$N=\g<1>$",)
