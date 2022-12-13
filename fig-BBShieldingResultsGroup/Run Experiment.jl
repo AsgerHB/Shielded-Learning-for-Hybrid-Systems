@@ -71,7 +71,7 @@ if !args["skip-experiment"]
 
     # Create UPPAAL models and queries from blueprints, by doing search and replace on the placeholders.
     # This is similar to templating, but the word blueprint was choseen to avoid a name clash with UPPAAL templates. 
-    blueprints_dir = pwd() ⨝ figure_name ⨝ "Blueprints" # TODO: $figure_name/Blueprints
+    blueprints_dir = pwd() ⨝ figure_name ⨝ "Blueprints"
 
     if !isdir(blueprints_dir)
         throw(error("Blueprints folder not found. Make sure this script is exectued from the root of the code folder.\nCurrent directory: $(pwd())\nContents: $(readdir())"))
