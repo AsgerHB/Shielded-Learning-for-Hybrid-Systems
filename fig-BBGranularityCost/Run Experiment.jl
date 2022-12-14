@@ -87,7 +87,7 @@ if !args["skip-shield-synthesis"]
     else 
     
         # HARDCODED: Parameters to generate shield. All variations will be used.
-        samples_per_axiss = [5]
+        samples_per_axiss = [4]
         gridargss = [(G, -15, 15, 0, 12) for G in (0.03, 0.025, 0.02, 0.015, 0.01, 0.005)]
     end
 

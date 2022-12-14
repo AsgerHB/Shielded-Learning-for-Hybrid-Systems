@@ -35,10 +35,10 @@ function get_shield(possible_shield_file, working_dir; test)
 
     if test
         grid = Grid(0.02, -13, 13, 0, 8) 
-        samples_per_axis = 5
+        samples_per_axis = 3
     else
         grid = Grid(0.01, -13, 13, 0, 8)
-        samples_per_axis = 20
+        samples_per_axis = 16
     end
     
     progress_update("Synthesising shield: $(samples_per_axis^2) samples $(grid.G) G")

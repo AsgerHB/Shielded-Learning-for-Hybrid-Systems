@@ -50,7 +50,7 @@ progress_update("Estimated total time to complete: 75 hours. (5 minutes if run w
 
 if !test
     # HARDCODED: Parameters to generate shield. All variations will be used.
-    samples_per_axiss = [1, 2, 3, 4, 8, 16, 20]
+    samples_per_axiss = [1, 2, 3, 4, 8, 16]
     barbaric_gridargss = [(0.05, -15, 15, 0, 12), (0.02, -15, 15, 0, 12), (0.01, -15, 15, 0, 12)]
 
     # HARDCODED: Parameters to generate shield. All variations will be used.
@@ -77,7 +77,7 @@ if !test
     runs_per_shield = 1000000
 else 
     # Test params that produce uninteresting results quickly
-    samples_per_axiss = [5]
+    samples_per_axiss = [2]
     barbaric_gridargss = [(0.1, -15, 15, 0, 12), (0.02, -15, 15, 0, 12)]
 
     algorithms = [

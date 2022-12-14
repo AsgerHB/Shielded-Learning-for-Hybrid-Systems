@@ -50,14 +50,14 @@ include("CC Statistical Checking of Shield.jl")
 
 if !test
     # HARDCODED: Parameters to generate shield. All variations will be used.
-    samples_per_axiss = [1, 2, 3, 5]
+    samples_per_axiss = [1, 2, 3, 4, 8, 16]
     Gs = [1, 0.5]
 
     # HARDCODED: Safety checking parameters.
     runs_per_shield = 1000000
 else 
     # Test params that produce uninteresting results quickly
-    samples_per_axiss = [2]
+    samples_per_axiss = [1]
     Gs = [1]
     
     runs_per_shield = 100

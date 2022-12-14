@@ -32,7 +32,7 @@ if test
 else
     NBPARAMS = Dict(
         "G" => 0.01,
-        "samples_per_axis" => 20
+        "samples_per_axis" => 16
     )
 end
 
