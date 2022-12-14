@@ -7,7 +7,7 @@ strategy DeathCosts1000 = loadStrategy {} -> {p, v}("%resultsdir%/DeathCosts1000
 E[<=120;%checks%] (max:LearnerPlayer.fired) under DeathCosts1000
 
 /* formula 3 */
-E[<=120;%checks%] (max:number_deaths) under DeathCosts1000
+E[<=120;%checks%] (max:(number_deaths > 0)) under DeathCosts1000
 
 /* formula 4 */
 E[<=120;%checks%] (max:interventions) under DeathCosts1000
@@ -19,7 +19,7 @@ strategy DeathCosts100 = loadStrategy {} -> {p, v}("%resultsdir%/DeathCosts100.s
 E[<=120;%checks%] (max:LearnerPlayer.fired) under DeathCosts100
 
 /* formula 7 */
-E[<=120;%checks%] (max:number_deaths) under DeathCosts100
+E[<=120;%checks%] (max:(number_deaths > 0)) under DeathCosts100
 
 /* formula 8 */
 E[<=120;%checks%] (max:interventions) under DeathCosts100
@@ -31,7 +31,7 @@ strategy DeathCosts10 = loadStrategy {} -> {p, v}("%resultsdir%/DeathCosts10.str
 E[<=120;%checks%] (max:LearnerPlayer.fired) under DeathCosts10
 
 /* formula 11 */
-E[<=120;%checks%] (max:number_deaths) under DeathCosts10
+E[<=120;%checks%] (max:(number_deaths > 0)) under DeathCosts10
 
 /* formula 12 */
 E[<=120;%checks%] (max:interventions) under DeathCosts10
