@@ -128,7 +128,7 @@ selected_file
 
 # ╔═╡ 9bf4c870-6b89-4cb3-a2d7-66d89149d804
 # See "note on BB time-locks"
-filter([:Experiment, :Death_Costs] => 
+filter([:Experiment, :Deterrence] => 
 		(e, d) -> ((e == "NoShield" && d == "-") || (e == "PostShielded" && d == "-")),
 		rawdata)
 
@@ -147,14 +147,14 @@ If a time-lock is hit, the script will detect that less than 3 or 9 mean values 
 
 All this is the cause of the rather odd filtering query 
 
-	filter([:Experiment, :Death_Costs] => 
+	filter([:Experiment, :Deterrence] => 
 			(e, d) -> !((e == "NoShield" && d == "-") || (e == "PostShielded" && d == "-")),
 			rawdata)
 
-The `Death_Costs` row is filled in if there are 9 results, to be 1000, 100 and 10 
+The `Deterrence` row is filled in if there are 9 results, to be 1000, 100 and 10 
 respectively. 
 Otherwise it is "-". So a bug can happen if 6 queries fail. Then, it appears to be a 
-valid row with `Death_Costs` "-". 
+valid row with `Deterrence` "-". 
 
 I am pretty sure simply filtering these away is valid, and that after doing this, no 
 invalid rows will remain. However this is only for reading historic data, since the code has been improved to avoid this. Maybe later I will even deal with the time-lock that causes this in the first place.
@@ -163,7 +163,7 @@ invalid rows will remain. However this is only for reading historic data, since 
 # ╔═╡ b842083d-b6c0-49bb-9243-e03b2a65bfe2
 cleandata = call() do
 	# See "note on BB time-locks
-	cleandata = filter([:Experiment, :Death_Costs] => 
+	cleandata = filter([:Experiment, :Deterrence] => 
 		(e, d) -> !((e == "NoShield" && d == "-") || (e == "PostShielded" && d == "-")),
 		rawdata)
 
@@ -177,8 +177,8 @@ cleandata = call() do
 			:Experiment => e -> namefix.(e), renamecols=false)
 	end
 	
-	cleandata = select(cleandata, [:Experiment, :Death_Costs, :Runs, :Avg_Cost, :Avg_Deaths, :Avg_Interventions])
-	cleandata = sort(cleandata, [:Experiment, :Death_Costs, :Runs])
+	cleandata = select(cleandata, [:Experiment, :Deterrence, :Runs, :Avg_Cost, :Avg_Deaths, :Avg_Interventions])
+	cleandata = sort(cleandata, [:Experiment, :Deterrence, :Runs])
 	cleandata = sort(cleandata, [:Experiment], by=experiment_order)
 
 	if problem == :RW
@@ -239,7 +239,7 @@ end
 # ╔═╡ 7904c209-eeea-4243-beb4-0e5a7fd47a56
 medians = 
 call(() -> begin
-	grouping =  groupby(cleandata, [:Experiment, :Death_Costs, :Runs ])
+	grouping =  groupby(cleandata, [:Experiment, :Deterrence, :Runs ])
 	medians = combine(grouping, 
 		:Avg_Cost => median, :Avg_Deaths => median, :Avg_Interventions => median,
 		renamecols=false)
@@ -248,12 +248,12 @@ end)
 # ╔═╡ e0444e2e-0e77-4e5a-ac1e-64db46f2558f
 standard_deviations = 
 call(() -> begin
-	grouping =  groupby(cleandata, [:Experiment, :Runs, :Death_Costs])
+	grouping =  groupby(cleandata, [:Experiment, :Runs, :Deterrence])
 	df = combine(grouping, 
 		nrow => :Count,
 		:Avg_Cost => std, :Avg_Deaths => std, :Avg_Interventions => std,
 		renamecols=true)
-	df = sort(df, [:Experiment, :Death_Costs, :Runs])
+	df = sort(df, [:Experiment, :Deterrence, :Runs])
 end)
 
 # ╔═╡ d13faa16-897a-4d01-9b14-ff6d03f4a592
@@ -350,8 +350,8 @@ average_cost = call(() -> begin
 	if post_shielded
 		df = DataFrame(medians)
 		filter!(:Experiment => e -> e == post_shield_type, df)
-		transform!(df, [:Experiment, :Death_Costs] => ByRow(make_label), renamecols=false)
-		rename!(df, :Experiment_Death_Costs => :Label)
+		transform!(df, [:Experiment, :Deterrence] => ByRow(make_label), renamecols=false)
+		rename!(df, :Experiment_Deterrence => :Label)
 		sort!(df, :Runs)
 		transform!(df, :Runs => r -> string.(r), renamecols=false)
 		p1 = @df df plot!(:Runs, :Avg_Cost, 
@@ -369,8 +369,8 @@ average_cost = call(() -> begin
 	if no_shield
 		df = DataFrame(medians)
 		filter!(:Experiment => e -> e == "NoShield", df)
-		transform!(df, [:Experiment, :Death_Costs] => ByRow(make_label), renamecols=false)
-		rename!(df, :Experiment_Death_Costs => :Label)
+		transform!(df, [:Experiment, :Deterrence] => ByRow(make_label), renamecols=false)
+		rename!(df, :Experiment_Deterrence => :Label)
 		sort!(df, :Runs)
 		transform!(df, :Runs => r -> string.(r), renamecols=false)
 		c1, c2 = colortheme[2], colortheme[3]
@@ -415,7 +415,7 @@ average_interventions = call(() -> begin
 	runlabels = ["$r runs" for r in runlabels]
 	runlabels = hcat(runlabels...)
 	
-	@df df groupedbar(:Death_Costs, :Avg_Interventions, 
+	@df df groupedbar(:Deterrence, :Avg_Interventions, 
 		group=:Runs,
 		color=colortheme,
 		linecolor=colortheme,
@@ -442,7 +442,7 @@ average_deaths = call(() -> begin
 	runlabels = ["$r runs" for r in runlabels]
 	runlabels = hcat(runlabels...)
 	
-	@df df groupedbar(:Death_Costs, :Avg_Deaths, 
+	@df df groupedbar(:Deterrence, :Avg_Deaths, 
 		group=:Runs,
 		color=colortheme,
 		linecolor=colortheme,
@@ -500,7 +500,7 @@ call(() -> begin
 	runlabels = ["$r runs" for r in runlabels]
 	runlabels = hcat(runlabels...)
 	
-	@df df groupedbar(:Death_Costs, :Avg_Interventions, 
+	@df df groupedbar(:Deterrence, :Avg_Interventions, 
 		group=:Runs,
 		color=colortheme,
 		linecolor=colortheme,

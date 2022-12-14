@@ -62,3 +62,4 @@ I am a big fan of not having to remember how a variable has been abbreviated, bu
  - `dir` This is an easy one. Short for directory. The (relative) path of a file or a folder.
  - `t` Time. 
  - `v, p` Velocity, Position. 
+ - `death` Safety violation. Term borrowed from video gaming.

@@ -80,10 +80,10 @@ The UPPAAL models are identical, save for the following variations:
  
  Query files are used along with a model to create the configurations.
  
- - **TrainSaveEvaluate.q** : For cost of death in {1000, 100, 10}, train a strategy, save it, then evaluate it.
+ - **TrainSaveEvaluate.q** : using  deterrence in {1000, 100, 10, 0}, train a strategy, save it, then evaluate it.
  - **TrainSaveEvaluateSingle.q** : Train a single strategy, save it, then evaluate it.
  - **NoStrategyEvaluate.q** : Evaluate the queries with no strategy applied.
- - **LoadEvaluate.q** : Load a strategy for cost of death in {1000, 100, 10}, then evaluate it.
+ - **LoadEvaluate.q** : Load a strategy using  deterrence in {1000, 100, 10, 0}, then evaluate it.
 
 The combinations are the following:
 

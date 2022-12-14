@@ -34,7 +34,7 @@ def clear_results():
     os.system(f"mkdir '{backupdir}'") 
     os.system(f"mv '{resultsdir}/'* '{backupdir}'")
 
-    header = "Experiment;Runs;Death Costs;Avg. Cost;Avg. Crashes;Avg. Interventions"
+    header = "Experiment;Runs;Deterrence;Avg. Cost;Avg. Crashes;Avg. Interventions"
     progress_update(f"Add Row: {header}")
     os.system(f"echo '{header}' > '{resultsdir}/Results.csv'")
 
@@ -42,18 +42,18 @@ def clear_results():
 # As you can see in clear_results, a row consists of the experiment done, the number of runs, the cost of death and then the results: average swings, deaths and interventions.
 # A query file will either have a non-applicable cost of death, or it will spit out results for all three variations at once.
 # So if I get 9 values, that means its the results for the 3 tiers of what a death costs. 
-def append_results(experiment, runs, values, death_costs="-"):
-    # Pad the list so that it has 11 elements
-    if len(values) == 9:
-        append_results(experiment, runs, values[0:3], death_costs="1000")
-        append_results(experiment, runs, values[3:6], death_costs="100")
-        append_results(experiment, runs, values[6:9], death_costs="10")
+def append_results(experiment, runs, values, deterrence="-"):
+    if len(values) == 4*3:
+        append_results(experiment, runs, values[0:3], deterrence="1000")
+        append_results(experiment, runs, values[3:6], deterrence="100")
+        append_results(experiment, runs, values[6:9], deterrence="10")
+        append_results(experiment, runs, values[9:12], deterrence="0")
         return
     elif len(values) != 3:
         progress_update(f"DROPPED INCONSISTENT ROW: {','.join(values)}")
         return
     
-    row = [experiment, runs, death_costs, *values]
+    row = [experiment, runs, deterrence, *values]
     results_csv = ";".join(row)
     progress_update(f"Add Row: {results_csv}")
     os.system(f"echo '{results_csv}' >> '{resultsdir}/Results.csv'")
@@ -64,7 +64,7 @@ re_aborted = re.compile("EXCEPTION: |is time-locked.|-- Aborted.")
 def get_savedir(experiment, runs, iteration):
     return f"{resultsdir}/{iteration}/{experiment}/{runs}Runs" if runs != None else f"{resultsdir}/{iteration}/{experiment}"
 
-def run_experiment(experiment, model, queries, runs, iteration, death_costs="-", post_shield_tweak_runs=None):
+def run_experiment(experiment, model, queries, runs, iteration, deterrence="-", post_shield_tweak_runs=None):
     savedir = get_savedir(experiment, runs, iteration)
     runs = runs or 0
     os.system(f"mkdir -p '{savedir}'")
@@ -99,7 +99,7 @@ def run_experiment(experiment, model, queries, runs, iteration, death_costs="-",
                 abort = True
                 break
     if not abort:
-        append_results(experiment, str(runs), extracted_queryresults, death_costs)
+        append_results(experiment, str(runs), extracted_queryresults, deterrence)
     else:
         progress_update("QUERY ABORTED; DROPPED ROW. (Probably that bloody time-lock.)")
 
@@ -111,13 +111,13 @@ def cleanup_strategies(experiment, runs, iteration):
     savedir = get_savedir(experiment, runs, iteration)
     os.system(f"mv '{resultsdir}/'*.strategy.json '{savedir}'")
 
-def run_post_shield_experiments(death_costs):
+def run_post_shield_experiments(deterrence):
     run_experiment( experiment = f"PostShieldedRandomChoice",
                     model = "CC__PostShieldedNondeterministic.xml",  # Nondeterministic: If the post-shielded strategy picks an unsafe action, the remaining safe actions can be selected in the UPPAAL model.
                     queries = "NoStrategyEvaluate.q",                # Evaluate the model under no particular strategy. (randomly choose a different action when the shield intervenes)
                     runs = runs,
                     iteration = i,
-                    death_costs = death_costs,
+                    deterrence = deterrence,
                     post_shield_tweak_runs = int(runs*post_shield_tweak_runs_multiplier))
 
     run_experiment( experiment = f"PostShieldedPolicyPreferred",
@@ -125,7 +125,7 @@ def run_post_shield_experiments(death_costs):
                     queries = "NoStrategyEvaluate.q",             # Evaluate the model under no particular strategy. (The strategy is provided by postshield.c)
                     runs = runs,
                     iteration = i,
-                    death_costs = death_costs,
+                    deterrence = deterrence,
                     post_shield_tweak_runs = int(runs*post_shield_tweak_runs_multiplier))
 
     run_experiment( experiment = f"PostShieldedInterventionMinimized",
@@ -133,7 +133,7 @@ def run_post_shield_experiments(death_costs):
                     queries = "MinimizeInterventionsEvaluate.q",     # Minimize interventions, then evaluate the model.
                     runs = runs,
                     iteration = i,
-                    death_costs = death_costs,
+                    deterrence = deterrence,
                     post_shield_tweak_runs = int(runs*post_shield_tweak_runs_multiplier))
 
     run_experiment( experiment = f"PostShieldedCostMinimized",
@@ -141,7 +141,7 @@ def run_post_shield_experiments(death_costs):
                     queries = "MinimizeCostEvaluate.q",              # Minimize cost, then evaluate the model.
                     runs = runs,
                     iteration = i,
-                    death_costs = death_costs,
+                    deterrence = deterrence,
                     post_shield_tweak_runs = int(runs*post_shield_tweak_runs_multiplier))
 
 
@@ -184,17 +184,17 @@ if __name__ == "__main__":
             # Take unshielded strategy and write it to the strategy-file that will be post-shielded.
             os.system(f"cp '{resultsdir}/DriveWell1000.strategy.json' '{postshieldme}'")
 
-            run_post_shield_experiments(death_costs=f"{1000}")
+            run_post_shield_experiments(deterrence=f"{1000}")
 
             # Take unshielded strategy and write it to the strategy-file that will be post-shielded.
             os.system(f"cp '{resultsdir}/DriveWell100.strategy.json' '{postshieldme}'")
 
-            run_post_shield_experiments(death_costs=f"{100}")
+            run_post_shield_experiments(deterrence=f"{100}")
 
             # Take unshielded strategy and write it to the strategy-file that will be post-shielded.
             os.system(f"cp '{resultsdir}/DriveWell10.strategy.json' '{postshieldme}'")
 
-            run_post_shield_experiments(death_costs=f"{10}")
+            run_post_shield_experiments(deterrence=f"{10}")
 
 
             cleanup_strategies("NoShield", runs, i)

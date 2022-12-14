@@ -29,7 +29,7 @@ def clear_results():
     os.system(f"mkdir '{backupdir}'") 
     os.system(f"mv '{resultsdir}/'* '{backupdir}'")
 
-    header = "Experiment;Runs;Death Costs;Avg. Cost;Avg. Deaths;Avg. Interventions"
+    header = "Experiment;Runs;Deterrence;Avg. Cost;Avg. Deaths;Avg. Interventions"
     print(header)
     os.system(f"echo '{header}' > '{resultsdir}/Results.csv'")
 
@@ -37,18 +37,18 @@ def clear_results():
 # As you can see in clear_results, a row consists of the experiment done, the number of runs, the cost of death and then the results: average swings, deaths and interventions.
 # A query file will either have a non-applicable cost of death, or it will spit out results for all three variations at once.
 # So if I get 9 values, that means its the results for the 3 tiers of what a death costs. 
-def append_results(experiment, runs, values, death_costs="-"):
-    # Pad the list so that it has 11 elements
-    if len(values) == 9:
-        append_results(experiment, runs, values[0:3], death_costs="1000")
-        append_results(experiment, runs, values[3:6], death_costs="100")
-        append_results(experiment, runs, values[6:9], death_costs="10")
+def append_results(experiment, runs, values, deterrence="-"):
+    if len(values) == 4*3:
+        append_results(experiment, runs, values[0:3], deterrence="1000")
+        append_results(experiment, runs, values[3:6], deterrence="100")
+        append_results(experiment, runs, values[6:9], deterrence="10")
+        append_results(experiment, runs, values[9:12], deterrence="0")
         return
     elif len(values) != 3:
         print(f"DROPPED INCONSISTENT ROW: {','.join(values)}")
         return
     
-    row = [experiment, runs, death_costs, *values]
+    row = [experiment, runs, deterrence, *values]
     results_csv = ";".join(row)
     print(results_csv)
     os.system(f"echo '{results_csv}' >> '{resultsdir}/Results.csv'")

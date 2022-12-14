@@ -1,7 +1,7 @@
 // Train a single strategy, save it, then evaluate it.
 
 /* formula 1 */
-strategy PreShielded = minE (total_cost + (t>1)*1000) [#<=30] {} -> {x, t} : <> x>=1 or t>=1
+strategy PreShielded = minE (total_cost) [#<=30] {} -> {x, t} : <> x>=1 or t>=1
 
 /* formula 2 */
 saveStrategy("%resultsdir%/PreShielded.strategy.json", PreShielded)
