@@ -63,3 +63,4 @@ I am a big fan of not having to remember how a variable has been abbreviated, bu
  - `t` Time. 
  - `v, p` Velocity, Position. 
  - `death` Safety violation. Term borrowed from video gaming.
+ - `runs` Training runs. These are called episodes in the paper.

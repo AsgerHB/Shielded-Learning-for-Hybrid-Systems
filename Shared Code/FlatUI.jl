@@ -46,3 +46,7 @@ ccshieldcolors=[
 ]
 
 ccshieldlabels=["No actions", "1 Action", "2 Actions", "All 3 Actions"]
+
+# Used for shielding results figures.
+shielding_type_colors = (pre_shielded=colors.GREEN_SEA, no_shield=colors.BELIZE_HOLE, post_shielded=colors.SUNFLOWER, layabout=colors.MIDNIGHT_BLUE)
+runs_colors = [colors.PETER_RIVER colors.EMERALD colors.AMETHYST colors.TURQUOISE]
