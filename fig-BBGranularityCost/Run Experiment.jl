@@ -119,22 +119,39 @@ replacements = Dict(
 search_and_replace(blueprints_dir, queries_models_dir, replacements)
 error_on_regex_in(queries_models_dir, r"%[a-zA-Z_ ]+%") # Throw error if a blueprint variable was missed
 
+
+# Backup
+query_results_backup_dir = results_dir ⨝ "Query Results Backup"
+
+if isdir(query_results_dir)
+    if isdir(query_results_backup_dir)
+        rm(query_results_backup_dir, recursive=true)
+    end
+    mv(query_results_dir, query_results_backup_dir)
+    mkdir(query_results_dir)
+end
+
+
+# Run all queries
 abspath_model = queries_models_dir ⨝ "BB__Shielded.xml"
 abspath_query = queries_models_dir ⨝ "TrainSaveEvaluateSingle.q"
 
 runs = args["test"] ? 100 : 12000
 repeats = args["test"] ? 2 : 10
 
-results = [] #[("shield", "runs", "cost", "deaths", "interventions")]
+results = []
 
 for i in 1:repeats
+
+    mkdir(query_results_dir ⨝ "$i")
+
     for shield_file in glob("*.shield", shields_dir)
         
         get_libbbshield(shield_file, "Shared Code/libbbshield/", libbbshield_file, working_dir=libbbshield_dir, test=args["test"])
 
         shield_name = replace(basename(shield_file), ".shield" => "")
 
-        query_results_file = query_results_dir ⨝ "$shield_name.txt"
+        query_results_file = query_results_dir ⨝ "$i" ⨝ "$shield_name.queryresults.txt"
 
         write(query_results_file, read(abspath_query))
 
@@ -176,6 +193,8 @@ for i in 1:repeats
         end
 
         push!(results, (shield_name, runs="$runs", cost, deaths, interventions))
+
+        [mv(f, query_results_dir ⨝ "$i" ⨝ "$shield_name PreShielded.strategy.json") for f in glob("*.strategy.json", query_results_dir)]
 
         CSV.write(query_results_csv, DataFrame(results))
     end
