@@ -36,7 +36,7 @@ function get_shield(possible_shield_file, working_dir; test)
     progress_update("No shield was provided. Synthesising a new shield instead.")
 
     if test
-        grid = Grid(0.01, 0, 1.2, 0, 1.2)
+        grid = Grid(0.005, 0, 1.2, 0, 1.2)
     else
         grid = Grid(0.005, 0, 1.2, 0, 1.2)
     end
