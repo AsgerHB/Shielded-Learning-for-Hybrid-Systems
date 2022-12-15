@@ -86,7 +86,7 @@ def run_experiment(experiment, model, queries, runs, iteration, deterrence="-", 
     # Save the query so we know what we just ran
     os.system(f"cat '{abspath_queries}' > '{queryresults}'")
     # Run the command and save append it to the queryresults file.
-    os.system(f"{command} >> '{queryresults}'")
+    os.system(f"{command} >> '{queryresults}' 2>&1") 
 
     # Do regex on the queryresults and save the mean values using append_results.
     # Some kind of time lock occurs which messes up the results. If a time lock happens, I have to discard that query
