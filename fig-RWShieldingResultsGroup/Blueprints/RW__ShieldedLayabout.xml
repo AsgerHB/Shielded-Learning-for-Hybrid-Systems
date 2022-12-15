@@ -16,7 +16,6 @@ const bool layabout = true;
 const bool unlucky = false;
 
 /* Cost functions */
-
 const int SLOW = 0;
 const int FAST = 1;
 
@@ -68,7 +67,8 @@ const double tau_fast = 0.05;
 const double delta_slow = 0.1;
 const double tau_slow = 0.12;
 
-double total_cost = 0.0; 
+double total_cost = 0.0;
+int steps = 0;
 
 void updateFast() {
     if (unlucky) {
@@ -78,6 +78,7 @@ void updateFast() {
         x = x + delta_fast - epsilon + random(2*epsilon);
         t = t + tau_fast - epsilon + random(2*epsilon);
     }
+    steps++;
     total_cost = total_cost + cost_function(x, t, FAST);
 }
 
@@ -90,6 +91,7 @@ void updateSlow() {
         x = x + delta_slow - epsilon + random(2*epsilon); 
         t = t + tau_slow - epsilon + random(2*epsilon);
     }
+    steps++;
     total_cost = total_cost + cost_function(x, t, SLOW);
 }
 
@@ -209,20 +211,11 @@ system Process;
 			<comment/>
 		</query>
 		<query>
-			<formula>E[#&lt;=30;100] (max:interventions) under LowCost</formula>
+			<formula>E[#&lt;=30;100] (max:100*interventions/(steps || 1)s) under LowCost</formula>
 			<comment/>
 		</query>
 		<query>
-			<formula>E[#&lt;=30;100] (max:interventions)</formula>
-			<comment/>
-		</query>
-		<query>
-			<formula>saveStrategy("/home/asger/Documents/Files/AAU/10.Semester/Speciale/Speciale-Code/RandomWalk/LowCost.strategy.json", LowCost)
-	    </formula>
-			<comment/>
-		</query>
-		<query>
-			<formula>strategy LowCost = loadStrategy {} -&gt; {x, t} ("/home/asger/Documents/Files/AAU/10.Semester/Speciale/Speciale-Code/RandomWalk/LowCost.strategy.json")</formula>
+			<formula>E[#&lt;=30;100] (max:100*interventions/(steps || 1)s)</formula>
 			<comment/>
 		</query>
 	</queries>

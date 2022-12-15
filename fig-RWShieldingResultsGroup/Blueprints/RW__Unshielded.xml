@@ -67,7 +67,8 @@ const double tau_fast = 0.05;
 const double delta_slow = 0.1;
 const double tau_slow = 0.12;
 
-double total_cost = 0.0; 
+double total_cost = 0.0;
+int steps = 0;
 
 void updateFast() {
     if (unlucky) {
@@ -77,6 +78,7 @@ void updateFast() {
         x = x + delta_fast - epsilon + random(2*epsilon);
         t = t + tau_fast - epsilon + random(2*epsilon);
     }
+    steps++;
     total_cost = total_cost + cost_function(x, t, FAST);
 }
 
@@ -89,6 +91,7 @@ void updateSlow() {
         x = x + delta_slow - epsilon + random(2*epsilon); 
         t = t + tau_slow - epsilon + random(2*epsilon);
     }
+    steps++;
     total_cost = total_cost + cost_function(x, t, SLOW);
 }
 
@@ -467,146 +470,11 @@ Mean estimate of displayed sample: 98.3 ± 50.7 (95% CI)</comment>
 			</result>
 		</query>
 		<query>
-			<formula>E[#&lt;=30;100] (max:interventions) under LowCost</formula>
-			<comment/>
-			<result outcome="success" type="quantity" value="≈ 0" timestamp="2022-10-04 13:11:33 +0200">
-				<option key="--epsilon" value="1.0E-4"/>
-				<details>≈ 0</details>
-				<plot title="Probability Density Distribution" xaxis="max: interventions" yaxis="probability density">
-					<series title="density" type="b(1.000000)" color="0x0000ff" encoding="csv">0.0,1.0
-					</series>
-					<series title="average" type="pl" color="0x00dd00" encoding="csv">0.0,0.0
-0.0,1.0
-					</series>
-					<comment>Parameters: α=0.05, ε=0.0001, bucket width=1, bucket count=1
-Runs: 100 in total, 100 (100%) displayed, 0 (0%) remaining
-Span of displayed sample: [0, 0]
-Mean estimate of displayed sample: ≈ 0</comment>
-				</plot>
-				<plot title="Probability Distribution" xaxis="max: interventions" yaxis="probability">
-					<series title="probability" type="b(1.000000)" color="0x0000ff" encoding="csv">0.0,1.0
-					</series>
-					<series title="average" type="pl" color="0x00dd00" encoding="csv">0.0,0.0
-0.0,1.0
-					</series>
-					<comment>Parameters: α=0.05, ε=0.0001, bucket width=1, bucket count=1
-Runs: 100 in total, 100 (100%) displayed, 0 (0%) remaining
-Span of displayed sample: [0, 0]
-Mean estimate of displayed sample: ≈ 0</comment>
-				</plot>
-				<plot title="Cumulative Probability Distribution" xaxis="max: interventions" yaxis="probability">
-					<series title="cumulative" type="l" color="0x000000" encoding="csv">0.0,0.0
-					</series>
-					<series title="average" type="pl" color="0x00dd00" encoding="csv">0.0,0.0
-0.0,1.0
-					</series>
-					<comment>Parameters: α=0.05, ε=0.0001, bucket width=1, bucket count=1
-Runs: 100 in total, 100 (100%) displayed, 0 (0%) remaining
-Span of displayed sample: [0, 0]
-Mean estimate of displayed sample: ≈ 0</comment>
-				</plot>
-				<plot title="Cumulative Probability Confidence Intervals" xaxis="max: interventions" yaxis="probability">
-					<series title="upper limit" type="k" color="0x0000dd" encoding="csv">0.0,0.03621669264517642
-					</series>
-					<series title="lower limit" type="k" color="0xdd0000" encoding="csv">0.0,0.0
-					</series>
-					<series title="cumulative" type="l" color="0x000000" encoding="csv">0.0,0.0
-					</series>
-					<series title="average" type="pl" color="0x00dd00" encoding="csv">0.0,0.0
-0.0,1.0
-					</series>
-					<comment>Parameters: α=0.05, ε=0.0001, bucket width=1, bucket count=1
-Runs: 100 in total, 100 (100%) displayed, 0 (0%) remaining
-Span of displayed sample: [0, 0]
-Mean estimate of displayed sample: ≈ 0</comment>
-				</plot>
-				<plot title="Frequency Histogram" xaxis="max: interventions" yaxis="count">
-					<series title="count" type="b(1.000000)" color="0x0000ff" encoding="csv">0.0,100.0
-					</series>
-					<series title="average" type="pl" color="0x00dd00" encoding="csv">0.0,0.0
-0.0,100.0
-					</series>
-					<comment>Parameters: α=0.05, ε=0.0001, bucket width=1, bucket count=1
-Runs: 100 in total, 100 (100%) displayed, 0 (0%) remaining
-Span of displayed sample: [0, 0]
-Mean estimate of displayed sample: ≈ 0</comment>
-				</plot>
-			</result>
-		</query>
-		<query>
-			<formula>E[#&lt;=30;100] (max:interventions)</formula>
-			<comment/>
-			<result outcome="success" type="quantity" value="≈ 0" timestamp="2022-10-04 13:11:33 +0200">
-				<option key="--epsilon" value="1.0E-4"/>
-				<details>≈ 0</details>
-				<plot title="Probability Density Distribution" xaxis="max: interventions" yaxis="probability density">
-					<series title="density" type="b(1.000000)" color="0x0000ff" encoding="csv">0.0,1.0
-					</series>
-					<series title="average" type="pl" color="0x00dd00" encoding="csv">0.0,0.0
-0.0,1.0
-					</series>
-					<comment>Parameters: α=0.05, ε=0.0001, bucket width=1, bucket count=1
-Runs: 100 in total, 100 (100%) displayed, 0 (0%) remaining
-Span of displayed sample: [0, 0]
-Mean estimate of displayed sample: ≈ 0</comment>
-				</plot>
-				<plot title="Probability Distribution" xaxis="max: interventions" yaxis="probability">
-					<series title="probability" type="b(1.000000)" color="0x0000ff" encoding="csv">0.0,1.0
-					</series>
-					<series title="average" type="pl" color="0x00dd00" encoding="csv">0.0,0.0
-0.0,1.0
-					</series>
-					<comment>Parameters: α=0.05, ε=0.0001, bucket width=1, bucket count=1
-Runs: 100 in total, 100 (100%) displayed, 0 (0%) remaining
-Span of displayed sample: [0, 0]
-Mean estimate of displayed sample: ≈ 0</comment>
-				</plot>
-				<plot title="Cumulative Probability Distribution" xaxis="max: interventions" yaxis="probability">
-					<series title="cumulative" type="l" color="0x000000" encoding="csv">0.0,0.0
-					</series>
-					<series title="average" type="pl" color="0x00dd00" encoding="csv">0.0,0.0
-0.0,1.0
-					</series>
-					<comment>Parameters: α=0.05, ε=0.0001, bucket width=1, bucket count=1
-Runs: 100 in total, 100 (100%) displayed, 0 (0%) remaining
-Span of displayed sample: [0, 0]
-Mean estimate of displayed sample: ≈ 0</comment>
-				</plot>
-				<plot title="Cumulative Probability Confidence Intervals" xaxis="max: interventions" yaxis="probability">
-					<series title="upper limit" type="k" color="0x0000dd" encoding="csv">0.0,0.03621669264517642
-					</series>
-					<series title="lower limit" type="k" color="0xdd0000" encoding="csv">0.0,0.0
-					</series>
-					<series title="cumulative" type="l" color="0x000000" encoding="csv">0.0,0.0
-					</series>
-					<series title="average" type="pl" color="0x00dd00" encoding="csv">0.0,0.0
-0.0,1.0
-					</series>
-					<comment>Parameters: α=0.05, ε=0.0001, bucket width=1, bucket count=1
-Runs: 100 in total, 100 (100%) displayed, 0 (0%) remaining
-Span of displayed sample: [0, 0]
-Mean estimate of displayed sample: ≈ 0</comment>
-				</plot>
-				<plot title="Frequency Histogram" xaxis="max: interventions" yaxis="count">
-					<series title="count" type="b(1.000000)" color="0x0000ff" encoding="csv">0.0,100.0
-					</series>
-					<series title="average" type="pl" color="0x00dd00" encoding="csv">0.0,0.0
-0.0,100.0
-					</series>
-					<comment>Parameters: α=0.05, ε=0.0001, bucket width=1, bucket count=1
-Runs: 100 in total, 100 (100%) displayed, 0 (0%) remaining
-Span of displayed sample: [0, 0]
-Mean estimate of displayed sample: ≈ 0</comment>
-				</plot>
-			</result>
-		</query>
-		<query>
-			<formula>saveStrategy("/home/asger/Documents/Files/AAU/10.Semester/Speciale/Speciale-Code/RandomWalk/LowCost.strategy.json", LowCost)
-	    </formula>
+			<formula>E[#&lt;=30;100] (max:100*interventions/(steps || 1)s) under LowCost</formula>
 			<comment/>
 		</query>
 		<query>
-			<formula>strategy LowCost = loadStrategy {} -&gt; {x, t} ("/home/asger/Documents/Files/AAU/10.Semester/Speciale/Speciale-Code/RandomWalk/LowCost.strategy.json")</formula>
+			<formula>E[#&lt;=30;100] (max:100*interventions/(steps || 1)s)</formula>
 			<comment/>
 		</query>
 	</queries>

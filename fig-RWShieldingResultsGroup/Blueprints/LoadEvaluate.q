@@ -10,7 +10,7 @@ E[#<=30;%checks%] (max:total_cost) under Deterrence1000
 E[#<=30;%checks%00] (max:t>1) under Deterrence1000
 
 /* formula 4 */
-E[#<=30;%checks%] (max:interventions) under Deterrence1000
+E[#<=30;%checks%] (max:100*interventions/(steps || 1)) under Deterrence1000
 
 /* formula 5 */
 strategy Deterrence100 = loadStrategy {} -> {x, t}  ("%resultsdir%/Deterrence100.strategy.json")
@@ -22,7 +22,7 @@ E[#<=30;%checks%] (max:total_cost) under Deterrence100
 E[#<=30;%checks%00] (max:t>1) under Deterrence100
 
 /* formula 8 */
-E[#<=30;%checks%] (max:interventions) under Deterrence100
+E[#<=30;%checks%] (max:100*interventions/(steps || 1)) under Deterrence100
 
 /* formula 9 */
 strategy Deterrence10 = loadStrategy {} -> {x, t}  ("%resultsdir%/Deterrence10.strategy.json")
@@ -34,7 +34,7 @@ E[#<=30;%checks%] (max:total_cost) under Deterrence10
 E[#<=30;%checks%00] (max:t>1) under Deterrence10
 
 /* formula 12 */
-E[#<=30;%checks%] (max:interventions) under Deterrence10
+E[#<=30;%checks%] (max:100*interventions/(steps || 1)) under Deterrence10
 
 
 /* formula 13 */
@@ -47,5 +47,5 @@ E[#<=30;%checks%] (max:total_cost) under Deterrence0
 E[#<=30;%checks%00] (max:t>1) under Deterrence0
 
 /* formula 16 */
-E[#<=30;%checks%] (max:interventions) under Deterrence0
+E[#<=30;%checks%] (max:100*interventions/(steps || 1)) under Deterrence0
 

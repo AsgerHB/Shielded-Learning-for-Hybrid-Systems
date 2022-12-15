@@ -7,4 +7,4 @@ E[#<=30;%checks%] (max:total_cost)
 E[#<=30;%checks%00] (max:t>1)
 
 /* formula 3 */
-E[#<=30;%checks%] (max:interventions)
+E[#<=30;%checks%] (max:100*interventions/(steps || 1))

@@ -14,7 +14,7 @@ E[#<=30;%checks%] (max:total_cost) under Deterrence1000
 E[#<=30;%checks%00] (max:t>1) under Deterrence1000
 
 /* formula 5 */
-E[#<=30;%checks%] (max:interventions) under Deterrence1000
+E[#<=30;%checks%] (max:100*interventions/(steps || 1)) under Deterrence1000
 
 /* formula 6 */
 strategy Deterrence100 = minE (total_cost + (t>1)*100) [#<=30] {} -> {x, t} : <> x>=1 or t>=1
@@ -29,7 +29,7 @@ E[#<=30;%checks%] (max:total_cost) under Deterrence100
 E[#<=30;%checks%00] (max:t>1) under Deterrence100
 
 /* formula 10 */
-E[#<=30;%checks%] (max:interventions) under Deterrence100
+E[#<=30;%checks%] (max:100*interventions/(steps || 1)) under Deterrence100
 
 /* formula 11 */
 strategy Deterrence10 = minE (total_cost + (t>1)*10) [#<=30] {} -> {x, t} : <> x>=1 or t>=1
@@ -44,7 +44,7 @@ E[#<=30;%checks%] (max:total_cost) under Deterrence10
 E[#<=30;%checks%00] (max:t>1) under Deterrence10
 
 /* formula 15 */
-E[#<=30;%checks%] (max:interventions) under Deterrence10
+E[#<=30;%checks%] (max:100*interventions/(steps || 1)) under Deterrence10
 
 /* formula 16 */
 strategy Deterrence0 = minE (total_cost + (t>1)*0) [#<=30] {} -> {x, t} : <> x>=1 or t>=1
@@ -59,6 +59,6 @@ E[#<=30;%checks%] (max:total_cost) under Deterrence0
 E[#<=30;%checks%00] (max:t>1) under Deterrence0
 
 /* formula 20 */
-E[#<=30;%checks%] (max:interventions) under Deterrence0
+E[#<=30;%checks%] (max:100*interventions/(steps || 1)) under Deterrence0
 
 
