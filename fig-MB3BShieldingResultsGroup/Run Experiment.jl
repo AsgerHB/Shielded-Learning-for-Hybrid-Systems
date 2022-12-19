@@ -1,14 +1,15 @@
 if !isfile("Project.toml")
     error("Project.toml not found. Try running this script from the root of the ReproducibilityPackage folder.")
 end
-import Pkg
+
+using Pkg
 Pkg.activate(".")
 Pkg.instantiate()
 using ArgParse
 using Glob
 using Dates
 include("../Shared Code/ExperimentUtilities.jl")
-include("Get libmb2shield.jl")
+include("Get libbbshield.jl")
 
 s = ArgParseSettings()
 
@@ -43,10 +44,8 @@ end
 
 args = parse_args(s)
 
-progress_update("Estimated total time to commplete: 19 hours. (30 minutes if run with --test)")
-
 results_dir = args["results-dir"]
-const figure_name = "fig-MB2ShieldingResultsGroup"
+figure_name = "fig-MB3BShieldingResultsGroup"
 results_dir = results_dir ⨝ figure_name
 
 queries_models_dir = results_dir ⨝ "UPPAAL Queries and Models"
@@ -55,20 +54,18 @@ mkpath(queries_models_dir)
 query_results_dir = results_dir ⨝ "Query Results"
 mkpath(query_results_dir)
 
-libmb2shield_dir = results_dir ⨝ "libbshield"
-mkpath(libmb2shield_dir)
+libbbshield_dir = results_dir ⨝ "libbshield"
+mkpath(libbbshield_dir)
 
 possible_shield_file = args["shield"] #results_dir ⨝ "../tab-BBSynthesis/Exported Strategies/400 Samples 0.01 G.shield"
 
-checks = args["test"] ? 10 : 1000 # Number of checks to use for estimating½ expected outcomes in the UPPAAL queries
-
-const number_of_balls = 3
+checks = args["test"] ? 10 : 1000 # Number of checks to use for estimating expected outcomes in the UPPAAL queries
 
 if !args["skip-experiment"]
     # Get the nondeterministic safe strategy that will be used for shielding.
     # Or just the "shield" for short.
-    libmb2shield_file = libmb2shield_dir ⨝ "libmb2shield.so"
-    get_libmb2shield(possible_shield_file, "Shared Code/libbbshield/", libmb2shield_file, working_dir=libmb2shield_dir, test=args["test"])
+    libbbshield_file = libbbshield_dir ⨝ "libbbshield.so"
+    get_libbbshield(possible_shield_file, "Shared Code/libbbshield/", libbbshield_file, working_dir=libbbshield_dir, test=args["test"])
 
 
     # Create UPPAAL models and queries from blueprints, by doing search and replace on the placeholders.
@@ -81,7 +78,7 @@ if !args["skip-experiment"]
 
     replacements = Dict(
         "%resultsdir%" => query_results_dir,
-        "%shieldfile%" => libmb2shield_file,
+        "%shieldfile%" => libbbshield_file,
         "%checks%" => checks
     )
 
@@ -139,17 +136,17 @@ NBPARAMS = Dict(
 
 include("ReadResults.jl")
 
-average_cost_name = "MB2ShieldingResults"
+average_cost_name = "MBShieldingResults"
 savefig(average_cost, results_dir ⨝ "$average_cost_name.png")
 savefig(average_cost, results_dir ⨝ "$average_cost_name.svg")
 progress_update("Saved $average_cost_name")
 
-average_interventions_name = "MB2ShieldingInterventions"
+average_interventions_name = "MBShieldingInterventions"
 savefig(average_interventions, results_dir ⨝ "$average_interventions_name.png")
 savefig(average_interventions, results_dir ⨝ "$average_interventions_name.svg")
 progress_update("Saved $average_interventions_name")
 
-average_deaths_name = "MB2ShieldingDeaths"
+average_deaths_name = "MBShieldingDeaths"
 savefig(average_deaths, results_dir ⨝ "$average_deaths_name.png")
 savefig(average_deaths, results_dir ⨝ "$average_deaths_name.svg")
 progress_update("Saved $average_deaths_name")
