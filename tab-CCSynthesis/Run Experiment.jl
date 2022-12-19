@@ -87,7 +87,6 @@ end
 ######################
 
 NBPARAMS = Dict(
-    # The product of these two numbers will be the total number of tests. (10000000)
     "csv_synthesis_report" => joinpath(shields_dir, "Barbaric Shields Synthesis Report.csv"),
     "csv_safety_report" => joinpath(evaluations_dir, "Test of Shields.csv")
 )
