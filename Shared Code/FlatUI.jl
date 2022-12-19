@@ -33,6 +33,9 @@ transitionlabels = ["Initial", "Reachable", "Not reachable"]
 bbshieldlabels = 	["{hit, nohit}", "{hit}", "{}"]
 bbshieldcolors = 	[colorant"#ffffff", colorant"#a1eaff", colorant"#ff9178"]
 
+rwshieldlabels = 	["{fast, slow}", "{fast}", "{}"]
+rwshieldcolors = 	[colorant"#ffffff", colorant"#a1eaff", colorant"#ff9178"]
+
 
 ccshieldcolors=[
 	colors.POMEGRANATE, # 000

@@ -4,9 +4,9 @@ using Serialization
 using Glob
 using ProgressLogging
 include("../Shared Code/ExperimentUtilities.jl")
-include("RW Library/RandomWalk.jl")
-include("RW Library/Squares.jl")
-include("RW Library/ShieldSynthesis.jl")
+include("../Shared Code/RandomWalk.jl")
+include("../Shared Code/RWSquares.jl")
+include("../Shared Code/RWShieldSynthesis.jl")
 
 
 # infix operator "\join" redefined to signify joinpath

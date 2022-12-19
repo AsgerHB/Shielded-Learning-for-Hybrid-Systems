@@ -181,3 +181,6 @@ function shield_action(shield, x, t, action)
 end
 
 
+function get_shielding_function(shield::Grid, strategy)
+	(x, t) -> shield_action(shield, x, t, strategy(x, t))
+end

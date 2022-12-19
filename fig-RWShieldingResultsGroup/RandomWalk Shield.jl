@@ -19,7 +19,7 @@ begin
 	using PlutoUI
 	using Random
 	using Plots
-	include("RW Library/RandomWalk.jl");
+	include("../Shared Code/RandomWalk.jl");
 end
 
 # ╔═╡ b0b79789-e1b9-46f6-a19a-fcee9d5a5be2

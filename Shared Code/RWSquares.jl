@@ -101,7 +101,7 @@ function initialize!(grid::Grid, value_function=(Ixl, Ixu, Itl, Itu) -> Itu > 1 
 end
 
 
-function draw(grid::Grid; colors=[:white, :black], show_grid=false)
+function draw(grid::Grid; colors=[:white, :black], show_grid=false, color_labels=[])
 	colors = cgrad(colors, length(colors), categorical=true)
 	x_tics = grid.x_min:grid.G:grid.x_max
 	y_tics = grid.y_min:grid.G:grid.y_max
@@ -111,6 +111,17 @@ function draw(grid::Grid; colors=[:white, :black], show_grid=false)
 	if show_grid && length(grid.x_min:grid.G:grid.x_max) < 100
 		vline!(grid.x_min:grid.G:grid.y_max, color="#afafaf", label=nothing)
 		hline!(grid.y_min:grid.G:grid.y_max, color="#afafaf", label=nothing)
+	end
+
+	# Show labels
+	if length(color_labels) > 0
+		if length(color_labels) != length(colors)
+			throw(ArgumentError("Length of argument color_labels does not match  number of colors."))
+		end
+		for (color, label) in zip(colors, color_labels)
+		    plot!(Float64[], Float64[], seriestype=:shape,   # The Float typing has been added to avoid a weird warning
+		        label=label, color=color)
+		end
 	end
 
 	return hm

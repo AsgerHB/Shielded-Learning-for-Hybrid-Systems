@@ -67,7 +67,7 @@ if !args["skip-experiment"]
     # Get the nondeterministic safe strategy that will be used for shielding.
     # Or just the "shield" for short.
     librwshield_file = librwshield_dir ⨝ "librwshield.so"
-    get_librwshield(possible_shield_file, figure_name ⨝ "RW Library/librwshield/", librwshield_file, working_dir=librwshield_dir, test=args["test"])
+    get_librwshield(possible_shield_file, figure_name ⨝ "../Shared Code/librwshield/", librwshield_file, working_dir=librwshield_dir, test=args["test"])
 
     # Create UPPAAL models and queries from blueprints, by doing search and replace on the placeholders.
     # This is similar to templating, but the word blueprint was choseen to avoid a name clash with UPPAAL templates. 
