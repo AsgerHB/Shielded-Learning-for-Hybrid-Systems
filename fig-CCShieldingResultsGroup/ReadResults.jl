@@ -24,6 +24,7 @@ begin
 	using StatsPlots
 	using NaturalSort
 	using Measures
+	using Printf
 	include("../Shared Code/FlatUI.jl")
 	include("../Shared Code/ExperimentUtilities.jl")
 end
@@ -447,34 +448,42 @@ post_shield_comparison = call() do
 	plot!(legend=:outertop)
 end
 
-# ╔═╡ dfcce060-ac1b-48a7-97c3-50aebb002c1a
-post_shield_cost_bar, post_shield_interventions_bar = call() do
+# ╔═╡ 4faeb976-5713-4274-999f-5290fd698365
+post_shield_variance = call() do
 	df = medians
 	df = filter(:Experiment => e -> occursin("PostShield", e), df)
 	df = filter(:Runs => ==(12000), df)
 	df = filter(:Deterrence => ==("10"), df)
-	
-	df = groupby(df, :Experiment)
-	
+end
+
+# ╔═╡ 60885198-7b1f-4f66-b5d2-dad390403dcc
+variants_names = Dict(
+	"PostShieldedRandomChoice" => "Random Choice",
+	"PostShieldedPolicyPreferred" => "Strategy Preferred",
+	"PostShieldedInterventionMinimized" => "Min Interventions",
+	"PostShieldedCostMinimized" => "Min Cost",
+)
+
+# ╔═╡ dfcce060-ac1b-48a7-97c3-50aebb002c1a
+post_shield_cost_bar, post_shield_interventions_bar = call() do
+	df = post_shield_variance
+
+	# Commented out: Get an average over multiple configurations
+	#= df = groupby(df, :Experiment)
+	z
 	df = combine(df, 
 		:Avg_Cost => mean,
 		:Avg_Interventions => mean,
 		renamecols=false)
 
-	df = sort(df, :Experiment)
+	df = sort(df, :Experiment) =#
 
 	variantscolors = [postshieldcolors[e] for e in df[!, :Experiment]]
-
-	variants_names = Dict(
-	"PostShieldedRandomChoice" => "Random Choice",
-	"PostShieldedPolicyPreferred" => "Strategy Preferred",
-	"PostShieldedInterventionMinimized" => "Min Interventions",
-	"PostShieldedCostMinimized" => "Min Cost",
-	)
 	
 	df = transform(df, 
 		:Experiment => ByRow(e -> variants_names[e]),
 		renamecols=false)
+
 
 	p1 = @df df bar(:Experiment, :Avg_Cost,
 				color=variantscolors,
@@ -499,6 +508,35 @@ post_shield_cost_bar, post_shield_interventions_bar = call() do
 	p1, p2
 end
 
+# ╔═╡ 1bd411c9-2ba2-4e94-a7dd-d07ba3ee17b4
+post_shield_variance_latexified = call() do
+	df = post_shield_variance
+	
+	number_format(d::Float64) = @sprintf("%.4f", d)
+	
+	df = transform(df, 
+		:Experiment => ByRow(e -> variants_names[e]),
+		:Avg_Cost => ByRow(number_format),
+		:Avg_Interventions => ByRow(number_format),
+		renamecols=false)
+
+	select(df, [:Experiment => "Intervention", 
+		:Avg_Cost => "Average Cost", 
+		:Avg_Interventions => "Average Interventions"])
+end 
+
+# ╔═╡ 2f5dfac9-1515-40e1-bbb6-372dc5ffddbe
+post_shield_cost_comparison = latex_table(post_shield_variance_latexified)
+
+# ╔═╡ dd75c7c3-dc2b-441c-b2f0-fa19814959c9
+HTML("""
+<label style="display:block" for="adsdf">Resulting LaTeX table:</label>
+
+<textarea id="adsdf" rows="10" cols="80" wrap="off" readonly>
+$(post_shield_cost_comparison) </textarea>
+
+""")
+
 # ╔═╡ 7ec370fa-4c45-4cc0-b973-d7184cebfe4b
 post_shield_interventions_bar
 
@@ -514,6 +552,7 @@ Measures = "442fdcdd-2543-5da2-b0f3-8c86c306513e"
 NaturalSort = "c020b1a1-e9b0-503a-9c33-f039bfc54a85"
 Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
 PlutoUI = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
+Printf = "de0858da-6303-5e67-8744-51eddeeeb8d7"
 Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
 StatsPlots = "f3b207a7-027a-5e70-b257-86293d7955fd"
 
@@ -533,7 +572,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.8.2"
 manifest_format = "2.0"
-project_hash = "130a988e078440b05e6d148cb80186651a146fa8"
+project_hash = "3b3d87bc5a0e9ca64ebed14514a2f5074340018d"
 
 [[deps.AbstractFFTs]]
 deps = ["ChainRulesCore", "LinearAlgebra"]
@@ -1811,7 +1850,12 @@ version = "0.9.1+5"
 # ╟─1b1089d9-fc40-45ce-9ee5-b95698473550
 # ╠═ac54a7f0-2062-4814-9d5b-34801c994afa
 # ╟─a5d5f44f-232c-46d8-8e32-5975bd6095f4
+# ╠═4faeb976-5713-4274-999f-5290fd698365
+# ╠═60885198-7b1f-4f66-b5d2-dad390403dcc
 # ╠═dfcce060-ac1b-48a7-97c3-50aebb002c1a
+# ╠═1bd411c9-2ba2-4e94-a7dd-d07ba3ee17b4
+# ╠═2f5dfac9-1515-40e1-bbb6-372dc5ffddbe
+# ╟─dd75c7c3-dc2b-441c-b2f0-fa19814959c9
 # ╠═7ec370fa-4c45-4cc0-b973-d7184cebfe4b
 # ╠═5c5e4c78-caea-4df7-a691-f95a50419662
 # ╟─00000000-0000-0000-0000-000000000001

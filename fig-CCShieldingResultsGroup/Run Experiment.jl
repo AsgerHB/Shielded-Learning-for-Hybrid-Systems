@@ -188,9 +188,9 @@ export_figure("CCShieldingInterventions", average_interventions)
 
 export_figure("CCShieldingDeaths", average_deaths)
 
-export_figure("CCPostShieldCostComparison", post_shield_cost_bar)
+#export_figure("CCPostShieldCostComparison", post_shield_cost_bar)
 
-export_figure("CCPostShieldInterventionsComparison", post_shield_interventions_bar)
+#export_figure("CCPostShieldInterventionsComparison", post_shield_interventions_bar)
 
 if safety_violations !== nothing
     progress_update("WARNING: Safety violation observed in shielded configuration. This is unexpected.")
@@ -200,6 +200,9 @@ end
 
 write(results_dir ⨝ "SafetyNotice.md", safety_violations_message)
 progress_update("Saved SafetyNotice")
+
+write(results_dir ⨝ "CCPostShieldComparison.tex", post_shield_cost_comparison)
+progress_update("Saved CCPostShieldComparison")
 
 progress_update("Done with $figure_name.")
 progress_update("====================================")
