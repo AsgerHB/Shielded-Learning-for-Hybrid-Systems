@@ -354,7 +354,7 @@ make_label(experiment, d) = "$(proper_experiment_name[experiment]) d=$d"
 # HACK: Spaces inserted to fix lexicographical sorting 
 function fix_bad_sorting(runs)
 	runs_labels = Dict(
-		100 => "100", 200 => "200", # Test values
+		10 => "10", 20 => "20", 100 => "100", 200 => "200", # Test values
 		1500 => " 1500", 3000 => " 3000", 6000 => " 6000", 
 		12000 => "12000")
 

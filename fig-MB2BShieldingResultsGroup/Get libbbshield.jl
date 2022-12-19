@@ -25,7 +25,9 @@ function get_shield(possible_shield_file, working_dir; test)
         end
         progress_update("Using existing shield found at $possible_shield_file")
         shield_dir = working_dir ⨝ basename(possible_shield_file)
-        cp(possible_shield_file, shield_dir, force=true)
+        if possible_shield_file != shield_dir
+            cp(possible_shield_file, shield_dir, force=true)
+        end
         progress_update("Saved a copy to $shield_dir")
         return shield_dir
     end
