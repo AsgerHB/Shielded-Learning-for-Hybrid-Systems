@@ -28,7 +28,6 @@ begin
 	using Printf
 	include("../Shared Code/ExperimentUtilities.jl")
 	include("../Shared Code/Ball.jl")
-	include("../Shared Code/ExperimentUtilities.jl")
 	TableOfContents()
 end
 
@@ -71,6 +70,86 @@ end
 
 # ╔═╡ cc15b974-9adf-4d0a-a321-9a784a993ade
 call(f) = f()
+
+# ╔═╡ 075ea28e-faa3-4a30-bcc3-497814d170db
+md"""
+## Select `Shields Synthesis Report.csv`
+
+Select the `Joint Shields Synthesis Report.csv` file from the `Exported Strategies` folder.
+
+(Yes, this is two different files that has been glued together. Scientific computing.)
+
+`csv_synthesis_report` = $(@bind csv_synthesis_report PlutoUI.FilePicker([MIME("text/csv")]))
+"""
+
+# ╔═╡ 263fc26b-3612-4b2e-9013-5abf1d1b6906
+# Default value can be changed when running notebook as a script
+# See docstring for @nbparam
+csv_synthesis_report′ = @nbparam("csv_synthesis_report", csv_synthesis_report)
+
+# ╔═╡ e66a6459-785b-4c11-a423-01dae4c545b7
+md"""
+## Select `Test of Shields.csv` file
+
+Select the `Test of Shields.csv` file. It should be in the `Safety Evaluations` folder.
+
+
+`csv_safety_report` = $(@bind csv_safety_report PlutoUI.FilePicker([MIME("text/csv")]))
+"""
+
+# ╔═╡ a6b233df-14c1-4ba4-8bf3-0e87f6e9f8e7
+# Default value can be changed when running notebook as a script
+# See docstring for @nbparam
+csv_safety_report′ = @nbparam("csv_safety_report", csv_safety_report)
+
+# ╔═╡ c9a0c097-7c4e-4343-bcb2-a1dd89e047cf
+# Alternative version of Base.open
+begin
+	# From PlutoUI FilePicker
+	function open′(f, picked_file::Dict)
+		f(picked_file["data"]  |> IOBuffer)
+	end
+
+	# A file name or path
+	function open′(f, file_name::AbstractString)
+		open(file_name, "r") do file
+			f(file)
+		end
+	end
+end
+
+# ╔═╡ e44678ea-499b-41ad-a291-9b323282ba87
+if csv_synthesis_report′ == nothing
+	synthesis_report = nothing
+	md"""
+!!! warning "No file selected"
+	Select a file to view the report.
+	"""
+else
+	synthesis_report = 
+		open′(csv_synthesis_report′) do file 
+			CSV.read(file, DataFrame)
+		end
+	"Imported successfully."
+end
+
+# ╔═╡ 89905705-ae89-4c90-a5c7-96286120e6ec
+synthesis_report
+
+# ╔═╡ 1b07a080-0038-4611-a674-6b0fbd9352a0
+if csv_safety_report′ == nothing
+	safety_report = nothing
+	md"""
+!!! warning "No file selected"
+	Select a file to view the report.
+	"""
+else
+	safety_report = 
+		open′(csv_safety_report′) do file
+			CSV.read(file, DataFrame)
+		end
+	"Imported successfully."
+end
 
 # ╔═╡ 98ab1267-2087-4fc8-963d-c2b76bd3f293
 # ╠═╡ skip_as_script = true
@@ -144,50 +223,6 @@ end
 draw_trace(rawresults[i].unsafe_trace...)
   ╠═╡ =#
 
-# ╔═╡ e66a6459-785b-4c11-a423-01dae4c545b7
-md"""
-## Select `Test of Shields.csv` file
-
-
-`csv_safety_report` = $(@bind csv_safety_report PlutoUI.FilePicker([MIME("text/csv")]))
-"""
-
-# ╔═╡ a6b233df-14c1-4ba4-8bf3-0e87f6e9f8e7
-# Default value can be changed when running notebook as a script
-# See docstring for @nbparam
-csv_safety_report′ = @nbparam("csv_safety_report", csv_safety_report)
-
-# ╔═╡ c9a0c097-7c4e-4343-bcb2-a1dd89e047cf
-# Alternative version of Base.open
-begin
-	# From PlutoUI FilePicker
-	function open′(f, picked_file::Dict)
-		f(picked_file["data"]  |> IOBuffer)
-	end
-
-	# A file name or path
-	function open′(f, file_name::AbstractString)
-		open(file_name, "r") do file
-			f(file)
-		end
-	end
-end
-
-# ╔═╡ 1b07a080-0038-4611-a674-6b0fbd9352a0
-if csv_safety_report′ == nothing
-	safety_report = nothing
-	md"""
-!!! warning "No file selected"
-	Select a file to view the report.
-	"""
-else
-	safety_report = 
-		open′(csv_safety_report′) do file
-			CSV.read(file, DataFrame)
-		end
-	"Imported successfully."
-end
-
 # ╔═╡ 07d7ad83-f43c-41df-aa4a-1aaa1dcb93a4
 safety_report
 
@@ -204,11 +239,57 @@ Markdown.parse("""
 """)
 
 # ╔═╡ 49589492-c716-4916-ba1b-a19338dc1528
-algorithm, granularity = :algorithm, :granularity
+algorithm, parameters, granularity = :algorithm, :parameters, :granularity
 
 # ╔═╡ 5e3494fb-43e0-4638-b37f-5c74dc4a59d8
 function average(lst)
 	sum(lst) / length(lst)
+end
+
+# ╔═╡ e5299152-8373-4303-9068-b0a8b54c3b1a
+begin
+	get_algorithm(filenames) = get_algorithm.(filenames)
+	
+	function get_algorithm(filename::AbstractString)
+		# match example: 100 samples 0.02 G.shield
+		m = match(r"(\d+) Samples ([0-9.]+) G", filename)
+		if m != nothing
+			return "Barbaric"
+		else
+			# match example: BOX 0.01 with G of 0.02.shield
+			m = match(r"(\w+) ([0-9.]+) with G of ([0-9.]+)", filename)
+			if m != nothing
+				return "Julia Reach $(m[1])(δ=$(m[2]))"
+			else
+				best_effort = replace(filename, ".shield" => "")
+				@warn "Unexpected filename: $filename\nCould not determine algorithm type. Using placeholder: $best_effort"
+				return best_effort
+			end
+		end
+	end
+end
+
+# ╔═╡ 6b1eaca3-33b7-4681-9201-75524853fa5b
+begin
+	get_algorithm_parameters(filenames) = get_algorithm_parameters.(filenames)
+	
+	function get_algorithm_parameters(filename::AbstractString)
+		# match example: 100 samples 0.02 G.shield
+		m = match(r"(\d+) Samples ([0-9.]+) G", filename)
+		if m != nothing
+			return "N=$(Int(cbrt(parse(Int, m[1])/3)))"
+		else
+			# match example: BOX 0.01 with G of 0.02.shield
+			m = match(r"(\w+) ([0-9.]+) with G of ([0-9.]+)", filename)
+			if m != nothing
+				return "time-step=$(m[2])"
+			else
+				best_effort = replace(filename, ".shield" => "")
+				@warn "Unexpected filename: $filename\nCould not determine algorithm type. Using placeholder: $best_effort"
+				return best_effort
+			end
+		end
+	end
 end
 
 # ╔═╡ d8f7ec0e-50cd-4557-9b53-c9146a80d8f6
@@ -248,29 +329,6 @@ begin
 
 	function n_from_grid_points(problem, grid_points::AbstractString)
 		n_from_grid_points(problem, parse(Int, grid_points))
-	end
-end
-
-# ╔═╡ e5299152-8373-4303-9068-b0a8b54c3b1a
-begin
-	get_algorithm(filenames) = get_algorithm.(filenames)
-	
-	function get_algorithm(filename::AbstractString)
-		# match example: 100 samples 0.02 G.shield
-		m = match(r"(\d+) Samples ([0-9.]+) G", filename)
-		if m != nothing
-			return "Barbaric with N=$(n_from_grid_points(problem, m[1]))"
-		else
-			# match example: BOX 0.01 with G of 0.02.shield
-			m = match(r"(\w+) ([0-9.]+) with G of ([0-9.]+)", filename)
-			if m != nothing
-				return "Julia Reach $(m[1])(δ=$(m[2]))"
-			else
-				best_effort = replace(filename, ".shield" => "")
-				@warn "Unexpected filename: $filename\nCould not determine algorithm type. Using placeholder: $best_effort"
-				return best_effort
-			end
-		end
 	end
 end
 
@@ -319,51 +377,21 @@ clean_safety_report = call(() -> begin
 	result = rename(result, :fraction_unsafe_function => percent_safe)
 	
 	result = transform(result,
-		file => get_algorithm, 
-		file => get_granularity, 
-		renamecols=true)
+		file => get_algorithm => algorithm, 
+		file => get_algorithm_parameters => parameters, 
+		file => get_granularity => granularity)
 
 	result = transform(result,
 	[runs, percent_safe] => ByRow((r, ps) -> r == 1 ? "-" : "$ps"))
 	
 	result = select(result,
-		:file_get_granularity => granularity, 
-		:file_get_algorithm => algorithm,  
+		granularity, 
+		algorithm,  
+		parameters,
 		percent_safe)
 	
 	result = sort(result, [granularity, algorithm], lt=natural)
 end)
-
-# ╔═╡ 075ea28e-faa3-4a30-bcc3-497814d170db
-md"""
-## Select `csv_synthesis_report` file
-
-
-`csv_synthesis_report` = $(@bind csv_synthesis_report PlutoUI.FilePicker([MIME("text/csv")]))
-"""
-
-# ╔═╡ 263fc26b-3612-4b2e-9013-5abf1d1b6906
-# Default value can be changed when running notebook as a script
-# See docstring for @nbparam
-csv_synthesis_report′ = @nbparam("csv_synthesis_report", csv_synthesis_report)
-
-# ╔═╡ e44678ea-499b-41ad-a291-9b323282ba87
-if csv_synthesis_report′ == nothing
-	synthesis_report = nothing
-	md"""
-!!! warning "No file selected"
-	Select a file to view the report.
-	"""
-else
-	synthesis_report = 
-		open′(csv_synthesis_report′) do file 
-			CSV.read(file, DataFrame)
-		end
-	"Imported successfully."
-end
-
-# ╔═╡ 89905705-ae89-4c90-a5c7-96286120e6ec
-synthesis_report
 
 # ╔═╡ 8d952460-c8f2-4b66-8c25-5e4d543fdc63
 # headers
@@ -380,21 +408,15 @@ cleaned_synthesis_report = call(() -> begin
 	div3600(s) = s./3600
 	GiB(b) = b./1073741824 # Bytes to GiB
 	result = transform(synthesis_report, 
-		saved_as => get_granularity, 
-		saved_as => get_algorithm, 
-		seconds_taken => div60,
-		seconds_taken => div3600,
-		bytes_used => GiB)
-	
-	result = rename(result, 
-		:saved_as_get_granularity => granularity,
-		:saved_as_get_algorithm => algorithm,
-		:seconds_taken_div60 => minutes_taken,
-		:seconds_taken_div3600 => hours_taken,
-		:bytes_used_GiB => gigabytes_used)
+		saved_as => get_granularity => granularity, 
+		saved_as => get_algorithm => algorithm, 
+		saved_as => get_algorithm_parameters => parameters, 
+		seconds_taken => div60 => minutes_taken,
+		seconds_taken => div3600 => hours_taken,
+		bytes_used => GiB => gigabytes_used)
 	
 	result = sort(result, [granularity, algorithm], lt=natural, rev=false)
-	result = select(result, [granularity, algorithm, valid, seconds_taken])
+	result = select(result, [granularity, algorithm, parameters, valid, seconds_taken])
 end)
 
 # ╔═╡ 21311e72-95f3-43bb-b4d0-099544d75469
@@ -404,12 +426,12 @@ md"""
 
 # ╔═╡ 00fa0da1-c3c4-4a3b-b516-a16e37f70785
 joint_report = innerjoin(clean_safety_report, cleaned_synthesis_report,
-					on=[granularity, algorithm])
+					on=[granularity, parameters, algorithm])
 
 # ╔═╡ 6c624e17-1f59-47e3-9192-9dbfb9c69a13
 joint_report_latexified = call() do
 	seconds_format(d::Float64) = @sprintf("%.0f", d)
-	percent_format(d::Float64) = @sprintf("%.1f", d)*"\\%"
+	percent_format(d::Float64) = d == 100.0 ? "100\\%" : @sprintf("%.4f", d)*"\\%"
 	wrap_math(str::String) = replace(
 			replace(str, r"δ=(\d+\.?\d*)" => s"$\\delta=\g<1>$"), 
 		r"N=(\d+)" => s"$N=\g<1>$")
@@ -431,49 +453,15 @@ joint_report_latexified = call() do
 	result = select(result, 
 		granularity => "\$\\granularity~~\$", 
 		algorithm => "Algorithm", 
+		parameters => "Parameters", 
 		seconds_taken => "Seconds",
 		valid => "Safe in \$\\state_0\$",
 		percent_safe => "Safe Runs")
 end
 
-# ╔═╡ 31a9e261-ded9-4398-8d45-f5678dcc9fbd
-function LatexTable(df; hline=true, headers=nothing, filter=nothing)
-	if headers == nothing
-		headers = [string(k) for k in keys(first(df))]
-	end
-
-	if filter == nothing
-		filter = string
-	end
-
-	rows = [ ]
-
-	result = "\\begin{tabular}"
-	
-	# Those |r|r|r|r| thingies
-	result *= "{$(repeat("|r", length(headers)))|} \\hline\n"
-	
-	# Table header
-	h = ["\\textbf{$(filter(cell))}" for cell in headers]
-	push!(rows, join(h, "\t&\t"))
-	
-	for row in eachrow(df)
-		r = [filter(cell) for cell in row]
-		push!(rows, join(r, "\t&\t"))
-	end
-
-	if hline
-		result *= join(rows, "\t\\\\ \\hline\n")
-		result *= "\t\\\\ \\hline\n"
-	else
-		result *= join(rows, "\t\\\\\n")
-	end
-	result *= "\\end{tabular}"
-	return result
-end
-
 # ╔═╡ 29f585d2-21c9-4c53-8fc3-2b1ae8ddf713
-resulting_latex_table = LatexTable(joint_report_latexified)
+resulting_latex_table = latex_table(joint_report_latexified, 
+	group_by=["\$\\granularity~~\$", "Algorithm"])
 
 # ╔═╡ 2ac7442f-13b2-401d-803e-a3005fd9a1b3
 HTML("""
@@ -1045,9 +1033,9 @@ version = "1.42.0+0"
 
 [[deps.Libiconv_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
-git-tree-sha1 = "42b62845d70a619f063a7da093d995ec8e15e778"
+git-tree-sha1 = "c7cb1f5d892775ba13767a87c7ada0b980ea0a71"
 uuid = "94ce4f54-9a6c-5748-9c1c-f9c7231a4531"
-version = "1.16.1+1"
+version = "1.16.1+2"
 
 [[deps.Libmount_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -1781,6 +1769,14 @@ version = "1.4.1+0"
 # ╟─a6dc63b1-b05b-4011-8da6-91812f0dc470
 # ╟─a558a662-d1ae-4a9e-bb9b-4aacc2d3f3d6
 # ╠═cc15b974-9adf-4d0a-a321-9a784a993ade
+# ╟─075ea28e-faa3-4a30-bcc3-497814d170db
+# ╠═263fc26b-3612-4b2e-9013-5abf1d1b6906
+# ╠═e44678ea-499b-41ad-a291-9b323282ba87
+# ╠═89905705-ae89-4c90-a5c7-96286120e6ec
+# ╟─e66a6459-785b-4c11-a423-01dae4c545b7
+# ╟─a6b233df-14c1-4ba4-8bf3-0e87f6e9f8e7
+# ╟─c9a0c097-7c4e-4343-bcb2-a1dd89e047cf
+# ╟─1b07a080-0038-4611-a674-6b0fbd9352a0
 # ╟─98ab1267-2087-4fc8-963d-c2b76bd3f293
 # ╟─60d7aeb7-42e6-4b72-ba91-1a33101f07fe
 # ╠═d16596cd-cdbb-4e5b-9441-ccfc730f358c
@@ -1789,10 +1785,6 @@ version = "1.4.1+0"
 # ╠═9c2cee19-3924-431c-bcae-37b00cdd05b6
 # ╟─953d3f41-38e1-45db-be2d-71889f9bf0c2
 # ╠═9f7d2852-4b9f-432c-bda7-b4aa40605a0e
-# ╟─e66a6459-785b-4c11-a423-01dae4c545b7
-# ╠═a6b233df-14c1-4ba4-8bf3-0e87f6e9f8e7
-# ╟─c9a0c097-7c4e-4343-bcb2-a1dd89e047cf
-# ╟─1b07a080-0038-4611-a674-6b0fbd9352a0
 # ╠═07d7ad83-f43c-41df-aa4a-1aaa1dcb93a4
 # ╟─1fc62c5a-cfc4-453a-9003-b25ff6480d05
 # ╠═c9913de3-c7bc-49f3-b7d6-b8f4af8cd956
@@ -1800,15 +1792,12 @@ version = "1.4.1+0"
 # ╠═f1239325-d766-4427-a5eb-d4dac7b2b1f4
 # ╠═5e3494fb-43e0-4638-b37f-5c74dc4a59d8
 # ╠═e5299152-8373-4303-9068-b0a8b54c3b1a
+# ╠═6b1eaca3-33b7-4681-9201-75524853fa5b
 # ╟─d8f7ec0e-50cd-4557-9b53-c9146a80d8f6
 # ╟─5a3906ba-8f85-469b-8b82-b8d101dc3e32
 # ╠═bac7a7ac-9968-4f72-b0c0-c72a59fd3905
 # ╠═d48a4ee9-349c-45df-96b1-93206541e56c
 # ╠═5292fdd2-2634-4cef-82be-877adae50f67
-# ╟─075ea28e-faa3-4a30-bcc3-497814d170db
-# ╠═263fc26b-3612-4b2e-9013-5abf1d1b6906
-# ╠═e44678ea-499b-41ad-a291-9b323282ba87
-# ╠═89905705-ae89-4c90-a5c7-96286120e6ec
 # ╠═8d952460-c8f2-4b66-8c25-5e4d543fdc63
 # ╠═677a73f0-9f42-434a-916f-febb8ab9f1bb
 # ╠═e92acf3c-e07e-4b28-ae00-904b7b2ae025
@@ -1817,6 +1806,5 @@ version = "1.4.1+0"
 # ╠═29f585d2-21c9-4c53-8fc3-2b1ae8ddf713
 # ╟─2ac7442f-13b2-401d-803e-a3005fd9a1b3
 # ╠═6c624e17-1f59-47e3-9192-9dbfb9c69a13
-# ╠═31a9e261-ded9-4398-8d45-f5678dcc9fbd
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

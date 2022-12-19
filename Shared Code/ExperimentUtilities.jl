@@ -126,3 +126,55 @@ function error_on_regex_in(dir, expression, glob_pattern="*")
 		end
 	end
 end
+
+
+"""     latex_table(df; [headers, group_by]) 
+
+Turn a data-frame into a latex-table.
+
+Args:
+
+	group_by: Visually groups table by inserting double-hline between groups. Hack: Does not alter sorting. Table should already be sorted so grouped rows are together. On change in value of any column in the list, apply dobule hline between rows """
+function latex_table(df; headers=nothing, group_by=[])
+	if headers == nothing
+		headers = [string(k) for k in keys(first(df))]
+	end
+
+	# \begin
+	result = "\\begin{tabular}"
+	
+	# Those |r|r|r|r| thingies
+	result *= "{$(repeat("|r", length(headers)))|} \\hline\n"
+	
+	# Table header
+	h = ["\\textbf{$cell}" for cell in headers]
+	result *= join(h, "\t&\t")
+
+	# If we are grouping by column values, the header should have its own visual group
+	if group_by != [] 
+		result *= "\t\\\\ \\hline\\hline\n"
+	else
+		result *= "\t\\\\ \\hline\n"
+	end
+
+	# The rows. The main feature.
+	for (i, row) in enumerate(eachrow(df))
+		r = [string(cell) for cell in row]
+		result *= join(r, "\t&\t")
+
+		# Check wheter to apply double hline (if the column changes next row)
+		if group_by != [] && i != nrow(df)
+			next_values = [df[i+1, :][column] for column in group_by]
+			if any([v != row[g] for (v, g) in zip(next_values, group_by)])
+				result *= "\t\\\\ \\hline\\hline\n"
+				continue
+			end
+		end
+		
+		result *= "\t\\\\ \\hline\n"
+	end
+
+	# \end
+	result *= "\\end{tabular}"
+	return result
+end
