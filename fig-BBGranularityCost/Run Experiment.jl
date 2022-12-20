@@ -192,6 +192,8 @@ for i in 1:repeats
 
         push!(results, (shield_name, runs="$runs", cost, deaths, interventions))
 
+        progress_update("Adding row: $(shield_name, runs="$runs", cost, deaths, interventions)")
+
         [mv(f, query_results_dir ⨝ "$i" ⨝ "$shield_name PreShielded.strategy.json") for f in glob("*.strategy.json", query_results_dir)]
 
         CSV.write(query_results_csv, DataFrame(results))
