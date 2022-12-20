@@ -196,6 +196,11 @@ if __name__ == "__main__":
 
             run_post_shield_experiments(deterrence=f"{10}")
 
+            # Take unshielded strategy and write it to the strategy-file that will be post-shielded.
+            os.system(f"cp '{resultsdir}/DriveWell0.strategy.json' '{postshieldme}'")
+
+            run_post_shield_experiments(deterrence=f"{0}")
+
 
             cleanup_strategies("NoShield", runs, i)
 
