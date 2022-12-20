@@ -451,9 +451,17 @@ end
 # ╔═╡ 4faeb976-5713-4274-999f-5290fd698365
 post_shield_variance = call() do
 	df = medians
-	df = filter(:Experiment => e -> occursin("PostShield", e), df)
-	df = filter(:Runs => ==(12000), df)
-	df = filter(:Deterrence => ==("10"), df)
+	test = nrow(filter(:Runs => ==(12000), df)) == 0
+
+	if !test
+		df = filter(:Experiment => e -> occursin("PostShield", e), df)
+		df = filter(:Runs => ==(12000), df)
+		df = filter(:Deterrence => ==("10"), df)
+	else
+		df = filter(:Experiment => e -> occursin("PostShield", e), df)
+		df = filter(:Runs => ==(20), df)
+		df = filter(:Deterrence => ==("10"), df)
+	end
 end
 
 # ╔═╡ 60885198-7b1f-4f66-b5d2-dad390403dcc
@@ -572,7 +580,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.8.2"
 manifest_format = "2.0"
-project_hash = "3b3d87bc5a0e9ca64ebed14514a2f5074340018d"
+project_hash = "d1f9a6578d3378838869a16d4614162cfead0998"
 
 [[deps.AbstractFFTs]]
 deps = ["ChainRulesCore", "LinearAlgebra"]
