@@ -10,7 +10,7 @@ E[<=120;%checks%] (max: D/1000)                          under Deterrence1000
 E[<=120;%checks%] (max:(rDistance <= 0))                 under Deterrence1000
 
 /* formula 4 */
-E[<=120;2] (max: interventions)                     under Deterrence1000
+E[<=120;%checks%] (max: interventions)                     under Deterrence1000
 
 /* formula 5 */
 strategy Deterrence100 = loadStrategy {} -> {rVelocityEgo, rVelocityFront, rDistance}("%resultsdir%/Deterrence100.strategy.json")
@@ -22,7 +22,7 @@ E[<=120;%checks%] (max: D/1000)                          under Deterrence100
 E[<=120;%checks%] (max:(rDistance <= 0))                 under Deterrence100
 
 /* formula 8 */
-E[<=120;2] (max: interventions)                     under Deterrence100
+E[<=120;%checks%] (max: interventions)                     under Deterrence100
 
 /* formula 9 */
 strategy Deterrence10 = loadStrategy {} -> {rVelocityEgo, rVelocityFront, rDistance}("%resultsdir%/Deterrence10.strategy.json")
@@ -34,7 +34,7 @@ E[<=120;%checks%] (max: D/1000)                          under Deterrence10
 E[<=120;%checks%] (max:(rDistance <= 0))                 under Deterrence10
 
 /* formula 12 */
-E[<=120;2] (max: interventions)                     under Deterrence10
+E[<=120;%checks%] (max: interventions)                     under Deterrence10
 
 /* formula 13 */
 strategy Deterrence0 = loadStrategy {} -> {rVelocityEgo, rVelocityFront, rDistance}("%resultsdir%/Deterrence0.strategy.json")
@@ -46,7 +46,7 @@ E[<=120;%checks%] (max: D/1000)                          under Deterrence0
 E[<=120;%checks%] (max:(rDistance <= 0))                 under Deterrence0
 
 /* formula 16 */
-E[<=120;2] (max: interventions)                     under Deterrence0
+E[<=120;%checks%] (max: interventions)                     under Deterrence0
 
 
 

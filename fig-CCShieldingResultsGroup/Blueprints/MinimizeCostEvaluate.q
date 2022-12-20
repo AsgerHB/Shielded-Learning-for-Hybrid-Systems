@@ -12,6 +12,6 @@ E[<=120;%checks%] (max: D/1000)                          under MinCost
 E[<=120;%checks%] (max:(rDistance <= 0))                 under MinCost
 
 /* formula 5 */
-E[<=120;2] (max: interventions)                     under MinCost
+E[<=120;%checks%] (max: interventions)                     under MinCost
 
 
