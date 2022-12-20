@@ -528,7 +528,7 @@ post_shield_variance_latexified = call() do
 		:Avg_Interventions => ByRow(number_format),
 		renamecols=false)
 
-	select(df, [:Experiment => "Intervention", 
+	select(df, [:Experiment => "Configuration", 
 		:Avg_Cost => "Average Cost", 
 		:Avg_Interventions => "Average Interventions"])
 end 
@@ -542,6 +542,78 @@ HTML("""
 
 <textarea id="adsdf" rows="10" cols="80" wrap="off" readonly>
 $(post_shield_cost_comparison) </textarea>
+
+""")
+
+# ╔═╡ 4d322457-d703-42f7-9209-b2ab40e7f3c0
+percentage_difference(a, b) = ((b - a)/a * 100)
+
+# ╔═╡ 931094b3-2be4-4541-a374-ae137ba300c4
+function formatted_percentage_difference(a, b)
+	result = percentage_difference(a, b)
+	if abs(result) < 0.1
+		result < 0 ? "< -0.1%" : "< 0.1%"
+	else
+		@sprintf("%.4f", result)*"\\%"
+	end
+end
+
+# ╔═╡ d11391a9-9a4a-4041-b752-dc5085dade16
+# Express table as a percentage variance from the PostShieldRandomChioce baseline
+percent_change_from_random = call() do
+	df = post_shield_variance
+
+	random_choice_row = only(filter(
+		:Experiment => ==("PostShieldedRandomChoice"), df)
+	)
+
+	random_choice_avg_cost = random_choice_row[:Avg_Cost]
+	random_choice_avg_interventions = random_choice_row[:Avg_Interventions]
+	
+	df = filter(:Experiment => !=("PostShieldedRandomChoice"), df)
+
+	df = transform(df, 
+		:Avg_Cost => ByRow(c -> 
+			formatted_percentage_difference(random_choice_avg_cost, c)),
+		renamecols=false
+	)
+	
+	df = transform(df, 
+		:Avg_Interventions => ByRow(c -> 
+			formatted_percentage_difference(random_choice_avg_interventions, c)),
+		renamecols=false
+	)
+	
+	df = transform(df, 
+		:Experiment => ByRow(e -> variants_names[e]),
+		renamecols=false)
+
+	select(df, [:Experiment => "Configuration", 
+		:Avg_Cost => "Average Cost", 
+		:Avg_Interventions => "Average Interventions"])	
+end
+
+# ╔═╡ 2856576b-e0e1-46d3-a450-7019588d7708
+formatted_percentage_difference(100, 90)
+
+# ╔═╡ 902282eb-b4ce-4fde-87ed-8178cb933f55
+formatted_percentage_difference(100, 99.99)
+
+# ╔═╡ 275a52c3-acc0-40ce-9ca0-52a71211545b
+formatted_percentage_difference(100, 100.001)
+
+# ╔═╡ 01344126-09c6-4af9-baee-9fa0dd913666
+formatted_percentage_difference(100, 105)
+
+# ╔═╡ eabf6b45-bffa-4b0b-88c1-f655238da13b
+percent_change_from_random′ = latex_table(percent_change_from_random)
+
+# ╔═╡ 658b76bb-e38b-4b87-a511-773fef593d3b
+HTML("""
+<label style="display:block" for="adsdf">Resulting LaTeX table:</label>
+
+<textarea id="adsdf" rows="10" cols="80" wrap="off" readonly>
+$(percent_change_from_random′) </textarea>
 
 """)
 
@@ -1864,6 +1936,15 @@ version = "0.9.1+5"
 # ╠═1bd411c9-2ba2-4e94-a7dd-d07ba3ee17b4
 # ╠═2f5dfac9-1515-40e1-bbb6-372dc5ffddbe
 # ╟─dd75c7c3-dc2b-441c-b2f0-fa19814959c9
+# ╠═d11391a9-9a4a-4041-b752-dc5085dade16
+# ╠═931094b3-2be4-4541-a374-ae137ba300c4
+# ╠═4d322457-d703-42f7-9209-b2ab40e7f3c0
+# ╠═2856576b-e0e1-46d3-a450-7019588d7708
+# ╠═902282eb-b4ce-4fde-87ed-8178cb933f55
+# ╠═275a52c3-acc0-40ce-9ca0-52a71211545b
+# ╠═01344126-09c6-4af9-baee-9fa0dd913666
+# ╠═eabf6b45-bffa-4b0b-88c1-f655238da13b
+# ╟─658b76bb-e38b-4b87-a511-773fef593d3b
 # ╠═7ec370fa-4c45-4cc0-b973-d7184cebfe4b
 # ╠═5c5e4c78-caea-4df7-a691-f95a50419662
 # ╟─00000000-0000-0000-0000-000000000001

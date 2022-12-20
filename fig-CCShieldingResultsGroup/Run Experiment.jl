@@ -200,7 +200,7 @@ end
 write(results_dir ⨝ "SafetyNotice.md", safety_violations_message)
 progress_update("Saved SafetyNotice")
 
-write(results_dir ⨝ "CCPostShieldComparison.tex", post_shield_cost_comparison)
+write(results_dir ⨝ "CCPostShieldComparison.tex", percent_change_from_random′)
 progress_update("Saved CCPostShieldComparison")
 
 progress_update("Done with $figure_name.")
