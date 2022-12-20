@@ -155,7 +155,7 @@ for i in 1:repeats
 
         write(query_results_file, read(abspath_query))
 
-        post_shielded_queries = Cmd([
+        post_shielded_queries = ignorestatus(Cmd([
             args["uppaal-dir"] ⨝ "bin" ⨝ "verifyta",
             "-s",
             "--epsilon", "0.001",
@@ -165,14 +165,12 @@ for i in 1:repeats
             "--runs-pr-state", "$runs",
             abspath_model,
             abspath_query
-        ])
+        ]))
 
         progress_update("Running: $post_shielded_queries")
 
-        post_shielded_queries_result = read(post_shielded_queries)
-
         open(query_results_file, "a") do file
-            write(file, post_shielded_queries_result)
+            run(pipeline(post_shielded_queries, stdout=file, stderr=file))
         end
 
         cost, deaths, interventions = nothing, nothing, nothing
