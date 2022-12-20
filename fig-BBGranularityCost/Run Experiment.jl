@@ -176,7 +176,13 @@ for i in 1:repeats
         cost, deaths, interventions = nothing, nothing, nothing
         
         try
-            cost, deaths, interventions = extract_query_results(query_results_file)
+            query_results = extract_query_results(query_results_file)
+
+            if length(query_results) != 3
+                throw(UppaalQueryFailedException("Inconsistent number of columns"))
+            end
+
+            cost, deaths, interventions = query_results
 
             if parse(Float64, deaths) > 0
                 @warn "Safety violation observed for $shield_name. This should not happen."
@@ -185,14 +191,14 @@ for i in 1:repeats
         catch ex
             if ex isa UppaalQueryFailedException
                 progress_update("Query failed. Skipping. Message: $(ex.message)")
+                continue
             else
                 throw(ex)
             end
         end
 
+        progress_update("Adding row: $((shield_name, runs, cost, deaths, interventions))")
         push!(results, (shield_name, runs="$runs", cost, deaths, interventions))
-
-        progress_update("Adding row: $(shield_name, runs="$runs", cost, deaths, interventions)")
 
         [mv(f, query_results_dir ⨝ "$i" ⨝ "$shield_name PreShielded.strategy.json") for f in glob("*.strategy.json", query_results_dir)]
 
