@@ -16,11 +16,9 @@ end
 
 # ╔═╡ 80e9500c-3367-11ed-3083-0d3c4e19390c
 begin
-	using CSV
 	using Plots
 	using PlutoUI
 	using Measures
-	using DataFrames
 	include("../Shared Code/ExperimentUtilities.jl")
 	include("../Shared Code/Ball.jl")
 	include("../Shared Code/BBSquares.jl")
@@ -38,9 +36,9 @@ A random initial square in the grid, and a random position and velocity is picke
 
 This check is repeated a number of times for different values of samples per axis, $N$. Multiple points are picked inside the same square, because I think this will run faster.
 
-## Note on Multiple Dispatch
+!!! info "Note on Multiple Dispatch"
 
-I would like to apologise to myself or any other future reader, for my use of multiple dispatch in this code. For one thing, you will find that the return types are inconsistent depending on argument types.
+	I would like to apologise to myself or any other future reader, for my use of multiple dispatch in this code. For one thing, you will find that the return types are inconsistent depending on argument types.
 """
 
 # ╔═╡ 85e33804-a37e-4a95-954b-67676df0b1f6
@@ -51,6 +49,11 @@ md"""
 ### Color shceme
 
 Colors by [Flat UI](https://flatuicolors.com/palette/defo)
+"""
+
+# ╔═╡ 59d9e520-b60a-48a4-9d14-810fd8279caf
+md"""
+## Config
 """
 
 # ╔═╡ 1983f4b8-bcf6-4222-bf66-d9e3084122dc
@@ -122,7 +125,7 @@ begin
 	@bind gridconfig confirm(PlutoUI.combine() do Child
 md"""
 ### Configure grid
-`G = ` $(Child(NumberField(0.01:0.01:1, default=0.5)))
+`G = ` $(Child(NumberField(0.01:0.01:1, default=0.01)))
 
 `v_min = ` $(Child(NumberField(typemin(Int):typemax(Int), default=-13)))
 
@@ -134,6 +137,29 @@ md"""
 """
 	end)
 end
+
+# ╔═╡ c66507ad-fe8f-4ca2-be45-269e20005d3e
+md"""
+### Testing parameters
+"""
+
+# ╔═╡ 69b52a66-6514-47cc-912e-576636beaf85
+md"""
+`samples_per_axis = ` $(@bind samples_per_axis NumberField(1:30, default=4))
+"""
+
+# ╔═╡ 7d183b70-0cb1-45ae-afd6-989f549bc164
+begin
+	default_samples_per_square = (@nbparam "samples_per_square" 100)
+	default_squares_to_test = (@nbparam "squares_to_test" 100)
+end
+
+# ╔═╡ 60cafe7b-8ae2-49a0-8361-6c8dcfcf45da
+md"""
+`samples_per_square =` $(@bind samples_per_square NumberField(0:100:100000, default=default_samples_per_square))
+
+`squares_to_test =` $(@bind squares_to_test NumberField(0:100:100000, default=default_squares_to_test))
+"""
 
 # ╔═╡ ec33aa7f-3c79-4c96-8769-cbfe4782d52a
 begin
@@ -151,6 +177,11 @@ begin
 	"""
 end
 
+# ╔═╡ 1c55a504-9cfc-4eae-a962-a8c176e3938a
+md"""
+## Test the barbaric method for specific number of samples per axis
+"""
+
 # ╔═╡ 4f701eeb-1483-4962-b7a5-7486e940e04e
 md"""
 `v = ` $(@bind v NumberField(v_min:G:v_max - G, default=v_max/2))
@@ -163,17 +194,14 @@ md"""
 # ╔═╡ 32dbe566-770c-405f-af43-97fea9ed0011
 square = box(grid, v, p)
 
-# ╔═╡ 1c55a504-9cfc-4eae-a962-a8c176e3938a
+# ╔═╡ 20386d96-983b-444f-83aa-ebf8398c75dc
 md"""
-## Test the barbaric method for specific number of samples per axis
-"""
-
-# ╔═╡ 69b52a66-6514-47cc-912e-576636beaf85
-md"""
-`samples_per_axis = ` $(@bind samples_per_axis NumberField(1:30, default=4))
+Number of samples: $(length(grid_points(square, samples_per_axis)))
 """
 
 # ╔═╡ 06feb834-f3a9-4698-b57b-7026489062ea
+# ╠═╡ skip_as_script = true
+#=╠═╡
 call() do
 	grid = Grid(0.5, -13, 13, 0, 8)
 	square = box(grid, v, p)
@@ -196,25 +224,7 @@ call() do
 			label="Sample locations after t_hit")
 	plot!(xlims=(v-4, v+4), ylims=(p-4,p+4))
 end
-
-# ╔═╡ 20386d96-983b-444f-83aa-ebf8398c75dc
-md"""
-Number of samples: $(length(grid_points(square, samples_per_axis)))
-"""
-
-# ╔═╡ 60cafe7b-8ae2-49a0-8361-6c8dcfcf45da
-md"""
-`samples_per_square =` $(@bind samples_per_square NumberField(0:100:100000, default=1000))
-
-`squares_to_test =` $(@bind squares_to_test NumberField(0:100:100000, default=1000))
-"""
-
-# ╔═╡ 4ff59e7a-a227-4d0f-a7c5-1094b39b12a6
-md"""
-Total iterations: $(samples_per_square*squares_to_test)
-
-Estimated time: $(1.24e-6*samples_per_square*squares_to_test) seconds
-"""
+  ╠═╡ =#
 
 # ╔═╡ 5c9c6c9e-6a0d-45fe-937c-df04e089c1ed
 # Get a number of random samples from inside a given square.
@@ -397,79 +407,47 @@ begin
 
 end
 
-# ╔═╡ 7d183b70-0cb1-45ae-afd6-989f549bc164
-begin
-	default_samples_per_square = (@nbparam "samples_per_square" 100)
-	default_squares_to_test = (@nbparam "squares_to_test" 100)
-end
-
-# ╔═╡ b0146496-4a96-4fa0-a75c-d16576561921
-@bind spa_test_params confirm(PlutoUI.combine() do Child
-md"""
-`tuple spa_test_params:`
-
-- `samples_per_square =`  $(Child("samples_per_square", NumberField(0:100:100000, default=default_samples_per_square)))
-- `squares_to_test =`  $(Child("squares_to_test", NumberField(0:100:100000, default=default_squares_to_test)))
-"""
-end)
-
 # ╔═╡ 288a212a-4ee6-4c29-8238-6d22f8e3b9d7
 # Values of `samples_per_axis` to test for
 spa_values = [4:16;]
 
-# ╔═╡ b8ffdbfd-5817-4a93-ba97-5c2e3667fc8d
-call(() -> begin
-	samples = spa_test_params.samples_per_square
-	squares = spa_test_params.squares_to_test
-	total_iterations = samples*squares*length(spa_values)
-	estimated_time = (1.24e-6)*samples*squares*length(spa_values)
-md"""
-Total iterations: $(total_iterations)
-
-Estimated time: $(estimated_time) seconds
-"""
-end)
-
 # ╔═╡ f72b8dba-1b9a-4b0b-802a-03c5a299e204
-_, spa_accuracies = compute_accuracies(grid, spa_values; spa_test_params...)
+_, spa_accuracies = compute_accuracies(grid, spa_values; samples_per_square, squares_to_test)
 
 # ╔═╡ a6771752-a238-4186-90a1-0f80c4a9524c
-p1 = plot_accuracies(spa_values, spa_accuracies; spa_test_params..., G=grid.G)
-
-# ╔═╡ 19c4b9b1-23b0-42f3-af84-c49f1f26921b
-DataFrame((;spa_values, spa_accuracies))
+p1 = plot_accuracies(spa_values, spa_accuracies; samples_per_square, squares_to_test, G=grid.G)
 
 # ╔═╡ 3bffdc6b-9978-47b6-83b9-e1366019f60b
 md"""
 ## Test the barbaric method for specific grid granularity
 """
 
-# ╔═╡ e531d726-898d-4766-aece-4191b184e7a3
-@bind granularity_test_params confirm(PlutoUI.combine() do Child
-md"""
-`tuple granularity_test_params:`
-
-- `samples_per_square =`  $(Child("samples_per_square", NumberField(0:100:100000, default=100)))
-- `squares_to_test =`  $(Child("squares_to_test", NumberField(0:100:100000, default=100)))
-- `samples_per_axis =`  $(Child("samples_per_axis", NumberField(1:30, default=4)))
-"""
-end)
-
 # ╔═╡ ef681e4f-1a78-4a9d-8a72-8b6190d4fd67
 granularities = [1, 0.5, 0.25, 0.1, 0.05, 0.04, 0.02, 0.01]
+
+# ╔═╡ 67972b5b-8366-4eb3-b50e-8307fcc86d93
+function estimate_time(samples_per_square, squares_to_test)
+	seconds_per_sample = 1.24e-6
+	
+	return seconds_per_sample * (length(spa_values)*samples_per_square*squares_to_test + length(granularities)*samples_per_square*squares_to_test)
+end
+
+# ╔═╡ 4ff59e7a-a227-4d0f-a7c5-1094b39b12a6
+@info md"""
+Number of samples: $(samples_per_square*squares_to_test) per data-point
+
+Estimated time: $(estimate_time(samples_per_square, squares_to_test)) seconds
+"""
 
 # ╔═╡ d42689aa-7c35-4372-87a8-e80a97f54d85
 grids = [Grid(G, -13, 13, 0, 8) for G in granularities]
 
 # ╔═╡ cd4e323a-0fd3-4600-b69d-e50397260c5e
 _, granularity_accuracies = compute_accuracies(grids, samples_per_axis; 
-					granularity_test_params.samples_per_square, granularity_test_params.squares_to_test)
-
-# ╔═╡ e2c78467-a653-475c-8326-7fe0a4babc5b
-DataFrame((;grids, granularity_accuracies))
+					samples_per_square)
 
 # ╔═╡ a559bbbd-fa9a-4681-aca6-34312fc88690
-p2 = plot_accuracies(grids, granularity_accuracies; granularity_test_params...)
+p2 = plot_accuracies(grids, granularity_accuracies; samples_per_square, squares_to_test, samples_per_axis)
 
 # ╔═╡ b6e33020-84a0-477b-ad1e-22713c31b404
 samples_taken = samples_per_square*squares_to_test
@@ -477,15 +455,11 @@ samples_taken = samples_per_square*squares_to_test
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
-CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
-DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 Measures = "442fdcdd-2543-5da2-b0f3-8c86c306513e"
 Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
 PlutoUI = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
 
 [compat]
-CSV = "~0.10.8"
-DataFrames = "~1.3.6"
 Measures = "~0.3.2"
 Plots = "~1.32.1"
 PlutoUI = "~0.7.40"
@@ -497,7 +471,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.8.2"
 manifest_format = "2.0"
-project_hash = "3b0f22ffb56e2fd9709cb45f53925e6b434cd30f"
+project_hash = "877949d34b7a5bc347bae4714a29688e95a5e7c0"
 
 [[deps.AbstractPlutoDingetjes]]
 deps = ["Pkg"]
@@ -526,12 +500,6 @@ deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
 git-tree-sha1 = "19a35467a82e236ff51bc17a3a44b69ef35185a2"
 uuid = "6e34b625-4abd-537c-b88f-471c36dfa7a0"
 version = "1.0.8+0"
-
-[[deps.CSV]]
-deps = ["CodecZlib", "Dates", "FilePathsBase", "InlineStrings", "Mmap", "Parsers", "PooledArrays", "SentinelArrays", "SnoopPrecompile", "Tables", "Unicode", "WeakRefStrings", "WorkerUtilities"]
-git-tree-sha1 = "8c73e96bd6817c2597cfd5615b91fca5deccf1af"
-uuid = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
-version = "0.10.8"
 
 [[deps.Cairo_jll]]
 deps = ["Artifacts", "Bzip2_jll", "Fontconfig_jll", "FreeType2_jll", "Glib_jll", "JLLWrappers", "LZO_jll", "Libdl", "Pixman_jll", "Pkg", "Xorg_libXext_jll", "Xorg_libXrender_jll", "Zlib_jll", "libpng_jll"]
@@ -597,21 +565,10 @@ git-tree-sha1 = "d05d9e7b7aedff4e5b51a029dced05cfb6125781"
 uuid = "d38c429a-6771-53c6-b99e-75d170b6e991"
 version = "0.6.2"
 
-[[deps.Crayons]]
-git-tree-sha1 = "249fe38abf76d48563e2f4556bebd215aa317e15"
-uuid = "a8cc5b0e-0ffa-5ad4-8c14-923d3ee1735f"
-version = "4.1.1"
-
 [[deps.DataAPI]]
 git-tree-sha1 = "fb5f5316dd3fd4c5e7c30a24d50643b73e37cd40"
 uuid = "9a962f9c-6df0-11e9-0e5d-c546b8b5ee8a"
 version = "1.10.0"
-
-[[deps.DataFrames]]
-deps = ["Compat", "DataAPI", "Future", "InvertedIndices", "IteratorInterfaceExtensions", "LinearAlgebra", "Markdown", "Missings", "PooledArrays", "PrettyTables", "Printf", "REPL", "Reexport", "SortingAlgorithms", "Statistics", "TableTraits", "Tables", "Unicode"]
-git-tree-sha1 = "db2a9cb664fcea7836da4b414c3278d71dd602d2"
-uuid = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
-version = "1.3.6"
 
 [[deps.DataStructures]]
 deps = ["Compat", "InteractiveUtils", "OrderedCollections"]
@@ -672,12 +629,6 @@ git-tree-sha1 = "74faea50c1d007c85837327f6775bea60b5492dd"
 uuid = "b22a6f82-2f65-5046-a5b2-351ab43fb4e5"
 version = "4.4.2+2"
 
-[[deps.FilePathsBase]]
-deps = ["Compat", "Dates", "Mmap", "Printf", "Test", "UUIDs"]
-git-tree-sha1 = "e27c4ebe80e8699540f2d6c805cc12203b614f12"
-uuid = "48062228-2e41-5def-b9a4-89aafe57970f"
-version = "0.9.20"
-
 [[deps.FileWatching]]
 uuid = "7b1f6079-737a-58dc-b8bc-7a2ca5c1b5ee"
 
@@ -710,10 +661,6 @@ deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
 git-tree-sha1 = "aa31987c2ba8704e23c6c8ba8a4f769d5d7e4f91"
 uuid = "559328eb-81f9-559d-9380-de523a88c83c"
 version = "1.0.10+0"
-
-[[deps.Future]]
-deps = ["Random"]
-uuid = "9fa8497b-333b-5362-9e8d-4d0656e87820"
 
 [[deps.GLFW_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Libglvnd_jll", "Pkg", "Xorg_libXcursor_jll", "Xorg_libXi_jll", "Xorg_libXinerama_jll", "Xorg_libXrandr_jll"]
@@ -803,12 +750,6 @@ git-tree-sha1 = "f550e6e32074c939295eb5ea6de31849ac2c9625"
 uuid = "83e8ac13-25f8-5344-8a64-a9f2b223428f"
 version = "0.5.1"
 
-[[deps.InlineStrings]]
-deps = ["Parsers"]
-git-tree-sha1 = "0cf92ec945125946352f3d46c96976ab972bde6f"
-uuid = "842dd82b-1e85-43dc-bf29-5d0ee9dffc48"
-version = "1.3.2"
-
 [[deps.InteractiveUtils]]
 deps = ["Markdown"]
 uuid = "b77e0a4c-d291-57a0-90e8-8db25a27a240"
@@ -818,11 +759,6 @@ deps = ["Test"]
 git-tree-sha1 = "b3364212fb5d870f724876ffcd34dd8ec6d98918"
 uuid = "3587e190-3f89-42d0-90ee-14403ec27112"
 version = "0.1.7"
-
-[[deps.InvertedIndices]]
-git-tree-sha1 = "82aec7a3dd64f4d9584659dc0b62ef7db2ef3e19"
-uuid = "41ab1584-1d38-5bbf-9106-f11c6c58b48f"
-version = "1.2.0"
 
 [[deps.IrrationalConstants]]
 git-tree-sha1 = "7fd44fd4ff43fc60815f8e764c0f352b83c49151"
@@ -1115,23 +1051,11 @@ git-tree-sha1 = "a602d7b0babfca89005da04d89223b867b55319f"
 uuid = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
 version = "0.7.40"
 
-[[deps.PooledArrays]]
-deps = ["DataAPI", "Future"]
-git-tree-sha1 = "a6062fe4063cdafe78f4a0a81cfffb89721b30e7"
-uuid = "2dfb63ee-cc39-5dd5-95bd-886bf059d720"
-version = "1.4.2"
-
 [[deps.Preferences]]
 deps = ["TOML"]
 git-tree-sha1 = "47e5f437cc0e7ef2ce8406ce1e7e24d44915f88d"
 uuid = "21216c6a-2e73-6563-6e65-726566657250"
 version = "1.3.0"
-
-[[deps.PrettyTables]]
-deps = ["Crayons", "Formatting", "Markdown", "Reexport", "Tables"]
-git-tree-sha1 = "dfb54c4e414caa595a1f2ed759b160f5a3ddcba5"
-uuid = "08abe8d2-0d0c-5749-adfa-8a2ac140af0d"
-version = "1.3.1"
 
 [[deps.Printf]]
 deps = ["Unicode"]
@@ -1188,12 +1112,6 @@ deps = ["Dates"]
 git-tree-sha1 = "f94f779c94e58bf9ea243e77a37e16d9de9126bd"
 uuid = "6c6a2e73-6563-6170-7368-637461726353"
 version = "1.1.1"
-
-[[deps.SentinelArrays]]
-deps = ["Dates", "Random"]
-git-tree-sha1 = "efd23b378ea5f2db53a55ae53d3133de4e080aa9"
-uuid = "91c51154-3ec4-41a3-a24f-3f23e20d615c"
-version = "1.3.16"
 
 [[deps.Serialization]]
 uuid = "9e88b42a-f829-5b0c-bbe9-9e923198166b"
@@ -1343,17 +1261,6 @@ deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
 git-tree-sha1 = "4528479aa01ee1b3b4cd0e6faef0e04cf16466da"
 uuid = "2381bf8a-dfd0-557d-9999-79630e7b1b91"
 version = "1.25.0+0"
-
-[[deps.WeakRefStrings]]
-deps = ["DataAPI", "InlineStrings", "Parsers"]
-git-tree-sha1 = "b1be2855ed9ed8eac54e5caff2afcdb442d52c23"
-uuid = "ea10d353-3f73-51f8-a26c-33c1cb351aa5"
-version = "1.4.2"
-
-[[deps.WorkerUtilities]]
-git-tree-sha1 = "cd1659ba0d57b71a464a29e64dbc67cfe83d54e7"
-uuid = "76eceee3-57b5-4d4a-8e66-0e911cebbf60"
-version = "1.6.1"
 
 [[deps.XML2_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Libiconv_jll", "Pkg", "Zlib_jll"]
@@ -1573,21 +1480,25 @@ version = "1.4.1+0"
 # ╠═80e9500c-3367-11ed-3083-0d3c4e19390c
 # ╠═85e33804-a37e-4a95-954b-67676df0b1f6
 # ╟─647bf22e-e667-43b6-9f50-eb9a01aca0d3
+# ╟─59d9e520-b60a-48a4-9d14-810fd8279caf
 # ╟─1983f4b8-bcf6-4222-bf66-d9e3084122dc
 # ╟─8e3480ce-dd5b-41c8-8e2a-9b31f6678d1a
 # ╟─363e9481-3b0f-46cf-8ab3-dedf8db815cb
 # ╟─9662d21a-7cbb-4c7f-9672-7fa7169e979c
 # ╟─a80afc36-fdbf-41eb-a0b2-c44c4a975db3
-# ╟─ec33aa7f-3c79-4c96-8769-cbfe4782d52a
 # ╟─1bb4133a-432a-497f-b32b-05015f8f9346
-# ╟─06feb834-f3a9-4698-b57b-7026489062ea
-# ╟─4f701eeb-1483-4962-b7a5-7486e940e04e
-# ╠═32dbe566-770c-405f-af43-97fea9ed0011
-# ╟─1c55a504-9cfc-4eae-a962-a8c176e3938a
+# ╟─c66507ad-fe8f-4ca2-be45-269e20005d3e
 # ╟─69b52a66-6514-47cc-912e-576636beaf85
 # ╟─20386d96-983b-444f-83aa-ebf8398c75dc
 # ╟─60cafe7b-8ae2-49a0-8361-6c8dcfcf45da
+# ╠═67972b5b-8366-4eb3-b50e-8307fcc86d93
+# ╠═7d183b70-0cb1-45ae-afd6-989f549bc164
 # ╟─4ff59e7a-a227-4d0f-a7c5-1094b39b12a6
+# ╟─ec33aa7f-3c79-4c96-8769-cbfe4782d52a
+# ╟─1c55a504-9cfc-4eae-a962-a8c176e3938a
+# ╟─4f701eeb-1483-4962-b7a5-7486e940e04e
+# ╠═32dbe566-770c-405f-af43-97fea9ed0011
+# ╟─06feb834-f3a9-4698-b57b-7026489062ea
 # ╟─40a75b53-7627-4ace-9486-c2d8cdb09ec7
 # ╠═a044cc8d-03d6-4b56-9a2d-242fb10afa29
 # ╠═ea4f4b3b-a711-4389-b257-9f3cd6b650a1
@@ -1601,16 +1512,10 @@ version = "1.4.1+0"
 # ╠═c8a5a0e6-b839-400b-90b0-171f4a8eb3a0
 # ╠═ff976e3c-d7f1-4f5b-9293-c98be15edca8
 # ╠═7b15069f-69bb-48a3-aa97-d18921e3db04
-# ╟─b0146496-4a96-4fa0-a75c-d16576561921
-# ╠═7d183b70-0cb1-45ae-afd6-989f549bc164
 # ╠═288a212a-4ee6-4c29-8238-6d22f8e3b9d7
-# ╟─b8ffdbfd-5817-4a93-ba97-5c2e3667fc8d
 # ╠═f72b8dba-1b9a-4b0b-802a-03c5a299e204
 # ╠═a6771752-a238-4186-90a1-0f80c4a9524c
-# ╠═19c4b9b1-23b0-42f3-af84-c49f1f26921b
-# ╠═e2c78467-a653-475c-8326-7fe0a4babc5b
 # ╟─3bffdc6b-9978-47b6-83b9-e1366019f60b
-# ╟─e531d726-898d-4766-aece-4191b184e7a3
 # ╠═ef681e4f-1a78-4a9d-8a72-8b6190d4fd67
 # ╠═d42689aa-7c35-4372-87a8-e80a97f54d85
 # ╠═cd4e323a-0fd3-4600-b69d-e50397260c5e

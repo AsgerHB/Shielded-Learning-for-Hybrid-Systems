@@ -29,7 +29,7 @@ if test
     NBPARAMS = Dict(
         # The product of these two numbers will be the total number of tests. (10000)
         "squares_to_test" => 100,
-        "samples_per_square" => 100,
+        "samples_per_square" => 1000,
     )
 else
     NBPARAMS = Dict(
@@ -39,9 +39,7 @@ else
     )
 end
 
-progress_update("Checking reachability function to build figure fig:NoRecovery...")
-estimated_time = (1.24e-6)*NBPARAMS["squares_to_test"]*NBPARAMS["samples_per_square"]*19 + 60*2
-progress_update("Estimated time: $(estimated_time) seconds")
+progress_update("Checking reachability function.")
 
 
 include("Reliability of Barbaric Method.jl")
@@ -73,7 +71,7 @@ open(rawdata_file, "a") do file
     println(file, "Accuracy: spa_accuracies = $spa_accuracies")
     println(file, "")
     println(file, "Accuracy as a function of G)")
-    println(file, "(Using N=$(granularity_test_params.samples_per_axis))")
+    println(file, "(Using N=$(samples_per_axis))")
     println(file, "G: granularities = $granularities")
     println(file, "Accuracy: granularity_accuracies = $granularity_accuracies")
  end
