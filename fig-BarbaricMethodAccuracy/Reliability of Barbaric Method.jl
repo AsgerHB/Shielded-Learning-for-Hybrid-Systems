@@ -417,7 +417,7 @@ end
 
 # ╔═╡ 288a212a-4ee6-4c29-8238-6d22f8e3b9d7
 # Values of `samples_per_axis` to test for
-spa_values = [4:16;]
+spa_values = [2:16;]
 
 # ╔═╡ f72b8dba-1b9a-4b0b-802a-03c5a299e204
 _, spa_accuracies = compute_accuracies(grid, spa_values; samples_per_square, squares_to_test)
