@@ -33,8 +33,8 @@ if test
     )
 else
     NBPARAMS = Dict(
-        # The product of these two numbers will be the total number of tests. (10000000)
-        "squares_to_test" => 100000,
+        # The product of these two numbers will be the total number of tests.
+        "squares_to_test" => 1000000,
         "samples_per_square" => 1000,
     )
 end
