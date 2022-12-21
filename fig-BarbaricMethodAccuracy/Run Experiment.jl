@@ -40,7 +40,7 @@ else
 end
 
 progress_update("Checking reachability function to build figure fig:NoRecovery...")
-estimated_time = (1.24e-6)*NBPARAMS["squares_to_test"]*NBPARAMS["samples_per_square"]*19 + 60
+estimated_time = (1.24e-6)*NBPARAMS["squares_to_test"]*NBPARAMS["samples_per_square"]*19 + 60*2
 progress_update("Estimated time: $(estimated_time) seconds")
 
 
@@ -50,16 +50,24 @@ progress_update("Computation done.")
 progress_update("Saving  to $results_dir")
 
 # Figure saved in notebook as p1 etc...
-savefig(p1, joinpath(results_dir, "$(figure_name)1.png"))
-savefig(p1, joinpath(results_dir, "$(figure_name)1.svg"))
-savefig(p2, joinpath(results_dir, "$(figure_name)2.png"))
-savefig(p2, joinpath(results_dir, "$(figure_name)2.svg"))
-progress_update("Saved $(figure_name)1")
-progress_update("Saved $(figure_name)2")
+savefig(p1, joinpath(results_dir, "BarbaricAccuracyN.png"))
+savefig(p1, joinpath(results_dir, "BarbaricAccuracyN.svg"))
+progress_update("Saved BarbaricAccuracyN")
+
+savefig(p2, joinpath(results_dir, "BarbaricAccuracyGranularity.png"))
+savefig(p2, joinpath(results_dir, "BarbaricAccuracyGranularity.svg"))
+progress_update("Saved BarbaricAccuracyGranularity")
 
 open(joinpath(results_dir, "rawdata.txt"), "a") do file
-    println(file, "spa_values: $spa_values")
-    println(file, "accuracies: $accuracies")
+    println(file, "Accuracy as a function of N)")
+    println(file, "(Using G=$(grid.G)")
+    println(file, "N: $spa_values")
+    println(file, "Accuracy: $spa_accuracies")
+    println(file, "")
+    println(file, "Accuracy as a function of G)")
+    println(file, "(Using N=$(granularity_test_params.samples_per_axis)")
+    println(file, "G: $granularities")
+    println(file, "Accuracy: $granularity_accuracies")
  end
 
 
