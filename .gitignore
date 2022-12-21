@@ -35,4 +35,8 @@ docs/site/
 
 ## Additional Ignores ##
 
+# Don't want to commit changes to these
 shield_dump.c
+
+# My sync program keeps pooping in the corners
+*.insyncdl
