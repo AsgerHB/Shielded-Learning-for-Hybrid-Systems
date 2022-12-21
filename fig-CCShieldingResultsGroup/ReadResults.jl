@@ -554,7 +554,7 @@ function formatted_percentage_difference(a, b)
 	if abs(result) < 0.1
 		result < 0 ? "< -0.1%" : "< 0.1%"
 	else
-		@sprintf("%.4f", result)*"\\%"
+		@sprintf("%.1f", result)*"\\%"
 	end
 end
 

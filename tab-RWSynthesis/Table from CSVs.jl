@@ -343,7 +343,8 @@ cleaned_synthesis_report = call(() -> begin
 		seconds_taken => div3600 => hours_taken,
 		bytes_used => GiB => gigabytes_used)
 	
-	result = sort(result, [granularity, algorithm], lt=natural, rev=true)
+	result = sort(result, [granularity, algorithm], lt=natural)
+	#result = reverse(result) # somehow rev=true doesn't work with lt=natural
 	result = select(result, [granularity, algorithm, parameters, valid, seconds_taken])
 end)
 
