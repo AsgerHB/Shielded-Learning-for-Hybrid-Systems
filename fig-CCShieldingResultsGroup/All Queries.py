@@ -182,22 +182,22 @@ if __name__ == "__main__":
 
             
             # Take unshielded strategy and write it to the strategy-file that will be post-shielded.
-            os.system(f"cp '{resultsdir}/DriveWell1000.strategy.json' '{postshieldme}'")
+            os.system(f"cp '{resultsdir}/Deterrence1000.strategy.json' '{postshieldme}'")
 
             run_post_shield_experiments(deterrence=f"{1000}")
 
             # Take unshielded strategy and write it to the strategy-file that will be post-shielded.
-            os.system(f"cp '{resultsdir}/DriveWell100.strategy.json' '{postshieldme}'")
+            os.system(f"cp '{resultsdir}/Deterrence100.strategy.json' '{postshieldme}'")
 
             run_post_shield_experiments(deterrence=f"{100}")
 
             # Take unshielded strategy and write it to the strategy-file that will be post-shielded.
-            os.system(f"cp '{resultsdir}/DriveWell10.strategy.json' '{postshieldme}'")
+            os.system(f"cp '{resultsdir}/Deterrence10.strategy.json' '{postshieldme}'")
 
             run_post_shield_experiments(deterrence=f"{10}")
 
             # Take unshielded strategy and write it to the strategy-file that will be post-shielded.
-            os.system(f"cp '{resultsdir}/DriveWell0.strategy.json' '{postshieldme}'")
+            os.system(f"cp '{resultsdir}/Deterrence0.strategy.json' '{postshieldme}'")
 
             run_post_shield_experiments(deterrence=f"{0}")
 
