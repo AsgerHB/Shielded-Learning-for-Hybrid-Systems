@@ -35,7 +35,7 @@ s = ArgParseSettings()
 
         "--uppaal-dir"
             help="""Root directory of the UPPAAL STRATEGO 10 install."""
-            default=homedir() ⨝ "/opt/uppaal-4.1.20-stratego-11-rc1-linux64/bin/verifyta"
+            default=homedir() ⨝ "opt/uppaal-4.1.20-stratego-11-rc1-linux64/"
 
         "--julia-dir"
             help="""Root directory of the julia install. Used to locate the file <julia-dir>/share/julia/julia_config.jl"""
