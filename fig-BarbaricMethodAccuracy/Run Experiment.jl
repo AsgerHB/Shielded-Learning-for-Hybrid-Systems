@@ -58,16 +58,24 @@ savefig(p2, joinpath(results_dir, "BarbaricAccuracyGranularity.png"))
 savefig(p2, joinpath(results_dir, "BarbaricAccuracyGranularity.svg"))
 progress_update("Saved BarbaricAccuracyGranularity")
 
-open(joinpath(results_dir, "rawdata.txt"), "a") do file
+rawdata_file = joinpath(results_dir, "rawdata.txt")
+
+if isfile(rawdata_file)
+    rm(rawdata_file)
+end
+
+open(rawdata_file, "a") do file
+    println(file, "Samples taken per datapoint: $samples_taken")
+    println(file, "")
     println(file, "Accuracy as a function of N)")
-    println(file, "(Using G=$(grid.G)")
-    println(file, "N: $spa_values")
-    println(file, "Accuracy: $spa_accuracies")
+    println(file, "(Using G=$(grid.G))")
+    println(file, "N: spa_values = $spa_values")
+    println(file, "Accuracy: spa_accuracies = $spa_accuracies")
     println(file, "")
     println(file, "Accuracy as a function of G)")
-    println(file, "(Using N=$(granularity_test_params.samples_per_axis)")
-    println(file, "G: $granularities")
-    println(file, "Accuracy: $granularity_accuracies")
+    println(file, "(Using N=$(granularity_test_params.samples_per_axis))")
+    println(file, "G: granularities = $granularities")
+    println(file, "Accuracy: granularity_accuracies = $granularity_accuracies")
  end
 
 
