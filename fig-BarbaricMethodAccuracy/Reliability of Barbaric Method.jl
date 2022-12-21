@@ -331,9 +331,13 @@ begin
 		accuracies = []
 		
 		for samples_per_axis in spa_values
-			total_incorrect, total_sampled = test_grid(samples_per_axis, mechanics, grid, 
-													squares_to_test=squares_to_test, 
-													samples_per_square=samples_per_square)
+			
+			total_incorrect, total_sampled = test_grid(samples_per_axis, 
+				mechanics, 
+				grid;
+				squares_to_test, 
+				samples_per_square)
+			
 			accuracy = 1 - total_incorrect/total_sampled
 			push!(accuracies, accuracy)
 		end
@@ -347,9 +351,13 @@ begin
 		accuracies = []
 		
 		for grid in grids
-			total_incorrect, total_sampled = test_grid(samples_per_axis, mechanics, grid, 
-													squares_to_test=squares_to_test, 
-													samples_per_square=samples_per_square)
+			
+			total_incorrect, total_sampled = test_grid(samples_per_axis, 
+					mechanics, 
+					grid;
+					squares_to_test, 
+					samples_per_square)
+			
 			accuracy = 1 - total_incorrect/total_sampled
 			push!(accuracies, accuracy)
 		end
@@ -444,7 +452,7 @@ grids = [Grid(G, -13, 13, 0, 8) for G in granularities]
 
 # ╔═╡ cd4e323a-0fd3-4600-b69d-e50397260c5e
 _, granularity_accuracies = compute_accuracies(grids, samples_per_axis; 
-					samples_per_square)
+					samples_per_square, squares_to_test)
 
 # ╔═╡ a559bbbd-fa9a-4681-aca6-34312fc88690
 p2 = plot_accuracies(grids, granularity_accuracies; samples_per_square, squares_to_test, samples_per_axis)
