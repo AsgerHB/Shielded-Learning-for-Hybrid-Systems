@@ -4,16 +4,6 @@
 using Markdown
 using InteractiveUtils
 
-# This Pluto notebook uses @bind for interactivity. When running this notebook outside of Pluto, the following 'mock version' of @bind gives bound variables a default value (instead of an error).
-macro bind(def, element)
-    quote
-        local iv = try Base.loaded_modules[Base.PkgId(Base.UUID("6e696c72-6542-2067-7265-42206c756150"), "AbstractPlutoDingetjes")].Bonds.initial_value catch; b -> missing; end
-        local el = $(esc(element))
-        global $(esc(def)) = Core.applicable(Base.get, el) ? Base.get(el) : iv(el)
-        el
-    end
-end
-
 # ╔═╡ 0d116750-2ccb-4a7c-bbde-4df74549a195
 begin
 	using Glob
@@ -52,7 +42,10 @@ md"""
 """
 
 # ╔═╡ d58e4a55-10ee-4208-a8b3-efbcb7445e00
-results_dir = @nbparam "results_dir" tempdir()
+# ╠═╡ skip_as_script = true
+#=╠═╡
+results_dir = tempdir()
+  ╠═╡ =#
 
 # ╔═╡ ed94e474-2dfc-45ce-9c9e-2e41093fb64a
 β1, β2 = bbmechanics.β1, bbmechanics.β2
@@ -60,27 +53,33 @@ results_dir = @nbparam "results_dir" tempdir()
 # ╔═╡ 3012bd3a-6563-4c36-826d-e1e55da905d2
 bbmechanics
 
+# ╔═╡ 8ad641ac-cf90-4345-803a-ab7708c7ef89
+# ╠═╡ skip_as_script = true
+#=╠═╡
+β1s = β1-0.08:0.005:β1+0.03
+  ╠═╡ =#
+
 # ╔═╡ 9f8ca58b-a8e9-49a4-bede-8e697c926ea2
-mechanicss = [
-    merge(bbmechanics, (;β1=x)) 
-	for x in β1-0.08:0.005:β1+0.03
-]
+
 
 # ╔═╡ 103c39d0-f388-4d7d-8710-b741d392d53a
+# ╠═╡ skip_as_script = true
+#=╠═╡
 @bind shield_file FilePicker()
-
-# ╔═╡ 4849cc05-f056-48a6-bfd5-4efc39aa258f
-shield_file′ = @nbparam "shield_file" shield_file["data"] |> IOBuffer
+  ╠═╡ =#
 
 # ╔═╡ 55e4ca85-6c91-492e-9aa2-ec32a93167f7
-shield = robust_grid_deserialization(shield_file′)
+# ╠═╡ skip_as_script = true
+#=╠═╡
+shield = robust_grid_deserialization(shield_file["data"] |> IOBuffer)
+  ╠═╡ =#
 
 # ╔═╡ 262d64f3-5f09-4e2d-bd14-c721d482c7cb
 any_action, must_hit, bad = 0, 1, 2
 
 # ╔═╡ 85df6ffb-7c70-4f4f-9c53-d23d622dc65e
 # Force a hit in both the "must hit" area AND the "bad" area. Call this "strenthened" for short.
-function shielded(policy)
+function shielded(shield::Grid, policy)
     return (v, p) ->
         if (v, p) ∈ shield && get_value(box(shield, v, p)) ∈ (must_hit, bad)
             "hit"
@@ -89,74 +88,55 @@ function shielded(policy)
         end
 end
 
-# ╔═╡ 5b837985-9e2d-4fde-9a4b-bf597dee84fb
-
-
 # ╔═╡ 68786d2a-a83d-4a26-b60e-32455903fd1c
-begin 
-    random_agents_hit_chances = [1 / 4, 1 / 5, 1 / 8, 1 / 10, 0]
-    
-end;
+hit_chance = 1/10
 
 # ╔═╡ a4f033a0-51dc-4365-841e-18aa3763c48a
+# ╠═╡ skip_as_script = true
+#=╠═╡
 @bind runs_per_configuration NumberField(
 	1:1000000, 
-	default=(@nbparam "runs_per_configuration" 100)
+	default=100
 )
+  ╠═╡ =#
 
 # ╔═╡ 3d22b581-f4b1-44eb-8938-41027c972dd4
-function check_robustness_of_shields(mechanicss, 
-		random_agents_hit_chances, 
-		runs_per_configuration, 
-		results_dir)
+function check_robustness_of_shield(shield::Grid, mechanics, β1s, 
+		hit_chance, 
+		runs_per_configuration)
+
+	# Sanity check
+	bad_mechanics = [β1 for β1 in β1s if β1 + mechanics.ϵ1 > 1.0]
+	if 0 < length(bad_mechanics)
+		@warn "Magic ball! Watch out! One or more of these mechanics allows the ball to bounce back with greater force than it had initially!"
+	end
 
 	results = []
-	@progress for mechanics in mechanicss
-	    for hit_chance in random_agents_hit_chances
-			
-	        result = evaluate_safety(mechanics, 
-				shielded(random_policy(hit_chance)), 
-				runs_per_configuration)
+	@progress for β1 in β1s
+		mechanics′ = merge(bbmechanics, (;β1))
+		result = evaluate_safety(mechanics′, 
+			shielded(shield, random_policy(hit_chance)), 
+			runs_per_configuration)
 
-			percent_unsafe = 100*
-				(result.safety_violations_observed/result.number_of_runs)
-			
-	        result = merge(result, 
-				(β1 = mechanics.β1,
-	            β2 = mechanics.β2,
-	            unsafe_state_handling="hit", 
-	            hit_chance=hit_chance, 
-	            percent_unsafe=percent_unsafe)
-			)
-	
-	        push!(results, result)
-	    end
-	    CSV.write(results_dir ⨝ "rawdata.csv", results)
+		percent_unsafe = 100*
+			(result.safety_violations_observed/result.number_of_runs)
+		
+		result = merge(result, 
+			(β1 = β1,
+			unsafe_state_handling="hit", 
+			hit_chance=hit_chance, 
+			percent_unsafe=percent_unsafe)
+		)
+
+		push!(results, result)
 	end
-	results
+	DataFrame(results)
 end
 
 # ╔═╡ 27272ec3-7be2-409a-b3e3-e4e7c434d2c6
-robustness_results = check_robustness_of_shields(mechanicss, random_agents_hit_chances, runs_per_configuration, results_dir)
-
-# ╔═╡ 2f4bf626-1afa-42ff-a20d-3753253503b1
-df = DataFrame(robustness_results)
-
-# ╔═╡ e83a568e-5dc3-4a9b-925d-8b9fa15f06b9
-function combine_hit_chances(df)		
-	result = groupby(df, ["β1", "β2"])
-	
-	result = combine(result, 
-		"unsafe_state_handling" => first,
-		"number_of_runs" => sum,
-		"β1" => first, 
-		"β2" => first, 
-		"percent_unsafe" => mean, renamecols=false)
-	result = sort(result, "β1", rev=true)
-end
-
-# ╔═╡ 81de6d9f-2b87-4115-9ec8-031f3d487e37
-combined = combine_hit_chances(filter("unsafe_state_handling" => x -> x == "hit", df))
+#=╠═╡
+robustness_results = check_robustness_of_shield(shield, bbmechanics, β1s, hit_chance, runs_per_configuration)
+  ╠═╡ =#
 
 # ╔═╡ 149d1cce-8216-4952-a31d-f4e0aa27f9fc
 avg(x) = length(x)/sum(x)
@@ -167,44 +147,59 @@ two_decimals(d::Float64) = @sprintf("%.2f", d)
 # ╔═╡ 46412bb7-6089-481a-a92e-4dad91c4dad5
 call(f) = f()
 
-# ╔═╡ abae1b33-770a-4a61-8ce2-a40147e8c74e
-call() do 
-	bad_mechanics = [m for m in mechanicss if m.β1 + m.ϵ1 > 1.0 || m.β2 + m.ϵ2 > 1.0]
-	if 0 < length(bad_mechanics)
-		Markdown.parse("""
-!!! warning "Warning: Magic ball!"
-	Watch out! One or more of these mechanics allows the ball to bounce back with greater force than it had initially!
+# ╔═╡ ca4a7fce-2873-4698-9ea7-db5e6b578160
+begin
+	function robustness_plot(df::DataFrame)
+		xticks = [r.β1 for r in eachrow(df)]
+		xticks = xticks[1:2:end]
+		
+		plot(legend=:outertop,
+			xrotation=90,
+			xticks=xticks,)
+		
+		@df df plot!(:β1, :percent_unsafe, 
+			size=(300, 300),
+			xflip=true,
+			marker=:o,
+			markerstrokewidth=0,
+			markerstrokealpha=0,
+			linewidth=2,
+			ylabel="Percent Safe Runs",
+			xlabel="β1",
+			label=nothing,
+			color=colors.EMERALD)
+		
+		vline!([β1], 
+			style=:dash,
+			color=colors.ASBESTOS,
+			linewidth=2,
+			label=nothing)
+	end
 
-		$(bad_mechanics...)
-""")
+	function robustness_plot(file::AbstractString)
+		df = CSV.read(file, DataFrame)
+		robustness_plot(df)
 	end
 end
 
-# ╔═╡ ca4a7fce-2873-4698-9ea7-db5e6b578160
-robustness_plot = call() do
-	xticks = [r.β1 for r in eachrow(combined)]
-	
-	plot(legend=:outertop,
-		xrotation=90,
-		xticks=xticks,)
-	
-	@df combined plot!(:β1, :percent_unsafe, 
-		xflip=true,
-		marker=:o,
-		markerstrokewidth=0,
-		markerstrokealpha=0,
-		linewidth=2,
-		ylabel="Percentage of runs that are unsafe",
-		xlabel="β1",
-		label="Performance of safe strategy",
-		color=colors.EMERALD)
-	
-	vline!([β1], 
-		style=:dash,
-		color=colors.ASBESTOS,
-		linewidth=2,
-		label="Value of β1 used to synthesise safe strategy")
+# ╔═╡ 6e2d0fad-9be5-418f-8f6a-12c7e38910d0
+#=╠═╡
+CSV.write(results_dir ⨝ "rawdata.csv", robustness_results)
+  ╠═╡ =#
+
+# ╔═╡ 0ad43c1e-2473-4827-88e9-357ffc62c175
+# ╠═╡ skip_as_script = true
+#=╠═╡
+begin
+	robustness_results # For reactivty to trigger
+	robustness_plot(results_dir ⨝ "rawdata.csv")
 end
+  ╠═╡ =#
+
+# ╔═╡ 4e2e15c1-6656-44d6-91c3-40d95c561b0c
+#=╠═╡
+robustness_plot(robustness_results)
+  ╠═╡ =#
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -560,9 +555,9 @@ version = "0.21.0+0"
 
 [[deps.Glib_jll]]
 deps = ["Artifacts", "Gettext_jll", "JLLWrappers", "Libdl", "Libffi_jll", "Libiconv_jll", "Libmount_jll", "PCRE2_jll", "Pkg", "Zlib_jll"]
-git-tree-sha1 = "fb83fbe02fe57f2c068013aa94bcdf6760d3a7a7"
+git-tree-sha1 = "d3b3624125c1474292d0d8ed0f65554ac37ddb23"
 uuid = "7746bdde-850d-59dc-9ae8-88ece973131d"
-version = "2.74.0+1"
+version = "2.74.0+2"
 
 [[deps.Glob]]
 git-tree-sha1 = "4df9f7e06108728ebf00a0a11edee4b29a482bb2"
@@ -775,9 +770,9 @@ version = "1.42.0+0"
 
 [[deps.Libiconv_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
-git-tree-sha1 = "42b62845d70a619f063a7da093d995ec8e15e778"
+git-tree-sha1 = "c7cb1f5d892775ba13767a87c7ada0b980ea0a71"
 uuid = "94ce4f54-9a6c-5748-9c1c-f9c7231a4531"
-version = "1.16.1+1"
+version = "1.16.1+2"
 
 [[deps.Libmount_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -1520,24 +1515,22 @@ version = "1.4.1+0"
 # ╠═d58e4a55-10ee-4208-a8b3-efbcb7445e00
 # ╠═ed94e474-2dfc-45ce-9c9e-2e41093fb64a
 # ╠═3012bd3a-6563-4c36-826d-e1e55da905d2
+# ╠═8ad641ac-cf90-4345-803a-ab7708c7ef89
 # ╠═9f8ca58b-a8e9-49a4-bede-8e697c926ea2
-# ╟─abae1b33-770a-4a61-8ce2-a40147e8c74e
 # ╠═103c39d0-f388-4d7d-8710-b741d392d53a
-# ╠═4849cc05-f056-48a6-bfd5-4efc39aa258f
 # ╠═55e4ca85-6c91-492e-9aa2-ec32a93167f7
 # ╠═262d64f3-5f09-4e2d-bd14-c721d482c7cb
 # ╠═85df6ffb-7c70-4f4f-9c53-d23d622dc65e
-# ╠═5b837985-9e2d-4fde-9a4b-bf597dee84fb
 # ╠═68786d2a-a83d-4a26-b60e-32455903fd1c
 # ╠═a4f033a0-51dc-4365-841e-18aa3763c48a
 # ╠═3d22b581-f4b1-44eb-8938-41027c972dd4
 # ╠═27272ec3-7be2-409a-b3e3-e4e7c434d2c6
-# ╠═2f4bf626-1afa-42ff-a20d-3753253503b1
-# ╠═e83a568e-5dc3-4a9b-925d-8b9fa15f06b9
-# ╠═81de6d9f-2b87-4115-9ec8-031f3d487e37
 # ╠═149d1cce-8216-4952-a31d-f4e0aa27f9fc
 # ╠═ad2864a6-4770-4253-a2c4-4b815ef90d82
 # ╠═46412bb7-6089-481a-a92e-4dad91c4dad5
 # ╠═ca4a7fce-2873-4698-9ea7-db5e6b578160
+# ╠═6e2d0fad-9be5-418f-8f6a-12c7e38910d0
+# ╠═0ad43c1e-2473-4827-88e9-357ffc62c175
+# ╠═4e2e15c1-6656-44d6-91c3-40d95c561b0c
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
