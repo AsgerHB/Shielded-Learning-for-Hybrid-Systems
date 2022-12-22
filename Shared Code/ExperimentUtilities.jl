@@ -178,3 +178,17 @@ function latex_table(df; headers=nothing, group_by=[])
 	result *= "\\end{tabular}"
 	return result
 end
+
+
+
+function export_figure(results_dir, name, figure)
+    savefig(figure, results_dir ⨝ "$name.png")
+    savefig(figure, results_dir ⨝ "$name.svg")
+    progress_update("Saved $name")
+end
+
+function export_table(results_dir, name, table)
+    CSV.write(results_dir ⨝ "$name.csv", table)
+    write(results_dir ⨝ "$name.txt", "$table")
+    progress_update("Saved $name")
+end

@@ -4,16 +4,6 @@
 using Markdown
 using InteractiveUtils
 
-# This Pluto notebook uses @bind for interactivity. When running this notebook outside of Pluto, the following 'mock version' of @bind gives bound variables a default value (instead of an error).
-macro bind(def, element)
-    quote
-        local iv = try Base.loaded_modules[Base.PkgId(Base.UUID("6e696c72-6542-2067-7265-42206c756150"), "AbstractPlutoDingetjes")].Bonds.initial_value catch; b -> missing; end
-        local el = $(esc(element))
-        global $(esc(def)) = Core.applicable(Base.get, el) ? Base.get(el) : iv(el)
-        el
-    end
-end
-
 # ╔═╡ 80e9500c-3367-11ed-3083-0d3c4e19390c
 begin
 	using Plots
@@ -38,7 +28,7 @@ This check is repeated a number of times for different values of samples per axi
 
 !!! info "Note on Multiple Dispatch"
 
-	I would like to apologise to myself or any other future reader, for my use of multiple dispatch in this code. For one thing, you will find that the return types are inconsistent depending on argument types.
+	I would like to apologise to myself, or any other future reader, for my use of multiple dispatch in this code. For one thing, you will find that the return types are inconsistent depending on argument types.
 """
 
 # ╔═╡ 85e33804-a37e-4a95-954b-67676df0b1f6
@@ -101,6 +91,8 @@ begin
 end
 
 # ╔═╡ 9662d21a-7cbb-4c7f-9672-7fa7169e979c
+# ╠═╡ skip_as_script = true
+#=╠═╡
 @bind mechanics PlutoUI.combine() do Child
 md"""
 ### Configure ball
@@ -119,8 +111,11 @@ md"""
 `p_hit = ` $(Child("p_hit", NumberField(-100:0.01:100, default=4)))
 """
 end
+  ╠═╡ =#
 
 # ╔═╡ a80afc36-fdbf-41eb-a0b2-c44c4a975db3
+# ╠═╡ skip_as_script = true
+#=╠═╡
 begin
 	@bind gridconfig confirm(PlutoUI.combine() do Child
 md"""
@@ -137,37 +132,18 @@ md"""
 """
 	end)
 end
-
-# ╔═╡ c66507ad-fe8f-4ca2-be45-269e20005d3e
-md"""
-### Testing parameters
-"""
-
-# ╔═╡ 69b52a66-6514-47cc-912e-576636beaf85
-md"""
-`samples_per_axis = ` $(@bind samples_per_axis NumberField(1:30, default=4))
-"""
-
-# ╔═╡ 7d183b70-0cb1-45ae-afd6-989f549bc164
-begin
-	default_samples_per_square = (@nbparam "samples_per_square" 100)
-	default_squares_to_test = (@nbparam "squares_to_test" 100)
-end
-
-# ╔═╡ 60cafe7b-8ae2-49a0-8361-6c8dcfcf45da
-md"""
-`samples_per_square =` $(@bind samples_per_square NumberField(0:100:100000, default=default_samples_per_square))
-
-`squares_to_test =` $(@bind squares_to_test NumberField(0:100:100000, default=default_squares_to_test))
-"""
+  ╠═╡ =#
 
 # ╔═╡ ec33aa7f-3c79-4c96-8769-cbfe4782d52a
+#=╠═╡
 begin
 	G, v_min, v_max, p_min, p_max = gridconfig
 	nothing
 end
+  ╠═╡ =#
 
 # ╔═╡ 1bb4133a-432a-497f-b32b-05015f8f9346
+#=╠═╡
 begin
 	grid = Grid(G, v_min, v_max, p_min, p_max)
 	md"""
@@ -176,13 +152,18 @@ begin
 	Size: $(length(grid.array))
 	"""
 end
+  ╠═╡ =#
 
-# ╔═╡ 1c55a504-9cfc-4eae-a962-a8c176e3938a
+# ╔═╡ 9d6256fc-c6b0-4ff4-88ad-8da5fdc11506
 md"""
-## Test the barbaric method for specific number of samples per axis
+## A Quick Visualisation
+
+Transition function illustrated with a nice plot.
 """
 
 # ╔═╡ 4f701eeb-1483-4962-b7a5-7486e940e04e
+# ╠═╡ skip_as_script = true
+#=╠═╡
 md"""
 `v = ` $(@bind v NumberField(v_min:G:v_max - G, default=v_max/2))
 
@@ -190,41 +171,19 @@ md"""
 
 `action = ` $(@bind action Select(["nohit", "hit"]))
 """
+  ╠═╡ =#
 
 # ╔═╡ 32dbe566-770c-405f-af43-97fea9ed0011
-square = box(grid, v, p)
-
-# ╔═╡ 20386d96-983b-444f-83aa-ebf8398c75dc
-md"""
-Number of samples: $(length(grid_points(square, samples_per_axis)))
-"""
-
-# ╔═╡ 06feb834-f3a9-4698-b57b-7026489062ea
-# ╠═╡ skip_as_script = true
 #=╠═╡
-call() do
-	grid = Grid(0.5, -13, 13, 0, 8)
-	square = box(grid, v, p)
-	set_reachable_area!(samples_per_axis, mechanics, square, action, 2)
-	set_value!(square, 1)
-	draw(grid, colors=transitioncolors, color_labels=transitionlabels,
-		xlabel="v", ylabel="p",
-		title="Example of barbaric computation of reachable squares")
-	draw_barbaric_transition!(samples_per_axis, mechanics, square, action,
-		colors=(start=colors.PETER_RIVER, _end=colors.ALIZARIN))
-	scatter!([], [], 
-			markersize=3, 
-			markerstrokewidth=0,
-			markercolor=colors.PETER_RIVER,
-			label="Initial positions of samples")
-	scatter!([], [], 
-			markersize=3, 
-			markerstrokewidth=0,
-			markercolor=colors.ALIZARIN,
-			label="Sample locations after t_hit")
-	plot!(xlims=(v-4, v+4), ylims=(p-4,p+4))
-end
+square = box(grid, v, p)
   ╠═╡ =#
+
+# ╔═╡ 013eb8a1-c196-4599-a687-d437f53791ae
+md"""
+## The Code
+
+Pardon the mess. If I have to make another change, I'm rewriting it all.
+"""
 
 # ╔═╡ 5c9c6c9e-6a0d-45fe-937c-df04e089c1ed
 # Get a number of random samples from inside a given square.
@@ -241,10 +200,14 @@ function get_samples(grid::Grid, count)
 end
 
 # ╔═╡ 40f2320d-d204-4256-926e-f858d01471d6
+#=╠═╡
 get_samples(square, 10)
+  ╠═╡ =#
 
 # ╔═╡ 14da51c7-ac2f-486c-bd8f-fa7428ab81dd
+#=╠═╡
 get_samples(grid, 10)
+  ╠═╡ =#
 
 # ╔═╡ 1c87cb42-1106-410a-84b7-027e83c8de07
 function is_inside(squares::Vector{Square}, v, p)
@@ -301,101 +264,79 @@ function test_grid(samples_per_axis, mechanics, grid; squares_to_test, samples_p
 	total_incorrect, total_sampled
 end
 
-# ╔═╡ a044cc8d-03d6-4b56-9a2d-242fb10afa29
-total_incorrect, total_sampled = 
-	test_grid(samples_per_axis, mechanics, grid, 
-		squares_to_test=squares_to_test, 
-		samples_per_square=samples_per_square)
-
-# ╔═╡ 40a75b53-7627-4ace-9486-c2d8cdb09ec7
-Markdown.parse("""
-!!! result
-	Out of $(total_sampled) samples, **there were $(100*total_incorrect/total_sampled)%** outside the area computed by the barbaric method.
-""")
-
-# ╔═╡ ea4f4b3b-a711-4389-b257-9f3cd6b650a1
-1 - (total_incorrect/total_sampled)
-
 # ╔═╡ ff976e3c-d7f1-4f5b-9293-c98be15edca8
-begin
-		
-	"""
-		(grid, spa_values; [samples_per_square, squares_to_test])
+function compute_accuracies_for_spa(grid::Grid, 
+	spa_values::Vector{Int},
+	mechanics; 
+	samples_per_square=100, 
+	squares_to_test=100)
 	
-	`spa_values`: List of `samples_per_axis` values that will be tested on.
-	"""
-	function compute_accuracies(grid::Grid, spa_values::Vector{Int}; 
+	accuracies = []
+	
+	for samples_per_axis in spa_values
+		
+		total_incorrect, total_sampled = test_grid(samples_per_axis, 
+			mechanics, 
+			grid;
+			squares_to_test, 
+			samples_per_square)
+		
+		accuracy = 1 - total_incorrect/total_sampled
+		push!(accuracies, accuracy)
+	end
+	spa_values, accuracies
+end
+
+# ╔═╡ 86b45fb8-a9bd-4855-8304-eb5f60e12509
+function compute_accuracies_for_granularity(granularities, 
+		samples_per_axis::Int,
+		mechanics;
 		samples_per_square=100, 
 		squares_to_test=100)
+	
+	grids = [Grid(G, -13, 13, 0, 8) for G in granularities]
+	accuracies = []
+	
+	for grid in grids
 		
-		accuracies = []
-		
-		for samples_per_axis in spa_values
-			
-			total_incorrect, total_sampled = test_grid(samples_per_axis, 
+		total_incorrect, total_sampled = test_grid(samples_per_axis, 
 				mechanics, 
 				grid;
 				squares_to_test, 
 				samples_per_square)
-			
-			accuracy = 1 - total_incorrect/total_sampled
-			push!(accuracies, accuracy)
-		end
-		spa_values, accuracies
-	end
-	
-	function compute_accuracies(grids::Vector{Grid}, samples_per_axis::Int; 
-		samples_per_square=100, 
-		squares_to_test=100)
 		
-		accuracies = []
-		
-		for grid in grids
-			
-			total_incorrect, total_sampled = test_grid(samples_per_axis, 
-					mechanics, 
-					grid;
-					squares_to_test, 
-					samples_per_square)
-			
-			accuracy = 1 - total_incorrect/total_sampled
-			push!(accuracies, accuracy)
-		end
-		grids, accuracies
+		accuracy = 1 - total_incorrect/total_sampled
+		push!(accuracies, accuracy)
 	end
-
+	grids, accuracies
 end
 
-# ╔═╡ 7b15069f-69bb-48a3-aa97-d18921e3db04
-begin
-	"""
-		(spa_values, accuracies; [plotargs...])
-	
-	`spa_values`: List of `samples_per_axis` values that will be tested on
-	"""
-	function plot_accuracies(spa_values::Vector{Int}, accuracies; 
+# ╔═╡ 5ef10f10-102e-43a0-99cc-8d333450995d
+function plot_accuracies_spa(spa_values::Vector{Int}, accuracies; 
 				samples_per_square, squares_to_test, G, plotargs...)
+
+		xticks = (spa_values, [N^2 for N in spa_values])
+		xticks = xticks[1][1:2:end], xticks[2][1:2:end]
 		
 		plot(spa_values, accuracies,
 			marker=:circle, markerstrokewidth=0,
 			color=colors.PETER_RIVER,
-			#xticks=(spa_values, ["$(length(grid_points(square, x)))" for x in spa_values]),
-			xticks=(spa_values),
-			yticks=[1.0, 0.9999, 0.999, 0.998, 0.997, 0.996, 0.995],
+			xticks=xticks,
+			#yticks=[1.0, 0.9999, 0.999, 0.998, 0.997, 0.996, 0.995],
 			size=(300, 300),
 			label="δ=$G", 
-			xlabel="N", 
+			xlabel="Supporting Points", 
 			ylabel="Accuracy",
 			legend=:bottomright,
 			;plotargs...)
 		
-		hline!([1, 0.9999], label=nothing, color=colors.ASBESTOS)
+		hline!([1], label=nothing, color=colors.ASBESTOS)
 	end
-	
-	function plot_accuracies(grids::Vector{Grid}, accuracies; 
+
+# ╔═╡ dbbdff6b-71e7-4583-8ad7-f6e49adbfb88
+function plot_accuracies_granularity(granularities, accuracies; 
 				samples_per_axis, samples_per_square, squares_to_test, plotargs...)
 	
-		granularities = [grid.G for grid in grids]
 		granularities = ["$G" for G in granularities]
 		
 		plot(granularities, accuracies,
@@ -413,52 +354,166 @@ begin
 		hline!([1], label=nothing, color=colors.ASBESTOS)
 	end
 
-end
-
-# ╔═╡ 288a212a-4ee6-4c29-8238-6d22f8e3b9d7
-# Values of `samples_per_axis` to test for
-spa_values = [2:16;]
-
-# ╔═╡ f72b8dba-1b9a-4b0b-802a-03c5a299e204
-_, spa_accuracies = compute_accuracies(grid, spa_values; samples_per_square, squares_to_test)
-
-# ╔═╡ a6771752-a238-4186-90a1-0f80c4a9524c
-p1 = plot_accuracies(spa_values, spa_accuracies; samples_per_square, squares_to_test, G=grid.G)
-
-# ╔═╡ 3bffdc6b-9978-47b6-83b9-e1366019f60b
+# ╔═╡ 7ab717db-a08b-4992-a067-846d0bf17cc4
 md"""
-## Test the barbaric method for specific grid granularity
+## Results
 """
 
-# ╔═╡ ef681e4f-1a78-4a9d-8a72-8b6190d4fd67
-granularities = [1, 0.5, 0.25, 0.1, 0.05, 0.04, 0.02, 0.01]
+# ╔═╡ c66507ad-fe8f-4ca2-be45-269e20005d3e
+md"""
+### Testing parameters
+"""
+
+# ╔═╡ 69b52a66-6514-47cc-912e-576636beaf85
+# ╠═╡ skip_as_script = true
+#=╠═╡
+md"""
+`samples_per_axis = ` $(@bind samples_per_axis NumberField(1:30, default=4))
+"""
+  ╠═╡ =#
+
+# ╔═╡ 06feb834-f3a9-4698-b57b-7026489062ea
+# ╠═╡ skip_as_script = true
+#=╠═╡
+call() do
+	grid = Grid(0.5, -13, 13, 0, 8)
+	square = box(grid, v, p)
+	set_reachable_area!(samples_per_axis, mechanics, square, action, 2)
+	set_value!(square, 1)
+	draw(grid, colors=transitioncolors, color_labels=transitionlabels,
+		xlabel="v", ylabel="p",
+		title="Example of barbaric computation of reachable squares")
+	draw_barbaric_transition!(samples_per_axis, mechanics, square, action,
+		colors=(start=colors.PETER_RIVER, _end=colors.ALIZARIN))
+	scatter!([], [], 
+			markersize=3, 
+			markerstrokewidth=0,
+			markercolor=colors.PETER_RIVER,
+			label="Initial positions of samples")
+	scatter!([], [], 
+			markersize=3, 
+			markerstrokewidth=0,
+			markercolor=colors.ALIZARIN,
+			label="Sample locations after t_hit")
+	plot!(xlims=(v-4, v+4), ylims=(p-4,p+4))
+end
+  ╠═╡ =#
+
+# ╔═╡ 20386d96-983b-444f-83aa-ebf8398c75dc
+# ╠═╡ skip_as_script = true
+#=╠═╡
+md"""
+Number of samples: $(length(grid_points(square, samples_per_axis)))
+"""
+  ╠═╡ =#
+
+# ╔═╡ 60cafe7b-8ae2-49a0-8361-6c8dcfcf45da
+# ╠═╡ skip_as_script = true
+#=╠═╡
+md"""
+`samples_per_square =` $(@bind samples_per_square NumberField(0:100:100000, default=100))
+
+`squares_to_test =` $(@bind squares_to_test NumberField(0:100:100000, default=100))
+"""
+  ╠═╡ =#
+
+# ╔═╡ a044cc8d-03d6-4b56-9a2d-242fb10afa29
+#=╠═╡
+total_incorrect, total_sampled = 
+	test_grid(samples_per_axis, mechanics, grid, 
+		squares_to_test=squares_to_test, 
+		samples_per_square=samples_per_square)
+  ╠═╡ =#
+
+# ╔═╡ 40a75b53-7627-4ace-9486-c2d8cdb09ec7
+#=╠═╡
+Markdown.parse("""
+!!! result
+	Out of $(total_sampled) samples, **there were $(100*total_incorrect/total_sampled)%** outside the area computed by the barbaric method.
+""")
+  ╠═╡ =#
+
+# ╔═╡ ea4f4b3b-a711-4389-b257-9f3cd6b650a1
+#=╠═╡
+1 - (total_incorrect/total_sampled)
+  ╠═╡ =#
 
 # ╔═╡ 67972b5b-8366-4eb3-b50e-8307fcc86d93
-function estimate_time(samples_per_square, squares_to_test)
+function estimate_time(spa_values, granularities, samples_per_square, squares_to_test)
 	seconds_per_sample = 1.24e-6
 	
 	return seconds_per_sample * (length(spa_values)*samples_per_square*squares_to_test + length(granularities)*samples_per_square*squares_to_test)
 end
 
-# ╔═╡ 4ff59e7a-a227-4d0f-a7c5-1094b39b12a6
-@info md"""
-Number of samples: $(samples_per_square*squares_to_test) per data-point
-
-Estimated time: $(estimate_time(samples_per_square, squares_to_test)) seconds
+# ╔═╡ 1c55a504-9cfc-4eae-a962-a8c176e3938a
+md"""
+### Test the barbaric method for specific number of samples per axis
 """
 
+# ╔═╡ 288a212a-4ee6-4c29-8238-6d22f8e3b9d7
+# ╠═╡ skip_as_script = true
+#=╠═╡
+# Values of `samples_per_axis` to test for
+spa_values = [5:16;]
+  ╠═╡ =#
+
+# ╔═╡ f72b8dba-1b9a-4b0b-802a-03c5a299e204
+#=╠═╡
+_, spa_accuracies = compute_accuracies_for_spa(
+	grid, 
+	spa_values, 
+	mechanics; 
+	samples_per_square, 
+	squares_to_test)
+  ╠═╡ =#
+
+# ╔═╡ a6771752-a238-4186-90a1-0f80c4a9524c
+#=╠═╡
+p1 = plot_accuracies_spa(spa_values, spa_accuracies; samples_per_square, squares_to_test, G=grid.G)
+  ╠═╡ =#
+
+# ╔═╡ 3bffdc6b-9978-47b6-83b9-e1366019f60b
+md"""
+### Test the barbaric method for specific grid granularity
+"""
+
+# ╔═╡ ef681e4f-1a78-4a9d-8a72-8b6190d4fd67
+# ╠═╡ skip_as_script = true
+#=╠═╡
+granularities = [1, 0.5, 0.25, 0.1, 0.05, 0.04, 0.02, 0.01]
+  ╠═╡ =#
+
+# ╔═╡ 4ff59e7a-a227-4d0f-a7c5-1094b39b12a6
+#=╠═╡
+md"""
+Number of samples: $(samples_per_square*squares_to_test) per data-point
+
+Estimated time: $(estimate_time(spa_values, granularities, samples_per_square, squares_to_test)) seconds
+"""
+  ╠═╡ =#
+
 # ╔═╡ d42689aa-7c35-4372-87a8-e80a97f54d85
-grids = [Grid(G, -13, 13, 0, 8) for G in granularities]
+
 
 # ╔═╡ cd4e323a-0fd3-4600-b69d-e50397260c5e
-_, granularity_accuracies = compute_accuracies(grids, samples_per_axis; 
-					samples_per_square, squares_to_test)
+#=╠═╡
+_, granularity_accuracies = compute_accuracies_for_granularity(
+	granularities, 
+	samples_per_axis,
+	mechanics; 
+	samples_per_square, 
+	squares_to_test)
+  ╠═╡ =#
 
 # ╔═╡ a559bbbd-fa9a-4681-aca6-34312fc88690
-p2 = plot_accuracies(grids, granularity_accuracies; samples_per_square, squares_to_test, samples_per_axis)
+#=╠═╡
+p2 = plot_accuracies_granularity(granularities, granularity_accuracies; samples_per_square, squares_to_test, samples_per_axis)
+  ╠═╡ =#
 
 # ╔═╡ b6e33020-84a0-477b-ad1e-22713c31b404
+#=╠═╡
 samples_taken = samples_per_square*squares_to_test
+  ╠═╡ =#
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -1495,18 +1550,12 @@ version = "1.4.1+0"
 # ╟─9662d21a-7cbb-4c7f-9672-7fa7169e979c
 # ╟─a80afc36-fdbf-41eb-a0b2-c44c4a975db3
 # ╟─1bb4133a-432a-497f-b32b-05015f8f9346
-# ╟─c66507ad-fe8f-4ca2-be45-269e20005d3e
-# ╟─69b52a66-6514-47cc-912e-576636beaf85
-# ╟─20386d96-983b-444f-83aa-ebf8398c75dc
-# ╟─60cafe7b-8ae2-49a0-8361-6c8dcfcf45da
-# ╠═67972b5b-8366-4eb3-b50e-8307fcc86d93
-# ╠═7d183b70-0cb1-45ae-afd6-989f549bc164
-# ╟─4ff59e7a-a227-4d0f-a7c5-1094b39b12a6
 # ╟─ec33aa7f-3c79-4c96-8769-cbfe4782d52a
-# ╟─1c55a504-9cfc-4eae-a962-a8c176e3938a
+# ╟─9d6256fc-c6b0-4ff4-88ad-8da5fdc11506
 # ╟─4f701eeb-1483-4962-b7a5-7486e940e04e
 # ╠═32dbe566-770c-405f-af43-97fea9ed0011
 # ╟─06feb834-f3a9-4698-b57b-7026489062ea
+# ╟─013eb8a1-c196-4599-a687-d437f53791ae
 # ╟─40a75b53-7627-4ace-9486-c2d8cdb09ec7
 # ╠═a044cc8d-03d6-4b56-9a2d-242fb10afa29
 # ╠═ea4f4b3b-a711-4389-b257-9f3cd6b650a1
@@ -1519,7 +1568,17 @@ version = "1.4.1+0"
 # ╠═0f00e394-79de-4593-b1c0-48e1ae5f1363
 # ╠═c8a5a0e6-b839-400b-90b0-171f4a8eb3a0
 # ╠═ff976e3c-d7f1-4f5b-9293-c98be15edca8
-# ╠═7b15069f-69bb-48a3-aa97-d18921e3db04
+# ╠═86b45fb8-a9bd-4855-8304-eb5f60e12509
+# ╠═5ef10f10-102e-43a0-99cc-8d333450995d
+# ╠═dbbdff6b-71e7-4583-8ad7-f6e49adbfb88
+# ╟─7ab717db-a08b-4992-a067-846d0bf17cc4
+# ╟─c66507ad-fe8f-4ca2-be45-269e20005d3e
+# ╟─69b52a66-6514-47cc-912e-576636beaf85
+# ╟─20386d96-983b-444f-83aa-ebf8398c75dc
+# ╟─60cafe7b-8ae2-49a0-8361-6c8dcfcf45da
+# ╠═67972b5b-8366-4eb3-b50e-8307fcc86d93
+# ╟─4ff59e7a-a227-4d0f-a7c5-1094b39b12a6
+# ╟─1c55a504-9cfc-4eae-a962-a8c176e3938a
 # ╠═288a212a-4ee6-4c29-8238-6d22f8e3b9d7
 # ╠═f72b8dba-1b9a-4b0b-802a-03c5a299e204
 # ╠═a6771752-a238-4186-90a1-0f80c4a9524c

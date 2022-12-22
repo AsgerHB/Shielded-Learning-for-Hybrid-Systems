@@ -38,7 +38,7 @@ mkpath(evaluations_dir)
 make_shields = !haskey(args, "skip-synthesis")
 test_shields = !haskey(args, "skip-evaluation")
 
-progress_update("Estimated total time to commplete: 10 minutes. (2 minutes if run with --test)")
+progress_update("Estimated total time to complete: 10 minutes. (2 minutes if run with --test)")
 
 #########
 # Setup #

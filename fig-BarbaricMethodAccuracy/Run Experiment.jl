@@ -1,83 +1,103 @@
 if !isfile("Project.toml")
     error("Project.toml not found. Try running this script from the root of the ReproducibilityPackage folder.")
 end
-
 import Pkg
 Pkg.activate(".")
 Pkg.instantiate()
-include("../Shared Code/ExperimentUtilities.jl")
-using Dates
 
-# cli args
-args = my_parse_args(ARGS)
-if haskey(args, "help")
-    print("""
-    --help              Display this help and exit.
-    --test              Test-mode. Produce potentially useless results, but fast. Useful for testing if everything is set up.
-    --results-dir       Results will be saved in an appropriately named subdirectory. Directory will be created if it does not exist.
-                        Default: '~/Results'
-    """)
-    exit()
+
+using ArgParse
+s = ArgParseSettings()
+
+# infix operator "\join" redefined to signify joinpath
+⨝ = joinpath
+
+@add_arg_table s begin
+    "--test"
+    help = """Test-mode. Produce potentially useless results, but fast.
+              Useful for testing if everything is set up."""
+    action = :store_true
+
+    "--results-dir"
+        help="""Results will be saved in an appropriately named subdirectory.
+                Directory will be created if it does not exist."""            
+        default=homedir() ⨝ "Results"
+
+    "--skip-experiment"
+    help="""Yea I know. But figures will still be created from <results-dir>/Results.csv
+            If nothing else I need this for testing."""
+    action=:store_true
 end
-test = haskey(args, "test")
-results_dir = get(args, "results-dir", "$(homedir())/Results")
-figure_name = "fig-BarbaricMethodAccuracy"
+
+args = parse_args(s)
+
+
+const figure_name = "fig-BarbaricMethodAccuracy"
+
+results_dir = args["results-dir"]
+
+mkpath(results_dir)
+
+# Additional includes here to make arg parsing go through faster
+using CSV
+using Dates
+using DataFrames
+include("Reliability of Barbaric Method.jl")
+include("../Shared Code/ExperimentUtilities.jl")
+
+progress_update("Estimated total time to complete: ?? hours. (1 minute if run with --test)")
+
 results_dir = joinpath(results_dir, figure_name)
 mkpath(results_dir)
 
-if test
-    NBPARAMS = Dict(
-        # The product of these two numbers will be the total number of tests. (10000)
-        "squares_to_test" => 100,
-        "samples_per_square" => 1000,
-    )
+if !args["test"]
+    squares_to_test = 1000000
+    samples_per_square = 1000
+    granularities = [1, 0.5, 0.25, 0.1, 0.05, 0.04, 0.02, 0.01]
+    spa_values = [5:16;] # Values of `samples_per_axis` to test for
 else
-    NBPARAMS = Dict(
-        # The product of these two numbers will be the total number of tests.
-        "squares_to_test" => 1000000,
-        "samples_per_square" => 1000,
-    )
+    squares_to_test = 100
+    samples_per_square = 100
+    granularities = [1, 0.5, 0.25, 0.1, 0.05, 0.04, 0.02, 0.01]
+    spa_values = [5:16;] # Values of `samples_per_axis` to test for
 end
 
-progress_update("Checking reachability function.")
+samples_per_axis = 16
+grid = Grid(0.01, -15, 15, 0, 10)
 
 
-include("Reliability of Barbaric Method.jl")
+if !args["skip-experiment"]
+    progress_update("Checking reachability function.")
 
-progress_update("Computation done.")
+    _, granularity_accuracies = compute_accuracies_for_granularity(granularities, samples_per_axis, bbmechanics; samples_per_square, squares_to_test)
+
+    _, spa_accuracies = compute_accuracies_for_spa(grid, spa_values, bbmechanics; samples_per_square, squares_to_test)
+
+    spa_df = DataFrame(hcat(spa_values, spa_accuracies), ["N", "Accuracy"])
+    granularity_df = DataFrame(hcat(granularities, granularity_accuracies), ["δ", "Accuracy"])
+
+    # Save as csv, txt
+    export_table(results_dir, "BarbaricAccuracyN", spa_df)
+    export_table(results_dir, "BarbaricAccuracyGranularity", granularity_df)
+
+    progress_update("Computation done.")
+end
+
+spa_df = CSV.read(results_dir ⨝ "BarbaricAccuracyN.csv", DataFrame)
+granularity_df = CSV.read(results_dir ⨝ "BarbaricAccuracyGranularity.csv", DataFrame)
+
+spa_values = spa_df[!, "N"]
+spa_accuracies = spa_df[!, "Accuracy"]
+granularities = granularity_df[!, "δ"]
+granularity_accuracies = granularity_df[!, "Accuracy"]
+
 progress_update("Saving  to $results_dir")
 
-# Figure saved in notebook as p1 etc...
-savefig(p1, joinpath(results_dir, "BarbaricAccuracyN.png"))
-savefig(p1, joinpath(results_dir, "BarbaricAccuracyN.svg"))
-progress_update("Saved BarbaricAccuracyN")
+p1 = plot_accuracies_spa(spa_values, spa_accuracies; samples_per_square, squares_to_test, G=grid.G)
+p2 = plot_accuracies_granularity(granularities, granularity_accuracies; samples_per_square, squares_to_test, samples_per_axis)
 
-savefig(p2, joinpath(results_dir, "BarbaricAccuracyGranularity.png"))
-savefig(p2, joinpath(results_dir, "BarbaricAccuracyGranularity.svg"))
-progress_update("Saved BarbaricAccuracyGranularity")
-
-rawdata_file = joinpath(results_dir, "rawdata.txt")
-
-if isfile(rawdata_file)
-    rm(rawdata_file)
-end
-
-open(rawdata_file, "a") do file
-    println(file, "Samples taken per datapoint: $samples_taken")
-    println(file, "")
-    println(file, "Accuracy as a function of N)")
-    println(file, "(Using G=$(grid.G))")
-    println(file, "N: spa_values = $spa_values")
-    println(file, "Accuracy: spa_accuracies = $spa_accuracies")
-    println(file, "")
-    println(file, "Accuracy as a function of G)")
-    println(file, "(Using N=$(samples_per_axis))")
-    println(file, "G: granularities = $granularities")
-    println(file, "Accuracy: granularity_accuracies = $granularity_accuracies")
- end
-
-
-progress_update("Saved rawdata.txt")
+export_figure(results_dir, "BarbaricAccuracyN", p1)
+export_figure(results_dir, "BarbaricAccuracyGranularity", p2)
 
 progress_update("Done with $figure_name.")
 progress_update("====================================")
