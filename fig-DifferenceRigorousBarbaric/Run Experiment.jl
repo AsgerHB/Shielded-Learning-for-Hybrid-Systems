@@ -42,6 +42,7 @@ results_dir = results_dir ⨝ figure_name
 
 mkpath(results_dir)
 
+# Additional includes to make arg parsing go through faster
 using Plots
 using Dates
 using Serialization
@@ -95,8 +96,9 @@ name2 = get_descriptor(args["shield2"])
 
 p1 = draw_diff(shield1, shield2, diffcolors, bbshieldcolors, bbshieldlabels; name1, name2,
     # plotargs
-    xlabel="v", ylabel="p", legend_position=(0.72, 0.93))
+    xlabel="v", ylabel="p", legend_position=:outertop)
 
+plot!(size=(300, 300), xlims=(-10, 7), ylims=(3, 7.5))
 
 const name = "DifferenceRigorousBarbaric"
 
