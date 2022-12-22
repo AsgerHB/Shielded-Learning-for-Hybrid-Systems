@@ -111,7 +111,8 @@ write(joinpath(results_dir, "$exported_table_name.tex"), "$resulting_latex_table
 # Oh god this is so hacky. These macros are used in the paper so I have to define them here also.
 write(joinpath(results_dir, "macros.tex"), 
 """\\newcommand{\\granularity}{G}
-\\newcommand{\\state}{s}""")
+\\newcommand{\\state}{s}
+\newcommand{\juliareach}{\textsc{JuliaReach}\xspace}""")
 
 
 progress_update("Saved $(exported_table_name)")
