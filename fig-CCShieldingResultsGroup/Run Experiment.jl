@@ -174,22 +174,16 @@ NBPARAMS = Dict(
 
 include("ReadResults.jl")
 
-function export_figure(name, figure)
-    savefig(figure, results_dir ⨝ "$name.png")
-    savefig(figure, results_dir ⨝ "$name.svg")
-    progress_update("Saved $name")
-end
 
+export_figure(results_dir, "CCShieldingResults", average_cost)
 
-export_figure("CCShieldingResults", average_cost)
+export_figure(results_dir, "CCShieldingInterventions", average_interventions)
 
-export_figure("CCShieldingInterventions", average_interventions)
+export_figure(results_dir, "CCShieldingDeaths", average_deaths)
 
-export_figure("CCShieldingDeaths", average_deaths)
+#export_figure(results_dir, "CCPostShieldCostComparison", post_shield_cost_bar)
 
-#export_figure("CCPostShieldCostComparison", post_shield_cost_bar)
-
-#export_figure("CCPostShieldInterventionsComparison", post_shield_interventions_bar)
+#export_figure(results_dir, "CCPostShieldInterventionsComparison", post_shield_interventions_bar)
 
 if safety_violations !== nothing
     progress_update("WARNING: Safety violation observed in shielded configuration. This is unexpected.")
