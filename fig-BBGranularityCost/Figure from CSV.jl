@@ -22,6 +22,7 @@ begin
 	using Statistics
 	using StatsPlots
 	using DataFrames
+	using Measures
 	include("../Shared Code/FlatUI.jl")
 	include("../Shared Code/ExperimentUtilities.jl")
 end
@@ -67,9 +68,15 @@ medians = call() do
 	medians = combine(medians, [:cost => median, :deaths => median, :interventions => median], renamecols=false)
 end
 
+# ╔═╡ c417b21a-2c53-4115-9bda-8386dae96fe4
+md"""
+Marker Size: $(@bind marker_size NumberField(1:30, default=8))
+
+Line Width: $(@bind line_width NumberField(1:30, default=4))
+"""
+
 # ╔═╡ 4271c766-f7eb-46bd-b37b-62958e4e4a75
 granularity_cost_plot = call() do
-	xticks = cleandata[!, :granularity]
 	
 	margin = 1
 	ylims = (min(cleandata[!, :cost]...) - margin, 
@@ -79,16 +86,16 @@ granularity_cost_plot = call() do
 		markershape=:star,
 		markerstrokewidth=1,
 		markerstrokecolor=:white,
-		linewidth=5,
-		markersize=12+4,
+		linewidth=line_width,
+		markersize=marker_size,
 		color=colors.GREEN_SEA,
-		xticks=xticks,
 		ylims=ylims,
 		label="Pre-shielded",
 		xlabel="δ",
 		xflip=true,
 		ylabel="Average swings per 120s",
-		size=(600,300))
+		margin=2mm,
+		size=(300,300))
 end
 
 # ╔═╡ b4f3ecfd-f41a-4d1a-89af-2170d71ed8f7
@@ -116,6 +123,7 @@ PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
 CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
+Measures = "442fdcdd-2543-5da2-b0f3-8c86c306513e"
 Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
 PlutoUI = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
 Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
@@ -124,6 +132,7 @@ StatsPlots = "f3b207a7-027a-5e70-b257-86293d7955fd"
 [compat]
 CSV = "~0.10.8"
 DataFrames = "~1.4.4"
+Measures = "~0.3.2"
 Plots = "~1.37.2"
 PlutoUI = "~0.7.49"
 StatsPlots = "~0.15.4"
@@ -135,7 +144,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.8.2"
 manifest_format = "2.0"
-project_hash = "e2e32449f0ab9a4e3baead78fc5e5f7ac7db9ebc"
+project_hash = "9056238f1d5160a6d934605d41d6260df786e04d"
 
 [[deps.AbstractFFTs]]
 deps = ["ChainRulesCore", "LinearAlgebra"]
@@ -1428,6 +1437,7 @@ version = "1.4.1+0"
 # ╠═d4b74fc4-522a-4cf9-bb9f-e55f15293d1e
 # ╠═46ba97e1-a601-447e-a94c-2d4f7aaa168e
 # ╠═c9d036c3-d56c-46ee-a89a-0e1bdb2ae28a
+# ╠═c417b21a-2c53-4115-9bda-8386dae96fe4
 # ╠═4271c766-f7eb-46bd-b37b-62958e4e4a75
 # ╠═b4f3ecfd-f41a-4d1a-89af-2170d71ed8f7
 # ╠═3c9ab394-7e2f-47f4-a634-3b1d0f9e4b9f
