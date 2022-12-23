@@ -45,7 +45,6 @@ using DataFrames
 include("Reliability of Barbaric Method.jl")
 include("../Shared Code/ExperimentUtilities.jl")
 
-progress_update("Estimated total time to complete: ?? hours. (1 minute if run with --test)")
 
 results_dir = joinpath(results_dir, figure_name)
 mkpath(results_dir)
@@ -53,51 +52,52 @@ mkpath(results_dir)
 if !args["test"]
     squares_to_test = 1000000
     samples_per_square = 1000
-    granularities = [1, 0.5, 0.25, 0.1, 0.05, 0.04, 0.02, 0.01]
-    spa_values = [5:16;] # Values of `samples_per_axis` to test for
+
+    # To use with the spa comparison
+    granularities1 = [0.1, 0.01]
+    samples_per_axiss1 = [5:16;] # Values of `samples_per_axis` to test for
+    
+    # To use with the granularities comparison
+    granularities2 = [1, 0.5, 0.25, 0.1, 0.05, 0.04, 0.02, 0.01]
+    samples_per_axiss2 = [5, 10]
 else
     squares_to_test = 100
     samples_per_square = 100
-    granularities = [1, 0.5, 0.25, 0.1, 0.05, 0.04, 0.02, 0.01]
-    spa_values = [5:16;] # Values of `samples_per_axis` to test for
+
+    # To use with the spa comparison
+    granularities1 = [0.1, 0.01]
+    samples_per_axiss1 = [5:16;] # Values of `samples_per_axis` to test for
+    
+    # To use with the granularities comparison
+    granularities2 = [1, 0.5, 0.25, 0.1, 0.05, 0.04, 0.02, 0.01]
+    samples_per_axiss2 = [5, 10]
 end
 
-samples_per_axis = 16
-grid = Grid(0.01, -15, 15, 0, 10)
-
+estimated_time = estimate_time(granularities1, samples_per_axiss1, samples_per_square, squares_to_test)
+estimated_time += estimate_time(granularities2, samples_per_axiss2, samples_per_square, squares_to_test)
+progress_update("Estimated time to complete: $estimated_time seconds.")
 
 if !args["skip-experiment"]
-    progress_update("Checking reachability function.")
-
-    _, granularity_accuracies = compute_accuracies_for_granularity(granularities, samples_per_axis, bbmechanics; samples_per_square, squares_to_test)
-
-    _, spa_accuracies = compute_accuracies_for_spa(grid, spa_values, bbmechanics; samples_per_square, squares_to_test)
-
-    spa_df = DataFrame(hcat(spa_values, spa_accuracies), ["N", "Accuracy"])
-    granularity_df = DataFrame(hcat(granularities, granularity_accuracies), ["δ", "Accuracy"])
+    spa_df = compute_accuracies(granularities1, samples_per_axiss1, bbmechanics; samples_per_square, squares_to_test)
+    granularity_df = compute_accuracies(granularities2, samples_per_axiss2, bbmechanics; samples_per_square, squares_to_test)
 
     # Save as csv, txt
     export_table(results_dir, "BarbaricAccuracyN", spa_df)
-    export_table(results_dir, "BarbaricAccuracyGranularity", granularity_df)
+    export_table(results_dir, "BarbaricAccuracyG", granularity_df)
 
     progress_update("Computation done.")
+else 
+    spa_df = CSV.read(results_dir ⨝ "BarbaricAccuracyN.csv", DataFrame)
+    granularity_df = CSV.read(results_dir ⨝ "BarbaricAccuracyG.csv", DataFrame)
 end
-
-spa_df = CSV.read(results_dir ⨝ "BarbaricAccuracyN.csv", DataFrame)
-granularity_df = CSV.read(results_dir ⨝ "BarbaricAccuracyGranularity.csv", DataFrame)
-
-spa_values = spa_df[!, "N"]
-spa_accuracies = spa_df[!, "Accuracy"]
-granularities = granularity_df[!, "δ"]
-granularity_accuracies = granularity_df[!, "Accuracy"]
 
 progress_update("Saving  to $results_dir")
 
-p1 = plot_accuracies_spa(spa_values, spa_accuracies; samples_per_square, squares_to_test, G=grid.G)
-p2 = plot_accuracies_granularity(granularities, granularity_accuracies; samples_per_square, squares_to_test, samples_per_axis)
+p1 = plot_accuracies_spa(spa_df)
+p2 = plot_accuracies_granularity(granularity_df)
 
 export_figure(results_dir, "BarbaricAccuracyN", p1)
-export_figure(results_dir, "BarbaricAccuracyGranularity", p2)
+export_figure(results_dir, "BarbaricAccuracyG", p2)
 
 progress_update("Done with $figure_name.")
 progress_update("====================================")
