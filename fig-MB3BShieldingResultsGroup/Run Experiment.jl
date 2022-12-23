@@ -130,7 +130,7 @@ progress_update("Saving  to $results_dir")
 
 NBPARAMS = Dict(
     "selected_file" => results_dir ⨝ "Query Results/Results.csv",
-    "layabout" => true,
+    "layabout" => false,
     "checks" => checks
 )
 
