@@ -416,17 +416,20 @@ common_plotargs = (
 # ╔═╡ 5ef10f10-102e-43a0-99cc-8d333450995d
 function plot_accuracies_spa(df, plotargs...)
 	labels = ["G=$G" for G in transpose(unique(df[!, :G]))]
+	xticks = df[!, :samples_per_axis] |> unique
+	xticks = xticks[2:2:end]
 	df = transform(df, :G => ByRow(string) => :G)
 
 	@df df plot(:samples_per_axis, :accuracy,
 		xflip=false,
+		xticks=xticks,
 		group=:G,
 		marker=:circle, markerstrokewidth=0,
 		color=[colors.PETER_RIVER colors.AMETHYST colors.BELIZE_HOLE],
 		xrotation=0,
 		size=(300, 300),
 		label=labels,
-		xlabel="δ", 
+		xlabel="N", 
 		ylabel="Accuracy",
 		legend=:outertop,
 		;common_plotargs..., plotargs...)
