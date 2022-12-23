@@ -112,9 +112,15 @@ cleandata = call() do
 	cleandata = sort(cleandata, [:Experiment, :Deterrence, :Runs])
 	cleandata = sort(cleandata, [:Experiment], by=experiment_order)
 
+	# We don't care about unshielded with no deterrence
 	cleandata = filter([:Experiment, :Deterrence] => 
 		(e, d) -> !(e == "NoShield" && d == "0"), 
 		cleandata)
+
+	# See note on BB time-locks
+	cleandata = filter([:Experiment, :Deterrence] => 
+			(e, d) -> !((e == "NoShield" && d == "-") || (e == "PostShielded" && d == "-")),
+			cleandata)
 
 	# Turn number of interventions into % interventions
 	cleandata = transform(cleandata, :Avg_Interventions => x -> (x/1200)*100, renamecols=false)
@@ -306,7 +312,7 @@ average_cost = call(() -> begin
 		transform!(df, :Runs => r -> string.(r), renamecols=false)
 		p1 = @df df plot!(:Runs, :Avg_Cost, 
 			group=:Label,
-			markershape=[:utriangle :diamond :pentagon],
+			markershape=[:circle :utriangle :diamond :pentagon],
 			markerstrokewidth=1,
 			markerstrokecolor=:white,
 			color=shielding_type_colors.post_shielded,
@@ -354,7 +360,7 @@ make_label(experiment, d) = "$(proper_experiment_name[experiment]) d=$d"
 # HACK: Spaces inserted to fix lexicographical sorting 
 function fix_bad_sorting(runs)
 	runs_labels = Dict(
-		100 => "100", 200 => "200", # Test values
+		10 => "10", 20 => "20", 100 => "100", 200 => "200", # Test values
 		1500 => " 1500", 3000 => " 3000", 6000 => " 6000", 
 		12000 => "12000")
 
@@ -480,7 +486,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.8.2"
 manifest_format = "2.0"
-project_hash = "0907f9190848bf57094e18a5f3a57eee62c4be29"
+project_hash = "130a988e078440b05e6d148cb80186651a146fa8"
 
 [[deps.AbstractFFTs]]
 deps = ["ChainRulesCore", "LinearAlgebra"]
