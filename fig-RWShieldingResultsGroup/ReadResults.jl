@@ -224,7 +224,7 @@ make_label(experiment, d) = "$(proper_experiment_name[experiment]) d=$d"
 average_cost = call(() -> begin
 	legend_position = :outertop
 	
-	plot(size=(300,650),
+	plot(size=(300,500),
 		legend_position=legend_position,
 		xlabel="Episodes",
 		ylabel=avg_cost_description,
@@ -314,10 +314,10 @@ average_interventions = call(() -> begin
 	
 	
 	@df df groupedbar(:Runs, :Avg_Interventions, 
-		size=(300, 325),
+		size=(300,220),
 		group=:Label,
-		color=runs_colors,
-		linecolor=runs_colors,
+		color=interventions_colors,
+		linecolor=interventions_colors,
 		legend=:outertop,
 		xlabel="Episodes",
 		ylabel=avg_interventions_description)
@@ -334,10 +334,10 @@ average_deaths = call(() -> begin
 	transform!(df, :Runs => fix_bad_sorting, renamecols=false)
 	
 	@df df groupedbar(:Runs, :Avg_Deaths, 
-		size=(300, 325),
+		size=(300,220),
 		group=:Label,
-		color=runs_colors,
-		linecolor=runs_colors,
+		color=deaths_colors,
+		linecolor=deaths_colors,
 		legend=:outertop,
 		xlabel="Episodes",
 		ylabel=avg_deaths_description)
@@ -387,8 +387,8 @@ call(() -> begin
 	@df df groupedbar(:Runs, :Avg_Interventions, 
 		size=(300, 400),
 		group=:Label,
-		color=runs_colors,
-		linecolor=runs_colors,
+		color=interventions_colors,
+		linecolor=interventions_colors,
 		yscale=:none,
 		#bar_width=20,
 		xlabel="Episodes",

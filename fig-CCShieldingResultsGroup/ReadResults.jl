@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.14
+# v0.19.19
 
 using Markdown
 using InteractiveUtils
@@ -253,7 +253,7 @@ end
 average_cost = call(() -> begin
 	legend_position = :outertop
 	
-	plot(size=(300,650),
+	plot(size=(300,500),
 		legend_position=legend_position,
 		xlabel="Episodes",
 		ylabel=avg_cost_description,
@@ -332,10 +332,10 @@ average_interventions = call(() -> begin
 	
 	
 	@df df groupedbar(:Runs, :Avg_Interventions, 
-		size=(300, 325),
+		size=(300, 220),
 		group=:Label,
-		color=runs_colors,
-		linecolor=runs_colors,
+		color=interventions_colors,
+		linecolor=interventions_colors,
 		legend=:outertop,
 		xlabel="Episodes",
 		ylabel=avg_interventions_description)
@@ -352,10 +352,10 @@ average_deaths = call(() -> begin
 	transform!(df, :Runs => fix_bad_sorting, renamecols=false)
 	
 	@df df groupedbar(:Runs, :Avg_Deaths, 
-		size=(300, 325),
+		size=(300, 220),
 		group=:Label,
-		color=runs_colors,
-		linecolor=runs_colors,
+		color=deaths_colors,
+		linecolor=deaths_colors,
 		legend=:outertop,
 		xlabel="Episodes",
 		ylabel=avg_deaths_description)
@@ -405,8 +405,8 @@ call(() -> begin
 	@df df groupedbar(:Runs, :Avg_Interventions, 
 		size=(300, 400),
 		group=:Label,
-		color=runs_colors,
-		linecolor=runs_colors,
+		color=interventions_colors,
+		linecolor=interventions_colors,
 		yscale=:none,
 		#bar_width=20,
 		xlabel="Episodes",
@@ -467,7 +467,7 @@ end
 # ╔═╡ 60885198-7b1f-4f66-b5d2-dad390403dcc
 variants_names = Dict(
 	"PostShieldedRandomChoice" => "Random Choice",
-	"PostShieldedPolicyPreferred" => "Strategy Preferred",
+	"PostShieldedPolicyPreferred" => "Agent Preference",
 	"PostShieldedInterventionMinimized" => "Min Interventions",
 	"PostShieldedCostMinimized" => "Min Cost",
 )
