@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.14
+# v0.19.19
 
 using Markdown
 using InteractiveUtils
@@ -164,7 +164,7 @@ begin
 			markerstrokewidth=0,
 			markerstrokealpha=0,
 			linewidth=2,
-			ylabel="Percent Safe Runs",
+			ylabel="Percent unsafe runs",
 			xlabel="β1",
 			label=nothing,
 			color=colors.EMERALD)
