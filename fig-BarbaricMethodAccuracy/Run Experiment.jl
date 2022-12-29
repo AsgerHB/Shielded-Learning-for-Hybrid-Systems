@@ -50,7 +50,7 @@ results_dir = joinpath(results_dir, figure_name)
 mkpath(results_dir)
 
 if !args["test"]
-    squares_to_test = 1000000
+    squares_to_test = 100000
     samples_per_square = 1000
 
     # To use with the spa comparison
@@ -66,11 +66,11 @@ else
 
     # To use with the spa comparison
     granularities1 = [0.1, 0.01]
-    samples_per_axiss1 = [5:16;] # Values of `samples_per_axis` to test for
+    samples_per_axiss1 = [2:16;] # Values of `samples_per_axis` to test for
     
     # To use with the granularities comparison
     granularities2 = [1, 0.5, 0.25, 0.1, 0.05, 0.04, 0.02, 0.01]
-    samples_per_axiss2 = [5, 10]
+    samples_per_axiss2 = [4, 8]
 end
 
 estimated_time = estimate_time(granularities1, samples_per_axiss1, samples_per_square, squares_to_test)
