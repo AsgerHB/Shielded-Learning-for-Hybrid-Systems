@@ -427,11 +427,11 @@ function plot_accuracies_spa(df, plotargs...)
 		marker=:circle, markerstrokewidth=0,
 		color=[colors.PETER_RIVER colors.AMETHYST colors.BELIZE_HOLE],
 		xrotation=0,
-		size=(300, 300),
+		size=(300, 180),
 		label=labels,
 		xlabel="N", 
 		ylabel="Accuracy",
-		legend=:outertop,
+		legend=:bottomright,
 		;common_plotargs..., plotargs...)
 	
 	hline!([1], label=nothing, color=colors.ASBESTOS)
@@ -483,11 +483,11 @@ function plot_accuracies_granularity(df, plotargs...)
 		marker=:circle, markerstrokewidth=0,
 		color=[colors.EMERALD colors.TURQUOISE colors.NEPHRITIS],
 		xrotation=0,
-		size=(300, 300),
+		size=(300, 180),
 		label=labels,
 		xlabel="δ", 
 		ylabel="Accuracy",
-		legend=:outertop,
+		legend=:bottomright,
 		;common_plotargs..., plotargs...)
 	
 	hline!([1], label=nothing, color=colors.ASBESTOS)
@@ -588,7 +588,7 @@ uuid = "6e34b625-4abd-537c-b88f-471c36dfa7a0"
 version = "1.0.8+0"
 
 [[deps.Cairo_jll]]
-deps = ["Artifacts", "Bzip2_jll", "Fontconfig_jll", "FreeType2_jll", "Glib_jll", "JLLWrappers", "LZO_jll", "Libdl", "Pixman_jll", "Pkg", "Xorg_libXext_jll", "Xorg_libXrender_jll", "Zlib_jll", "libpng_jll"]
+deps = ["Artifacts", "Bzip2_jll", "CompilerSupportLibraries_jll", "Fontconfig_jll", "FreeType2_jll", "Glib_jll", "JLLWrappers", "LZO_jll", "Libdl", "Pixman_jll", "Pkg", "Xorg_libXext_jll", "Xorg_libXrender_jll", "Zlib_jll", "libpng_jll"]
 git-tree-sha1 = "4b859a208b2397a7a623a03449e4636bdb17bcf2"
 uuid = "83423d85-b0ee-5818-9007-b63ccbeb887a"
 version = "1.16.1+1"
