@@ -211,10 +211,16 @@ call() do
 	end
 end
 
+# ╔═╡ 45500c97-b2a7-4669-ab37-579c75ca3002
+grouping = call() do
+	grouping =  groupby(cleandata, [:Experiment, :Deterrence, :Runs ])
+	grouping = combine(grouping, x -> x[1:10, :])
+	grouping =  groupby(grouping, [:Experiment, :Deterrence, :Runs ])
+end;
+
 # ╔═╡ 7904c209-eeea-4243-beb4-0e5a7fd47a56
 medians = 
-call(() -> begin
-	grouping =  groupby(cleandata, [:Experiment, :Deterrence, :Runs ])
+call(() -> begin	
 	medians = combine(grouping, 
 		:Avg_Cost => median, :Avg_Deaths => median, :Avg_Interventions => median,
 		renamecols=false)
@@ -223,7 +229,6 @@ end)
 # ╔═╡ e0444e2e-0e77-4e5a-ac1e-64db46f2558f
 standard_deviations = 
 call(() -> begin
-	grouping =  groupby(cleandata, [:Experiment, :Runs, :Deterrence])
 	df = combine(grouping, 
 		nrow => :Count,
 		:Avg_Cost => std, :Avg_Deaths => std, :Avg_Interventions => std,
@@ -351,6 +356,9 @@ average_cost = call(() -> begin
 	
 	p1
 end)
+
+# ╔═╡ ed1965e8-0c24-48b0-ad8a-896d5c52d7bc
+plot(average_cost, ylim=(20, 72))
 
 # ╔═╡ 1724e32a-be5c-4784-8b32-615e26160235
 make_label(experiment, d) = "$(proper_experiment_name[experiment]) d=$d"
@@ -548,7 +556,7 @@ uuid = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
 version = "0.10.4"
 
 [[deps.Cairo_jll]]
-deps = ["Artifacts", "Bzip2_jll", "Fontconfig_jll", "FreeType2_jll", "Glib_jll", "JLLWrappers", "LZO_jll", "Libdl", "Pixman_jll", "Pkg", "Xorg_libXext_jll", "Xorg_libXrender_jll", "Zlib_jll", "libpng_jll"]
+deps = ["Artifacts", "Bzip2_jll", "CompilerSupportLibraries_jll", "Fontconfig_jll", "FreeType2_jll", "Glib_jll", "JLLWrappers", "LZO_jll", "Libdl", "Pixman_jll", "Pkg", "Xorg_libXext_jll", "Xorg_libXrender_jll", "Zlib_jll", "libpng_jll"]
 git-tree-sha1 = "4b859a208b2397a7a623a03449e4636bdb17bcf2"
 uuid = "83423d85-b0ee-5818-9007-b63ccbeb887a"
 version = "1.16.1+1"
@@ -1745,12 +1753,14 @@ version = "0.9.1+5"
 # ╟─8da05256-b0d7-479e-bd42-2e03d521711c
 # ╟─ad80adab-6b8a-4fd5-b457-8e9e407b4cff
 # ╟─885b1c23-e56c-4940-b699-0602292583ee
-# ╟─7904c209-eeea-4243-beb4-0e5a7fd47a56
+# ╠═7904c209-eeea-4243-beb4-0e5a7fd47a56
+# ╠═45500c97-b2a7-4669-ab37-579c75ca3002
 # ╟─e0444e2e-0e77-4e5a-ac1e-64db46f2558f
 # ╟─d13faa16-897a-4d01-9b14-ff6d03f4a592
 # ╟─0f8633b1-af76-4fb7-9822-7abd90a35a06
 # ╠═b9c5b5e8-7c3c-4cb1-850d-937e928c8090
 # ╠═b11d7a45-2e55-4ccb-82f8-d09cb669719b
+# ╠═ed1965e8-0c24-48b0-ad8a-896d5c52d7bc
 # ╟─4fd405a2-ef9e-4590-8af1-6f806724ef2c
 # ╠═1724e32a-be5c-4784-8b32-615e26160235
 # ╠═e47b5ba0-3a9d-4d73-9ec8-00adb42ee2fe
