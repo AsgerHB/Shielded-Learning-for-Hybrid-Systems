@@ -413,6 +413,9 @@ common_plotargs = (
 	markersize=7, 
 	linewidth=4)
 
+# ╔═╡ ad5fd6c0-59fd-4437-9ff6-57f08c6656bc
+figure_size=(300, 150)
+
 # ╔═╡ 5ef10f10-102e-43a0-99cc-8d333450995d
 function plot_accuracies_spa(df, plotargs...)
 	labels = ["G=$G" for G in transpose(unique(df[!, :G]))]
@@ -424,10 +427,11 @@ function plot_accuracies_spa(df, plotargs...)
 		xflip=false,
 		xticks=xticks,
 		group=:G,
-		marker=:circle, markerstrokewidth=0,
+		marker=:circle, 
+		markerstrokewidth=1,
 		color=[colors.PETER_RIVER colors.AMETHYST colors.BELIZE_HOLE],
 		xrotation=0,
-		size=(300, 180),
+		size=figure_size,
 		label=labels,
 		xlabel="N", 
 		ylabel="Accuracy",
@@ -484,7 +488,7 @@ function plot_accuracies_granularity(df, plotargs...)
 		marker=:circle, markerstrokewidth=0,
 		color=[colors.EMERALD colors.TURQUOISE colors.NEPHRITIS],
 		xrotation=0,
-		size=(300, 180),
+		size=figure_size,
 		label=labels,
 		xlabel="δ", 
 		ylabel="Accuracy",
@@ -1830,6 +1834,7 @@ version = "1.4.1+0"
 # ╠═288a212a-4ee6-4c29-8238-6d22f8e3b9d7
 # ╠═f72b8dba-1b9a-4b0b-802a-03c5a299e204
 # ╠═5e833de4-3a70-4133-a312-ef0b007d1c20
+# ╠═ad5fd6c0-59fd-4437-9ff6-57f08c6656bc
 # ╠═5ef10f10-102e-43a0-99cc-8d333450995d
 # ╠═a6771752-a238-4186-90a1-0f80c4a9524c
 # ╟─3bffdc6b-9978-47b6-83b9-e1366019f60b

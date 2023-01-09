@@ -159,7 +159,7 @@ begin
 			xticks=xticks,)
 		
 		@df df plot!(:β1, :percent_unsafe, 
-			size=(300, 300),
+			size=(300, 200),
 			xflip=true,
 			marker=:circle,
 			markersize=5,
