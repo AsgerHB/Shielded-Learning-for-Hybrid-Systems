@@ -279,8 +279,7 @@ average_cost = call(() -> begin
 		#xlims=(1500, 12000),
 		legend_position=legend_position,
 		xlabel="Training runs",
-		ylabel=avg_cost_description,
-		margin=5mm)
+		ylabel=avg_cost_description)
 
 	
 	make_label(experiment, d) = "$(proper_experiment_name[experiment]) d=$d"

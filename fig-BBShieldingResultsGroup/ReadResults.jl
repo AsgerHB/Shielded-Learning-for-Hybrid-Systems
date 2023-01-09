@@ -280,7 +280,6 @@ average_cost = call(() -> begin
 		legend_position=legend_position,
 		xlabel="Training runs",
 		ylabel=avg_cost_description,
-		margin=5mm)
 
 	
 	make_label(experiment, d) = "$(proper_experiment_name[experiment]) d=$d"
@@ -383,6 +382,7 @@ average_interventions = call(() -> begin
 		linecolor=interventions_colors,
 		legend=:outertop,
 		xlabel="Episodes",
+		margin=0mm,
 		ylabel=avg_interventions_description)
 end)
 
@@ -403,6 +403,7 @@ average_deaths = call(() -> begin
 		linecolor=deaths_colors,
 		legend=:outertop,
 		xlabel="Episodes",
+		margin=0mm,
 		ylabel=avg_deaths_description)
 end)
 

@@ -16,6 +16,7 @@ begin
 	using StatsPlots
 	using NaturalSort
 	using Printf
+	using Measures
 	using Statistics
 	using ProgressLogging
 	include("StatisticalChecking.jl")
@@ -209,6 +210,7 @@ CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
 Glob = "c27321d9-0574-5035-807b-f59d2c89b15c"
+Measures = "442fdcdd-2543-5da2-b0f3-8c86c306513e"
 NaturalSort = "c020b1a1-e9b0-503a-9c33-f039bfc54a85"
 Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
 PlutoUI = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
@@ -222,6 +224,7 @@ StatsPlots = "f3b207a7-027a-5e70-b257-86293d7955fd"
 CSV = "~0.10.7"
 DataFrames = "~1.4.3"
 Glob = "~1.3.0"
+Measures = "~0.3.2"
 NaturalSort = "~1.0.0"
 Plots = "~1.36.4"
 PlutoUI = "~0.7.48"
@@ -235,7 +238,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.8.2"
 manifest_format = "2.0"
-project_hash = "75282f8c697bf7d63f20f07b7f3d600a838ce551"
+project_hash = "c9b154c196f202a03ea612de86b06fc0ea6c3d7e"
 
 [[deps.AbstractFFTs]]
 deps = ["ChainRulesCore", "LinearAlgebra"]

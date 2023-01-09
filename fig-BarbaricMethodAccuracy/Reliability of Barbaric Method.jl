@@ -432,6 +432,7 @@ function plot_accuracies_spa(df, plotargs...)
 		xlabel="N", 
 		ylabel="Accuracy",
 		legend=:bottomright,
+		margin=0mm,
 		;common_plotargs..., plotargs...)
 	
 	hline!([1], label=nothing, color=colors.ASBESTOS)
@@ -488,6 +489,7 @@ function plot_accuracies_granularity(df, plotargs...)
 		xlabel="δ", 
 		ylabel="Accuracy",
 		legend=:bottomright,
+		margin=0mm
 		;common_plotargs..., plotargs...)
 	
 	hline!([1], label=nothing, color=colors.ASBESTOS)
