@@ -418,7 +418,7 @@ figure_size=(300, 150)
 
 # ╔═╡ 5ef10f10-102e-43a0-99cc-8d333450995d
 function plot_accuracies_spa(df, plotargs...)
-	labels = ["G=$G" for G in transpose(unique(df[!, :G]))]
+	labels = ["δ=$G" for G in transpose(unique(df[!, :G]))]
 	xticks = df[!, :samples_per_axis] |> unique
 	xticks = xticks[2:2:end]
 	df = transform(df, :G => ByRow(string) => :G)

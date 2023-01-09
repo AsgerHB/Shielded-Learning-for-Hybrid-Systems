@@ -167,7 +167,7 @@ begin
 			markerstrokecolor=:white,
 			linewidth=2,
 			ylabel="Percent unsafe runs",
-			xlabel="β1",
+			xlabel="β",
 			label=nothing,
 			color=colors.EMERALD)
 		

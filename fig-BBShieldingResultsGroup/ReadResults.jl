@@ -278,8 +278,8 @@ average_cost = call(() -> begin
 	plot(size=(300,500),
 		#xlims=(1500, 12000),
 		legend_position=legend_position,
-		xlabel="Training runs",
-		ylabel=avg_cost_description,
+		xlabel="Episodes",
+		ylabel=avg_cost_description)
 
 	
 	make_label(experiment, d) = "$(proper_experiment_name[experiment]) d=$d"
