@@ -55,7 +55,7 @@ if !args["test"]
 
     # To use with the spa comparison
     granularities1 = [0.1, 0.01]
-    samples_per_axiss1 = [5:16;] # Values of `samples_per_axis` to test for
+    samples_per_axiss1 = [2:16;] # Values of `samples_per_axis` to test for
     
     # To use with the granularities comparison
     granularities2 = [1, 0.5, 0.25, 0.1, 0.05, 0.04, 0.02, 0.01]
