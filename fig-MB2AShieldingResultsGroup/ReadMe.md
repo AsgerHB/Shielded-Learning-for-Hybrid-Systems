@@ -14,7 +14,7 @@ The experiment has the following configurations:
 
 Run from parent directory as 
 
-	julia "fig-BBShieldingResultsGroup/Run Experiment"
+	julia "fig-MB2AShieldingResultsGroup/Run Experiment.jl"
 
 
 

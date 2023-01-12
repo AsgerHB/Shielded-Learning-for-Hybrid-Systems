@@ -9,6 +9,6 @@ Shields are synthesised using either a "barbaric" or "rigorous" reachability met
 The rigorous method makes use of the library `ReachabilityAnalysis.jl` to over-approximate possible outcomes of the system. This gives theoretical guarantees for the safety, at the cost of more compute time and a less optimistic shield. 
 The barbaric method makes use of a sampling-based method to under-approximate the possible outcomes of the system. This is a quick-and-dirty solution to the reachability problem, and will be tested here is whether it works in practice. 
 
-Everything is tied together in the file `Run Experiment.jl`. Run as `julia "Run Experiment"` from within this folder. 
+Everything is tied together in the file `Run Experiment.jl`. Run as `julia "Run Experiment.jl"` from within this folder. 
 
 Some of files are Pluto Notebooks, which by their nature are also valid standalone julia scripts. 
