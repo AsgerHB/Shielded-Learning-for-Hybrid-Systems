@@ -326,7 +326,7 @@ test_dir = mktempdir(prefix="jl_checking_")
 # ╠═╡ skip_as_script = true
 #=╠═╡
 test_shields_and_save_results(
-	"/home/asger/Insync/OQ82YK@cs.aau.dk/OneDrive Biz - SharePoint/DEIS - Shielded AI - TACAS Paper - Dokumenter/Shielded AI - TACAS Paper/Code/Export/CCShields", 
+	"path/to/Code/Export/CCShields", 
 	test_dir, 
 	100)
   ╠═╡ =#

@@ -13820,7 +13820,7 @@ Mean estimate of displayed sample: 0.755 ± 0.089 (95% CI)</comment>
 			</result>
 		</query>
 		<query>
-			<formula>saveStrategy("/home/asger/Insync/OQ82YK@cs.aau.dk/OneDrive Biz - SharePoint/DEIS - Shielded AI - TACAS Paper - Dokumenter/Shielded AI - TACAS Paper/Code/Export/MB2HitWell1000.strategy.json", HitWell1000)</formula>
+			<formula>saveStrategy("path/to/Code/Export/MB2HitWell1000.strategy.json", HitWell1000)</formula>
 			<comment/>
 			<result outcome="success" type="quality" timestamp="2022-11-07 13:12:14 +0100">
 				<option key="--total-runs" value="12000"/>
@@ -14490,7 +14490,7 @@ Mean estimate of displayed sample: 104.78 ± 1.1116 (95% CI)</comment>
 			<comment/>
 		</query>
 		<query>
-			<formula>strategy ImportedStrategy = loadStrategy {} -&gt; {p, v} ("/home/asger/Insync/OQ82YK@cs.aau.dk/OneDrive Biz - SharePoint/DEIS - Shielded AI - TACAS Paper - Dokumenter/Shielded AI - TACAS Paper/Code/Export/MB2HitWell1000.strategy.json")</formula>
+			<formula>strategy ImportedStrategy = loadStrategy {} -&gt; {p, v} ("path/to/Code/Export/MB2HitWell1000.strategy.json")</formula>
 			<comment/>
 		</query>
 		<query>

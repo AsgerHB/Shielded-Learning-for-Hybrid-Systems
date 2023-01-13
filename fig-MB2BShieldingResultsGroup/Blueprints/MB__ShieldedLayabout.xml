@@ -267,7 +267,7 @@ x' == 10</label>
 			<comment/>
 		</query>
 		<query>
-			<formula>saveStrategy("/home/asger/Documents/Files/Arbejde/AAU/TacasPaper/Code/Exported.strategy.json", HitWell1000)</formula>
+			<formula>saveStrategy("/path/to/Code/Exported.strategy.json", HitWell1000)</formula>
 			<comment/>
 		</query>
 		<query>
@@ -275,7 +275,7 @@ x' == 10</label>
 			<comment/>
 		</query>
 		<query>
-			<formula>strategy ImportedStrategy = loadStrategy {} -&gt; {p, v} ("/home/asger/Documents/Files/Arbejde/AAU/TacasPaper/Code/BB-exported.strategy.json")</formula>
+			<formula>strategy ImportedStrategy = loadStrategy {} -&gt; {p, v} ("/path/to/Code/BB-exported.strategy.json")</formula>
 			<comment/>
 		</query>
 		<query>

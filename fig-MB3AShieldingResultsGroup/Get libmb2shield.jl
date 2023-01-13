@@ -99,9 +99,9 @@ function get_libmb2shield(possible_shield_file, lib_source_code_dir, lib_destina
 end
 
 if abspath(PROGRAM_FILE) == @__FILE__
-    possible_shield_file = "/home/asger/Results/tab-BBSynthesis/Exported Strategies/25 Samples 0.02 G.shield"
+    possible_shield_file = homedir() ⨝ "/Results/tab-BBSynthesis/Exported Strategies/25 Samples 0.02 G.shield"
     test = true
-    lib_destination_dir = "/home/asger/libmb2shield.2.so"
+    lib_destination_dir = homedir() ⨝ "/libmb2shield.2.so"
     lib_source_code_dir = "N/A" # Removed because it was nonsense
     println("Running as standalone script. This is suitable for testing.")
     result = get_libmb2shield(possible_shield_file, lib_source_code_dir, lib_destination_dir; test)

@@ -469,8 +469,8 @@ get_shielded_strategy_int(selected_file, shield_file, false)((3, 3, 41))
 # ╠═╡ skip_as_script = true
 #=╠═╡
 get_shielded_strategy(
-	"/home/asger/Insync/OQ82YK@cs.aau.dk/OneDrive Biz - SharePoint/DEIS - Shielded AI - TACAS Paper - Dokumenter/Shielded AI - TACAS Paper/Code/Export/CC-shielded.json",
-	"/home/asger/Insync/OQ82YK@cs.aau.dk/OneDrive Biz - SharePoint/DEIS - Shielded AI - TACAS Paper - Dokumenter/Shielded AI - TACAS Paper/Code/Export/CCShields/old testshield CC 192 samples with G of 0.5.shield",
+	"path/to/CC-shielded.json",
+	"path/to/CCShields/old testshield CC 192 samples with G of 0.5.shield",
 	false
 )([10, 10, 100])
   ╠═╡ =#

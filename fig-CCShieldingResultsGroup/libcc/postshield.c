@@ -30,7 +30,7 @@ The platform-independent way of including the julia-to-c library is to pull the 
 
 
 // Consts for testing only
-#define CODE_PATH "/home/asger/Insync/OQ82YK@cs.aau.dk/OneDrive Biz - SharePoint/DEIS - Shielded AI - TACAS Paper - Dokumenter/Shielded AI - TACAS Paper/ReproducibilityPackage"
+#define CODE_PATH "/path/to/ReproducibilityPackage"
 # define POSTSHIELD_NOTEBOOK_PATH CODE_PATH "fig-CCShieldingResultsGroup/PostShield Strategy.jl"
 #define STRATEGY_PATH CODE_PATH "/Export/CC-shielded.json"
 #define SHIELD_PATH CODE_PATH "/Export/CCShields/old testshield CC 192 samples with G of 0.5.shield"

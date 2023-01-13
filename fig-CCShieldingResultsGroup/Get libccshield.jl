@@ -126,8 +126,8 @@ if abspath(PROGRAM_FILE) == @__FILE__
     println("Working in: $working_dir")
     possible_shield_file = "../Export/CCShields/CC 375 Samples 0.5 G.shield"
     test = true
-    preshield_destination = "/home/asger/libccshield.2.so"
-    postshield_destination = "/home/asger/libccpostshield.2.so"
+    preshield_destination = homedir() ⨝ "/libccshield.2.so"
+    postshield_destination = homedir() ⨝ "/libccpostshield.2.so"
     source_dir = "CLibrary"
     result = get_libccshield(possible_shield_file, source_dir; preshield_destination, postshield_destination, working_dir, test)
 
