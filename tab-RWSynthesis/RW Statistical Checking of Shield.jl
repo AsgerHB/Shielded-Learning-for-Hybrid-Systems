@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.14
+# v0.19.19
 
 using Markdown
 using InteractiveUtils
@@ -337,7 +337,10 @@ end
   ╠═╡ =#
 
 # ╔═╡ 271f092a-a50c-4c9a-9055-afc502ea558e
+# ╠═╡ skip_as_script = true
+#=╠═╡
 test_shield("/home/asger/Results/fig-RWShieldingResultsGroup/librwshield/RW 0.005 G.shield", [1/i for i in 2:5], 10)
+  ╠═╡ =#
 
 # ╔═╡ 42bd7fbb-faf2-4ae7-b538-62f70e9e09fc
 """
@@ -383,13 +386,6 @@ end
 
 # ╔═╡ 47808dd5-0476-4c4d-b567-9f00d48c173a
 test_dir = mktempdir(prefix="jl_checking_")
-
-# ╔═╡ 7a94b9c0-1614-4c72-a371-284d07e508ea
-test_shields_and_save_results(
-	"/home/asger/Results/fig-RWShieldingResultsGroup/librwshield/", 
-	test_dir, 
-	[1/i for i in 2:5],
-	100)
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -453,7 +449,7 @@ uuid = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
 version = "0.10.4"
 
 [[deps.Cairo_jll]]
-deps = ["Artifacts", "Bzip2_jll", "Fontconfig_jll", "FreeType2_jll", "Glib_jll", "JLLWrappers", "LZO_jll", "Libdl", "Pixman_jll", "Pkg", "Xorg_libXext_jll", "Xorg_libXrender_jll", "Zlib_jll", "libpng_jll"]
+deps = ["Artifacts", "Bzip2_jll", "CompilerSupportLibraries_jll", "Fontconfig_jll", "FreeType2_jll", "Glib_jll", "JLLWrappers", "LZO_jll", "Libdl", "Pixman_jll", "Pkg", "Xorg_libXext_jll", "Xorg_libXrender_jll", "Zlib_jll", "libpng_jll"]
 git-tree-sha1 = "4b859a208b2397a7a623a03449e4636bdb17bcf2"
 uuid = "83423d85-b0ee-5818-9007-b63ccbeb887a"
 version = "1.16.1+1"
@@ -1463,6 +1459,5 @@ version = "1.4.1+0"
 # ╠═271f092a-a50c-4c9a-9055-afc502ea558e
 # ╠═42bd7fbb-faf2-4ae7-b538-62f70e9e09fc
 # ╠═47808dd5-0476-4c4d-b567-9f00d48c173a
-# ╠═7a94b9c0-1614-4c72-a371-284d07e508ea
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
