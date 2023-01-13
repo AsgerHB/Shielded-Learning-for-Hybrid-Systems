@@ -112,7 +112,7 @@ write(joinpath(results_dir, "$exported_table_name.tex"), "$resulting_latex_table
 write(joinpath(results_dir, "macros.tex"), 
 """\\newcommand{\\granularity}{G}
 \\newcommand{\\state}{s}
-\newcommand{\juliareach}{\textsc{JuliaReach}\xspace}""")
+\\newcommand{\\juliareach}{\\textsc{JuliaReach}\\xspace}""")
 
 
 progress_update("Saved $(exported_table_name)")
