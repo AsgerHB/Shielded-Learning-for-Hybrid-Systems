@@ -17,9 +17,6 @@ s = ArgParseSettings()
 # infix operator "\join" redefined to signify joinpath
 ⨝ = joinpath
 
-shield1_default = homedir() ⨝ "Results/tab-BBSynthesis/Exported Strategies/400 Samples 0.01 G.shield"
-shield2_default = homedir() ⨝ "Results/tab-BBSynthesis/Exported Strategies/BOX 0.001 with G of 0.01.shield"
-
 @add_arg_table s begin
     "--test"
         help="""Test-mode. Produce potentially useless results, but fast.
