@@ -214,7 +214,12 @@ end
 # ╔═╡ 45500c97-b2a7-4669-ab37-579c75ca3002
 grouping = call() do
 	grouping =  groupby(cleandata, [:Experiment, :Deterrence, :Runs ])
-	grouping = combine(grouping, x -> x[1:10, :])
+	
+	# Take at most 10 rows for each configuration. (Experiment, Deterrence, Runs)
+	take = min(combine(grouping, nrow)[!, :nrow]...) # Find the lowest number of rows for a configuration
+	take = min(take, 10)
+
+	grouping = combine(grouping, x -> x[1:take, :])
 	grouping =  groupby(grouping, [:Experiment, :Deterrence, :Runs ])
 end;
 
