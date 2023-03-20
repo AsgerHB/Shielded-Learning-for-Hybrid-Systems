@@ -1,0 +1,303 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.5//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_5.dtd'>
+<nta>
+	<declaration>// Place global declarations here.
+clock l, t;
+hybrid clock v;
+double c;
+
+import "%libopshield_path%"
+{
+    int get_value(double v_ego, double v_front, double distance);
+};</declaration>
+	<template>
+		<name x="5" y="5">Pump</name>
+		<declaration>// Place local declarations here.
+</declaration>
+		<location id="id0" x="-34" y="0">
+			<name x="-44" y="-34">off</name>
+			<label kind="invariant" x="-68" y="-68">l' == -1 &amp;&amp;
+v' == -c</label>
+			<label kind="exponentialrate" x="-42" y="50">1</label>
+		</location>
+		<location id="id1" x="153" y="0">
+			<name x="143" y="-34">on</name>
+			<label kind="invariant" x="119" y="-68">l' == -1 &amp;&amp;
+v' == 2.2 - c</label>
+			<label kind="exponentialrate" x="153" y="42">1</label>
+		</location>
+		<init ref="id0"/>
+		<transition id="id2">
+			<source ref="id0"/>
+			<target ref="id1"/>
+			<label kind="guard" x="34" y="-9">l &lt;= 0</label>
+			<label kind="assignment" x="34" y="8">l = 2</label>
+			<nail x="25" y="8"/>
+			<nail x="34" y="-9"/>
+			<nail x="85" y="-9"/>
+			<nail x="93" y="8"/>
+		</transition>
+		<transition id="id3">
+			<source ref="id1"/>
+			<target ref="id0"/>
+			<label kind="guard" x="34" y="-76">l &lt;= 0</label>
+			<label kind="assignment" x="34" y="-59">l = 2</label>
+			<nail x="93" y="-8"/>
+			<nail x="85" y="-34"/>
+			<nail x="34" y="-34"/>
+			<nail x="25" y="-8"/>
+		</transition>
+	</template>
+	<template>
+		<name>Machine</name>
+		<location id="id4" x="93" y="-93">
+			<label kind="invariant" x="68" y="-127">t &lt;= 16</label>
+		</location>
+		<location id="id5" x="187" y="-93">
+			<label kind="invariant" x="161" y="-127">t &lt;= 18</label>
+		</location>
+		<location id="id6" x="-102" y="-93">
+			<label kind="invariant" x="-127" y="-127">t &lt;= 12</label>
+		</location>
+		<location id="id7" x="-195" y="-93">
+			<label kind="invariant" x="-221" y="-127">t &lt;= 10</label>
+		</location>
+		<location id="id8" x="-340" y="-93">
+			<label kind="invariant" x="-366" y="-127">t &lt;= 8</label>
+		</location>
+		<location id="id9" x="-425" y="-93">
+			<label kind="invariant" x="-450" y="-127">t &lt;= 4</label>
+		</location>
+		<location id="id10" x="-518" y="-93">
+			<label kind="invariant" x="-544" y="-127">t &lt;= 2</label>
+		</location>
+		<location id="id11" x="280" y="-93">
+			<label kind="invariant" x="254" y="-127">t &lt;= 20</label>
+		</location>
+		<location id="id12" x="0" y="-93">
+			<label kind="invariant" x="-25" y="-127">t &lt;= 14</label>
+		</location>
+		<init ref="id10"/>
+		<transition id="id13">
+			<source ref="id4"/>
+			<target ref="id5"/>
+			<label kind="guard" x="110" y="-76">t &gt;= 16</label>
+			<label kind="assignment" x="111" y="-93">c = 0.5</label>
+		</transition>
+		<transition id="id14">
+			<source ref="id12"/>
+			<target ref="id4"/>
+			<label kind="guard" x="17" y="-76">t &gt;= 14</label>
+			<label kind="assignment" x="18" y="-93">c = 1.7</label>
+		</transition>
+		<transition id="id15">
+			<source ref="id11"/>
+			<target ref="id10"/>
+			<label kind="guard" x="322" y="-93">t &gt;= 20</label>
+			<label kind="assignment" x="322" y="-135">c = 0,
+t = 0</label>
+			<nail x="322" y="-93"/>
+			<nail x="322" y="-136"/>
+			<nail x="-561" y="-136"/>
+			<nail x="-561" y="-93"/>
+		</transition>
+		<transition id="id16">
+			<source ref="id5"/>
+			<target ref="id11"/>
+			<label kind="guard" x="203" y="-76">t &gt;= 18</label>
+			<label kind="assignment" x="202" y="-93">c = 0</label>
+		</transition>
+		<transition id="id17">
+			<source ref="id6"/>
+			<target ref="id12"/>
+			<label kind="guard" x="-85" y="-76">t &gt;= 12</label>
+			<label kind="assignment" x="-84" y="-93">c = 0</label>
+		</transition>
+		<transition id="id18">
+			<source ref="id7"/>
+			<target ref="id6"/>
+			<label kind="guard" x="-178" y="-76">t &gt;= 10</label>
+			<label kind="assignment" x="-178" y="-93">c = 2.5</label>
+		</transition>
+		<transition id="id19">
+			<source ref="id8"/>
+			<target ref="id7"/>
+			<label kind="guard" x="-324" y="-76">t &gt;= 8</label>
+			<label kind="assignment" x="-323" y="-93">c = 1.2</label>
+		</transition>
+		<transition id="id20">
+			<source ref="id9"/>
+			<target ref="id8"/>
+			<label kind="guard" x="-409" y="-76">t &gt;= 4</label>
+			<label kind="assignment" x="-408" y="-93">c = 0</label>
+		</transition>
+		<transition id="id21">
+			<source ref="id10"/>
+			<target ref="id9"/>
+			<label kind="guard" x="-501" y="-76">t &gt;= 2</label>
+			<label kind="assignment" x="-501" y="-93">c = 1.2</label>
+		</transition>
+	</template>
+	<system>// List one or more processes to be composed into a system.
+system Pump, Machine;
+</system>
+	<queries>
+		<query>
+			<formula>simulate[&lt;=60] {c}</formula>
+			<comment/>
+			<result outcome="success" type="quality" timestamp="2023-03-16 16:00:08 +0100">
+				<plot title="Simulations (1)" xaxis="time" yaxis="value">
+					<series title="c" type="l" color="0xff0000" encoding="csv">0.0,0.0
+2.0,0.0
+2.0,1.2
+4.0,1.2
+4.0,0.0
+8.0,0.0
+8.0,1.2
+10.0,1.2
+10.0,2.5
+12.0,2.5
+12.0,0.0
+14.0,0.0
+14.0,1.7
+16.0,1.7
+16.0,0.5
+18.0,0.5
+18.0,0.0
+22.0,0.0
+22.0,1.2
+24.0,1.2
+24.0,0.0
+28.0,0.0
+28.0,1.2
+30.0,1.2
+30.0,2.5
+32.0,2.5
+32.0,0.0
+34.0,0.0
+34.0,1.7
+36.0,1.7
+36.0,0.5
+38.0,0.5
+38.0,0.0
+42.0,0.0
+42.0,1.2
+44.0,1.2
+44.0,0.0
+48.0,0.0
+48.0,1.2
+50.0,1.2
+50.0,2.5
+52.0,2.5
+52.0,0.0
+54.0,0.0
+54.0,1.7
+56.0,1.7
+56.0,0.5
+58.0,0.5
+58.0,0.0
+60.000002,0.0
+					</series>
+					<comment/>
+				</plot>
+			</result>
+		</query>
+		<query>
+			<formula>simulate[&lt;=20;5] {v}</formula>
+			<comment/>
+			<result outcome="success" type="quality" timestamp="2023-03-16 16:01:09 +0100">
+				<plot title="Simulations (5)" xaxis="time" yaxis="value">
+					<series title="v" type="l" color="0xff0000" encoding="csv">0.0,0.0
+0.37178362777440327,0.0
+2.0,3.582076018896313
+2.7506553949766044,4.332731413872917
+4.0,2.833517887844842
+4.867238583449725,2.833517887844842
+8.0,9.725593004255442
+10.0,11.725593004255442
+10.049484164022005,11.71074775504884
+12.0,6.834458165103852
+12.416663365256655,6.834458165103852
+14.0,10.3177987615392
+14.768265248103795,10.701931385591097
+16.0,8.607982307367557
+18.0,7.607982307367553
+18.544904925828085,7.607982307367553
+20.000002,10.809195870545816
+					</series>
+					<series title="" type="l" color="0xff1212" encoding="csv">0.0,0.0
+2.0,0.0
+2.999753137387829,-1.1997037648653917
+4.0,-0.19945690225322066
+5.5509199106328655,3.212566901139082
+7.74596647417741,3.212566901139082
+8.0,3.771440657948778
+10.0,5.771440657948777
+10.816752183348624,5.52641500294419
+12.0,2.568295461315751
+14.0,2.568295461315751
+14.476853339369416,1.7576447843877443
+16.0,2.519218114703037
+18.0,5.919218114702964
+18.502363302418395,7.024417380023425
+20.000002,7.024417380023425
+					</series>
+					<series title="" type="l" color="0xff2424" encoding="csv">0.0,0.0
+0.17510132043106616,0.0
+2.0,4.014777095051653
+2.3952130909411684,4.409990185992821
+4.0,2.4842458951222257
+4.810501262636033,2.4842458951222257
+8.0,9.501143117322991
+10.0,11.501143117322991
+11.659178410388414,11.003389594206467
+12.0,10.151335620177505
+14.0,10.151335620177505
+14.461443403021569,9.366881835040834
+16.0,10.136160133530048
+16.482413242300687,10.956262645441226
+18.0,10.19746926659157
+19.442532578988175,10.19746926659157
+20.000002,11.423901992817596
+					</series>
+					<series title="" type="l" color="0xff3636" encoding="csv">0.0,0.0
+2.0,0.0
+3.7283494007662936,-2.0740192809195537
+4.0,-1.802368681685847
+6.620323122603704,3.962342188042339
+8.0,3.962342188042339
+9.286088188224443,2.419036362173018
+10.0,3.1329481739485745
+12.0,2.532948173948574
+12.156579153539367,2.8774223117351805
+14.0,2.8774223117351805
+15.316167557589038,0.6399374638338342
+16.0,0.9818536850393148
+17.562426091823276,3.6379780411388922
+18.0,3.4191910870505318
+20.000002,3.4191910870505318
+					</series>
+					<series title="" type="l" color="0xff4747" encoding="csv">0.0,0.0
+0.29224123004390157,0.0
+2.0,3.757069293903412
+3.03832658840883,4.795395882312242
+4.0,3.641387788402838
+6.2719440805206865,3.641387788402838
+8.0,7.443110811257303
+9.104417930457842,8.547528741715146
+10.0,7.472830258264553
+11.990649489395057,2.4962065347769404
+12.0,2.4934013815954574
+14.0,6.893401381595479
+14.075583899008652,6.931193331099805
+16.0,3.659685959414531
+17.622844984358306,2.8482634672353755
+18.0,3.4894269938262608
+20.000002,7.889431393826207
+					</series>
+					<comment/>
+				</plot>
+			</result>
+		</query>
+	</queries>
+</nta>
