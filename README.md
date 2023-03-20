@@ -16,6 +16,19 @@ Make sure you have the following packages installed on your system:
 	tar zxvf julia-1.8.2-linux-x86_64.tar.gz
 	mv julia-1.8.2/ ~/julia-1.8.2
 
+Download dependencies for this repository. Note that the `]` key activates the package manager interface.
+
+	cd /path/to/this/repository
+	julia
+	] instantiate
+
+### Install the GridShielding Package
+
+The package has not yet beed added to the Julia packages repository, and so has to be downloaded manually from GitHub.
+
+	mkdir -p .julia/dev
+	cd .julia/dev
+	git clone https://github.com/AsgerHB/GridShielding.jl 
 	
 	
 ### Install UPPAAL STRATEGO 10 and Activate License
