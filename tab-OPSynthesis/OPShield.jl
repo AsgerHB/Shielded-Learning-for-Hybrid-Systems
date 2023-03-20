@@ -104,13 +104,13 @@ The state variable is going to be: $(t, v, p, l)$ where
 md"""
 Note that the variable $p$ represents an automaton location and can therefore only assume the values $0$ and $1$. For this reason, the granularity is fixed to $1$.
 
-`granularity_t =` $(@bind granularity_t NumberField(0.001:0.001:4, default=2))
+`granularity_t =` $(@bind granularity_t NumberField(0.001:0.001:4, default=m.time_step))
 
 `granularity_v =` $(@bind granularity_v NumberField(0.001:0.001:4, default=0.1))
 
 `granularity_p = 1.0`
 
-`granularity_l =` $(@bind granularity_l NumberField(0.001:0.001:m.time_step, default=0.1))
+`granularity_l =` $(@bind granularity_l NumberField(0.001:0.001:m.time_step, default=m.time_step))
 
 """
 
@@ -185,17 +185,14 @@ md"""
 ## Some Debug Stuff
 """
 
-# ╔═╡ 252ac6f4-ae88-4647-91cc-7f29e0a1a015
+# ╔═╡ 9f1c8c62-0ad1-4c93-8f0a-ef0f61f2bcf4
 md"""
-## Synthesising Safe Strategy
+## Importing Safe Strategy
+
+Optionally, you can import an existing safe strategy.
 """
 
-# ╔═╡ f65de4dd-438b-43c2-9571-adc3fa03fb09
-reachability_function = get_barbaric_reachability_function(simulation_model)
-
 # ╔═╡ 5ff2a592-e30e-43ad-938e-5396f94f713e
-# Enable this cell in order to import a shield instead of synthesising it from scratch.
-
 md"""
 **Pick your shield:** 
 
@@ -203,7 +200,47 @@ md"""
 """
 
 # ╔═╡ f589d4eb-5f83-449b-8271-56fc1b008b83
-shield, max_steps_reached = robust_grid_deserialization(selected_file["data"] |> IOBuffer), false
+imported_shield = 
+	if selected_file !== nothing
+		robust_grid_deserialization(selected_file["data"] |> IOBuffer), false
+	else
+		nothing
+	end
+
+# ╔═╡ 252ac6f4-ae88-4647-91cc-7f29e0a1a015
+md"""
+## Synthesising Safe Strategy
+"""
+
+# ╔═╡ 40116c98-2afb-48d8-a7d6-de03c5bc119c
+grid; @bind make_shield_button CounterButton("Make Shield")
+
+# ╔═╡ f65de4dd-438b-43c2-9571-adc3fa03fb09
+reachability_function = get_barbaric_reachability_function(simulation_model)
+
+# ╔═╡ d57587e2-a9f3-4e10-9679-325f716882e9
+if make_shield_button > 0
+	reachability_function_precomputed = 
+		get_transitions(reachability_function, PumpStatus, grid)
+end
+
+# ╔═╡ 084c26b7-2786-4aea-af07-43e6adee06cf
+@bind max_steps NumberField(0:1000, default=10)
+
+# ╔═╡ 09496aef-95be-43b8-95d1-5cdaa9da50b9
+if make_shield_button > 0 && imported_shield === nothing
+
+	## The actual call to make_shield ##
+	
+	shield, max_steps_reached = 
+		make_shield(reachability_function_precomputed, PumpStatus, grid; max_steps)
+
+	
+elseif imported_shield === nothing
+	shield, max_steps_reached = grid, true
+else
+	shield, max_steps_reached = imported_shield, false
+end
 
 # ╔═╡ 56781a46-51a5-425d-aea8-bcfd4820da88
 if max_steps_reached
@@ -213,8 +250,38 @@ md"""
 """
 end
 
-# ╔═╡ 084c26b7-2786-4aea-af07-43e6adee06cf
-@bind max_steps NumberField(0:1000, default=10)
+# ╔═╡ 671e75ef-7c4d-4fc5-a0a3-66d0f59e4778
+md"""
+Show barbaric transition $(@bind show_tv CheckBox()) 
+"""
+
+# ╔═╡ 1e2dcb19-8e61-45b9-a033-0e28406b1511
+md"""
+Select which axes to display. Order is ignored.
+
+$(@bind index_1 Select(
+	[1 => "t",
+	2 => "v",
+	3 => "p",
+	4 => "l",]
+))
+$(@bind index_2 Select(
+	[1 => "t",
+	2 => "v",
+	3 => "p",
+	4 => "l",],
+	default=2
+))
+"""
+
+# ╔═╡ bf83ba44-8900-48c8-a172-161337181e41
+begin
+	xlabel = min(index_1, index_2)
+	ylabel = max(index_1, index_2)
+	state_variables = Dict(1 => "t", 2 => "v", 3 => "p", 4 => "l")
+	xlabel = state_variables[xlabel]
+	ylabel = state_variables[ylabel];
+end
 
 # ╔═╡ 7692cddf-6b37-4be2-847f-afb6d34e44ab
 md"""
@@ -255,37 +322,6 @@ supporting_points = SupportingPoints(samples_per_axis, partition)
 # ╔═╡ 31699662-ddfc-45a8-b963-f0b03b7c71c2
 supporting_points |> collect
 
-# ╔═╡ b83a55ee-f2a3-4b0b-8e0a-12dc6caf5075
-possible_outcomes(simulation_model, partition, action)
-
-# ╔═╡ cd732487-5c1b-487e-b037-4523a7389365
-[Partition(grid, i) |> Bounds 
-	for i in reachability_function(partition, action)]
-
-# ╔═╡ 671e75ef-7c4d-4fc5-a0a3-66d0f59e4778
-md"""
-Show barbaric transition $(@bind show_tv CheckBox()) 
-"""
-
-# ╔═╡ 1e2dcb19-8e61-45b9-a033-0e28406b1511
-md"""
-Select which axes to display.
-
-$(@bind index_1 Select(
-	[1 => "t",
-	2 => "v",
-	3 => "p",
-	4 => "l",]
-))
-$(@bind index_2 Select(
-	[1 => "t",
-	2 => "v",
-	3 => "p",
-	4 => "l",],
-	default=2
-))
-"""
-
 # ╔═╡ d099b12b-9e8e-482f-82ed-a4681a424d2e
 slice = let
 	slice = Any[i for i in partition.indices]
@@ -294,14 +330,12 @@ slice = let
 	slice
 end
 
-# ╔═╡ bf83ba44-8900-48c8-a172-161337181e41
-begin
-	xlabel = min(index_1, index_2)
-	ylabel = max(index_1, index_2)
-	state_variables = Dict(1 => "t", 2 => "v", 3 => "p", 4 => "l")
-	xlabel = state_variables[xlabel]
-	ylabel = state_variables[ylabel]
-end
+# ╔═╡ b83a55ee-f2a3-4b0b-8e0a-12dc6caf5075
+possible_outcomes(simulation_model, partition, action)
+
+# ╔═╡ cd732487-5c1b-487e-b037-4523a7389365
+[Partition(grid, i) |> Bounds 
+	for i in reachability_function(partition, action)]
 
 # ╔═╡ fd2b4c23-e373-43e7-9a4f-63203ef2b83b
 let
@@ -324,6 +358,7 @@ md"""
 """
 
 # ╔═╡ dae2fc1d-38d0-48e1-bddc-3b490648648b
+# Probability that the random agents selects the action "off" at any given time
 @bind off_chance NumberField(0:0.01:1, default=0.3)
 
 # ╔═╡ 4f01a075-b44b-467c-9f87-55df435b7bdd
@@ -346,7 +381,7 @@ function shielded(shield, policy)
 end
 
 # ╔═╡ a57c6670-6d88-4119-b5b1-7509a8806dae
-shielded(shield, (_...) -> action)((t, v, p, l))
+shielded(something(shield, grid), (_...) -> action)((t, v, p, l))
 
 # ╔═╡ 1b447b3e-0565-4dc5-b679-5102c946dec2
 shielded_random_agent = shielded(shield, random_agent)
@@ -426,7 +461,7 @@ cost(m, shielded_random_agent)
 
 # ╔═╡ e5a18013-48a1-4329-b238-65a606a82c9b
 unsafe_trace === nothing ? nothing :
-@bind state_index NumberField(1:length(unsafe_trace.actions))
+@bind state_index NumberField(1:length(unsafe_trace.actions), default=2)
 
 # ╔═╡ f0a96c74-c73b-4763-992e-73d4aa542976
 if unsafe_trace != nothing let
@@ -462,9 +497,9 @@ end end
 
 # ╔═╡ 4af0b349-5894-4da5-8c3b-9fbc466d94f5
 if unsafe_trace != nothing let 
-	ts, vs, ps, ls, elapsed, actions = unsafe_trace
+	(;ts, vs, ps, ls, elapsed, actions) = unsafe_trace
 	
-	shielded_random_agent((ts[state_index], vs[state_index], ps[state_index], ls[state_index])),  actions[state_index]
+	shielded_random_agent((ts[state_index], vs[state_index], ps[state_index], ls[state_index])),  actions[state_index - 1]
 end end
 
 # ╔═╡ 16598016-eb21-43da-a45b-bd09692125ca
@@ -525,18 +560,22 @@ end
 # ╠═31699662-ddfc-45a8-b963-f0b03b7c71c2
 # ╠═b83a55ee-f2a3-4b0b-8e0a-12dc6caf5075
 # ╠═cd732487-5c1b-487e-b037-4523a7389365
-# ╟─252ac6f4-ae88-4647-91cc-7f29e0a1a015
-# ╠═f65de4dd-438b-43c2-9571-adc3fa03fb09
-# ╠═5ff2a592-e30e-43ad-938e-5396f94f713e
+# ╟─9f1c8c62-0ad1-4c93-8f0a-ef0f61f2bcf4
+# ╟─5ff2a592-e30e-43ad-938e-5396f94f713e
 # ╠═f589d4eb-5f83-449b-8271-56fc1b008b83
+# ╟─252ac6f4-ae88-4647-91cc-7f29e0a1a015
+# ╟─40116c98-2afb-48d8-a7d6-de03c5bc119c
+# ╠═f65de4dd-438b-43c2-9571-adc3fa03fb09
+# ╠═d57587e2-a9f3-4e10-9679-325f716882e9
+# ╠═09496aef-95be-43b8-95d1-5cdaa9da50b9
 # ╟─56781a46-51a5-425d-aea8-bcfd4820da88
 # ╠═084c26b7-2786-4aea-af07-43e6adee06cf
-# ╟─7692cddf-6b37-4be2-847f-afb6d34e44ab
 # ╟─671e75ef-7c4d-4fc5-a0a3-66d0f59e4778
 # ╟─1e2dcb19-8e61-45b9-a033-0e28406b1511
 # ╟─d099b12b-9e8e-482f-82ed-a4681a424d2e
 # ╠═bf83ba44-8900-48c8-a172-161337181e41
 # ╟─fd2b4c23-e373-43e7-9a4f-63203ef2b83b
+# ╟─7692cddf-6b37-4be2-847f-afb6d34e44ab
 # ╟─4d169b72-54f8-4325-adec-f53d18e54fae
 # ╠═dae2fc1d-38d0-48e1-bddc-3b490648648b
 # ╠═4f01a075-b44b-467c-9f87-55df435b7bdd
