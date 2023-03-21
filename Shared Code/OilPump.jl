@@ -138,7 +138,11 @@ The state is represented by the tuple $(t, v, p, l)$ where
 """
 
 # ╔═╡ a2a0991c-7485-4bf3-8353-b33d2f4e9688
-function simulate_point(mechanics::OPMechanics, state, action::PumpStatus)
+function simulate_point(mechanics::OPMechanics, 
+		state, 
+		action::PumpStatus, 
+		random_outcomes)
+	
 	t, v, p, l = state # Time, Velocity, Pump-state, Latency-timer
 	p ∉ [Int(on) Int(off)] && error("p $p out of range")
 	t′, v′, p′, l′ = t, v, p, l
@@ -150,7 +154,10 @@ function simulate_point(mechanics::OPMechanics, state, action::PumpStatus)
 	
 	while t′ < t + mechanics.time_step
 		time_step = min(t + mechanics.time_step - t′, next_rate_change(t′) - t′)
-		v′ = v′ - consumption_rate(t′)*time_step # TODO: Fluctuation
+		v′ = v′ - consumption_rate(t′)*time_step 
+		if consumption_rate(t′) > 0
+			v′ = v′ + random_outcomes[1]
+		end
 		t′ += time_step
 	end
 	t′ = t′%20
@@ -161,6 +168,12 @@ function simulate_point(mechanics::OPMechanics, state, action::PumpStatus)
 	end
 
 	return t′, v′, p′, l′ # TODO: Imprecision
+end
+
+# ╔═╡ 5ed3810f-dedd-4844-a491-3a0ad3547b15
+function simulate_point(mechanics::OPMechanics, state, action::PumpStatus)
+	random_outcomes = rand(-mechanics.fluctuation:0.001:mechanics.fluctuation)
+	simulate_point(mechanics::OPMechanics, state, action::PumpStatus, random_outcomes)
 end
 
 # ╔═╡ dead1cb7-09e8-45c5-81dd-8c3bb164741d
@@ -229,6 +242,9 @@ struct OPTrace
 	actions
 end
 
+# ╔═╡ 77907f6b-4986-4699-838b-b849363416d2
+initial_state = (0., 10., 0., 0.)
+
 # ╔═╡ 5e2912de-768c-4711-82a9-d809f78e93ff
 function simulate_trace(mechanics::OPMechanics, state, policy; duration=20)
 	t, v, p, l = state
@@ -268,26 +284,29 @@ function plot_trace!(tup; params...)
 end
 
 # ╔═╡ 1a071438-946e-48ea-be42-189c1dc66bae
-function plot_trace!(trace::OPTrace; params...)
-	(;vs, ts, ps, elapsed, actions) = trace
+function plot_trace!(trace::OPTrace; show_actions=true, params...)
+	(;vs, ts, ps, ls, elapsed, actions) = trace
 	plot!(elapsed, vs,
 		line=(colors.WET_ASPHALT, 3),
 		label="tank",
 		xlabel="time (s)",
 		ylabel="volume (l)";
 		params...)
-	
-	scatter!([(t, v) for (t, v, a) in zip(elapsed, vs, ps)
-				if a == Int(on)],
-		marker=(colors.PETER_RIVER, :utriangle, 6),
-		markerstrokewidth=0,
-		label="on")
-	
-	scatter!([(t, v) for (t, v, a) in zip(elapsed, vs, ps)
-				if a == Int(off)],
-		marker=(colors.ORANGE, :dtriangle, 6),
-		markerstrokewidth=0,
-		label="off")
+
+	if show_actions
+		scatter!([(t, v) for (t, v, p, l) in zip(elapsed, vs, ps, ls)
+					if p == Int(on)],
+			marker=(colors.PETER_RIVER, :utriangle, 6),
+			markerstrokewidth=0,
+			label="on")
+		
+		scatter!([(t, v) for (t, v, p, l) in zip(elapsed, vs, ps, ls)
+					if p == Int(off)],
+			marker=(colors.ORANGE, :dtriangle, 6),
+			markerstrokewidth=0,
+			label="off")
+	end
+	plot!()
 end
 
 # ╔═╡ 3b049ee6-f6c0-4b03-ab7b-aa5d7b72d387
@@ -301,6 +320,34 @@ begin
 		line=(colors.PETER_RIVER, 3))
 end
   ╠═╡ =#
+
+# ╔═╡ a8d0fb4d-2a37-4c00-b14e-9ad929e75433
+md"""
+# Safety
+"""
+
+# ╔═╡ a775dad5-974c-4aae-b1dc-81535bf960cc
+is_safe(state, m::OPMechanics) = m.v_min <= state[2] <= m.v_max
+
+# ╔═╡ e362439c-716f-4dcb-91b4-3eaddceab0ea
+function count_unsafe_traces(mechanics::OPMechanics, policy::Function; 
+	runs=1000,
+	run_duration=120)
+
+	unsafe_count = 0
+	unsafe_trace = nothing
+	for i in 1:runs
+		trace = simulate_trace(mechanics, initial_state, policy, duration=run_duration)
+		(;ts, vs, ps, ls, elapsed, actions) = trace
+
+		if !all([mechanics.v_min < v < mechanics.v_max for v in vs])
+			unsafe_count += 1
+			unsafe_trace = trace
+		end
+	end
+
+	return (unsafe=unsafe_count, total=runs, unsafe_trace)
+end
 
 # ╔═╡ 64084492-f5f7-4f5c-b21c-8191d512f9c4
 md"""
@@ -1351,18 +1398,23 @@ version = "1.4.1+0"
 # ╠═e7effef6-61e2-4b0d-bb94-75760ba8c00a
 # ╟─ca873c15-677d-45f8-a5ee-c936de1b7094
 # ╠═a2a0991c-7485-4bf3-8353-b33d2f4e9688
+# ╠═5ed3810f-dedd-4844-a491-3a0ad3547b15
 # ╠═dead1cb7-09e8-45c5-81dd-8c3bb164741d
 # ╠═d5c6d42a-3471-4005-80ec-9be2163962c9
 # ╠═a490bc63-a9d9-4261-aca8-0a1f877d09ce
 # ╠═a214953e-b4d2-482c-aaad-7fc22a6b8feb
 # ╟─6c41264e-db32-4a5f-aa82-438a82824681
 # ╠═126e00be-7899-405a-bd6e-731c76215726
+# ╠═77907f6b-4986-4699-838b-b849363416d2
 # ╠═5e2912de-768c-4711-82a9-d809f78e93ff
 # ╠═675538d0-5291-4069-9363-57464ba1012f
 # ╠═a5c44feb-e5f5-4ce0-a911-7ad0c7bd4acf
 # ╟─3b049ee6-f6c0-4b03-ab7b-aa5d7b72d387
 # ╠═9e9174d8-7634-4a2f-ad07-f89e6af6fa3f
 # ╠═1a071438-946e-48ea-be42-189c1dc66bae
+# ╟─a8d0fb4d-2a37-4c00-b14e-9ad929e75433
+# ╠═a775dad5-974c-4aae-b1dc-81535bf960cc
+# ╠═e362439c-716f-4dcb-91b4-3eaddceab0ea
 # ╟─64084492-f5f7-4f5c-b21c-8191d512f9c4
 # ╠═f1f39983-dd7e-4169-a3e3-1b63bc21ea2c
 # ╠═b0ef9fe2-3cf8-413b-9950-328da3572d47

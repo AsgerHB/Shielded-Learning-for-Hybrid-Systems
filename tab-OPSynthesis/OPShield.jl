@@ -104,13 +104,13 @@ The state variable is going to be: $(t, v, p, l)$ where
 md"""
 Note that the variable $p$ represents an automaton location and can therefore only assume the values $0$ and $1$. For this reason, the granularity is fixed to $1$.
 
-`granularity_t =` $(@bind granularity_t NumberField(0.001:0.001:4, default=m.time_step))
+`granularity_t =` $(@bind granularity_t NumberField(0.001:0.001:4, default=1))
 
-`granularity_v =` $(@bind granularity_v NumberField(0.001:0.001:4, default=0.1))
+`granularity_v =` $(@bind granularity_v NumberField(0.001:0.001:4, default=1))
 
 `granularity_p = 1.0`
 
-`granularity_l =` $(@bind granularity_l NumberField(0.001:0.001:m.time_step, default=m.time_step))
+`granularity_l =` $(@bind granularity_l NumberField(0.001:0.001:m.time_step, default=1))
 
 """
 
@@ -118,11 +118,7 @@ Note that the variable $p$ represents an automaton location and can therefore on
 granularity = [granularity_t, granularity_v, 1, granularity_l]
 
 # ╔═╡ b57bac6c-87e2-49a8-a771-46f2b9e82f59
-begin
-	is_safe(state) = m.v_min <= state[2] <= m.v_max
-	
-	is_safe(bounds::Bounds) = is_safe(bounds.lower) && is_safe(bounds.upper)
-end
+is_safe(bounds::Bounds) = is_safe(bounds.lower, m) && is_safe(bounds.upper, m)
 
 # ╔═╡ ae621a99-56e3-4a93-8af0-096c3a6f00f0
 begin
@@ -148,7 +144,7 @@ md"""
 """
 
 # ╔═╡ d2300c36-906c-4351-952a-3a5176338649
-randomness_space=Bounds((0, 0), (0, 0))
+randomness_space = Bounds((-m.fluctuation,), (m.fluctuation,))
 
 # ╔═╡ ce2ecf63-c2dc-4c6b-9a60-1a934e915ba2
 md"""
@@ -202,7 +198,7 @@ md"""
 # ╔═╡ f589d4eb-5f83-449b-8271-56fc1b008b83
 imported_shield = 
 	if selected_file !== nothing
-		robust_grid_deserialization(selected_file["data"] |> IOBuffer), false
+		robust_grid_deserialization(selected_file["data"] |> IOBuffer)
 	else
 		nothing
 	end
@@ -213,7 +209,7 @@ md"""
 """
 
 # ╔═╡ 40116c98-2afb-48d8-a7d6-de03c5bc119c
-grid; @bind make_shield_button CounterButton("Make Shield")
+grid, simulation_model; @bind make_shield_button CounterButton("Make Shield")
 
 # ╔═╡ f65de4dd-438b-43c2-9571-adc3fa03fb09
 reachability_function = get_barbaric_reachability_function(simulation_model)
@@ -246,7 +242,9 @@ end
 if max_steps_reached
 md"""
 !!! danger "NB"
-	Synthesis not complete. Increase `max_steps` to obtain an infinite-horizon strategy.
+	Synthesis not complete. 
+
+	Either synthesis hasn't started, or `max_steps` needs to be increased to obtain an infinite-horizon strategy.
 """
 end
 
@@ -404,6 +402,9 @@ let
 	plot!(xlabel="t", ylabel="v")
 end
 
+# ╔═╡ dad2155a-562d-4340-afa3-cd6889ba216b
+[1 2]*[1 1; 1 1]
+
 # ╔═╡ aeba4953-dee5-4810-a3de-0fc191711e16
 begin
 	plot()
@@ -420,25 +421,7 @@ begin
 end
 
 # ╔═╡ f241c723-948e-4ffb-a425-b36f1f9f71f5
-function count_unsafe_traces(mechanics::OPMechanics, policy::Function; 
-	runs=1000,
-	run_duration=120)
 
-	unsafe_count = 0
-	unsafe_trace = nothing
-	s0 = (0., 10., 1, -1.)
-	for i in 1:runs
-		trace = simulate_trace(mechanics, s0, policy, duration=run_duration)
-		(;ts, vs, ps, ls, elapsed, actions) = trace
-
-		if !all([mechanics.v_min < v < mechanics.v_max for v in vs])
-			unsafe_count += 1
-			unsafe_trace = trace
-		end
-	end
-
-	return (unsafe=unsafe_count, total=runs, unsafe_trace)
-end
 
 # ╔═╡ d77f23be-3a54-4c48-ab6d-b1c31adc3e25
 unsafe, total, unsafe_trace = count_unsafe_traces(m, shielded_random_agent, run_duration=120, runs=1000)
@@ -460,8 +443,9 @@ end
 cost(m, shielded_random_agent)
 
 # ╔═╡ e5a18013-48a1-4329-b238-65a606a82c9b
-unsafe_trace === nothing ? nothing :
-@bind state_index NumberField(1:length(unsafe_trace.actions), default=2)
+if unsafe_trace !== nothing
+	@bind state_index NumberField(1:length(unsafe_trace.actions), default=2)
+end
 
 # ╔═╡ f0a96c74-c73b-4763-992e-73d4aa542976
 if unsafe_trace != nothing let
@@ -487,6 +471,8 @@ if unsafe_trace != nothing let
 	x, y = xs[state_index], ys[state_index]
 	
 	plot!(xs, ys,
+		xlims=(shield.bounds.lower[1], shield.bounds.upper[1]),
+		ylims=(shield.bounds.lower[2], shield.bounds.upper[2]),
 		line=(colors.WET_ASPHALT, 2);
 		xlabel, ylabel)
 	
@@ -583,13 +569,14 @@ end
 # ╠═a57c6670-6d88-4119-b5b1-7509a8806dae
 # ╠═1b447b3e-0565-4dc5-b679-5102c946dec2
 # ╠═fdfa1b59-217e-4504-9d4f-2ad44c39cfd8
+# ╠═dad2155a-562d-4340-afa3-cd6889ba216b
 # ╠═aeba4953-dee5-4810-a3de-0fc191711e16
 # ╠═f241c723-948e-4ffb-a425-b36f1f9f71f5
 # ╠═d77f23be-3a54-4c48-ab6d-b1c31adc3e25
 # ╟─150d8707-e8ef-4476-9378-9dd1c63036bf
 # ╠═ac138da0-fd64-4e35-ab26-e5803fa2d9b5
 # ╠═e5a18013-48a1-4329-b238-65a606a82c9b
-# ╠═f0a96c74-c73b-4763-992e-73d4aa542976
+# ╟─f0a96c74-c73b-4763-992e-73d4aa542976
 # ╠═4af0b349-5894-4da5-8c3b-9fbc466d94f5
 # ╟─16598016-eb21-43da-a45b-bd09692125ca
-# ╠═63b217ad-bb2c-420b-b327-2c9a28be0a90
+# ╟─63b217ad-bb2c-420b-b327-2c9a28be0a90

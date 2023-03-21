@@ -11,58 +11,72 @@ include("../Shared Code/ExperimentUtilities.jl")
 # Args  #
 #########
 
-args = my_parse_args(ARGS)
-if haskey(args, "help")
-    print("""
-    --help              Display this help and exit.
-    --test              Test-mode. Produce potentially useless results, but fast.
-                        Useful for testing if everything is set up.
-    --results-dir       Results will be saved in an appropriately named subdirectory.
-                        Directory will be created if it does not exist.
-                        Default: '~/Results'
-    --skip-barbaric     Skip synthesis using barbaric reachability funciton.
-                        Useful if there are already shields saved in the results dir.
-    --skip-evaluation   Do not evaluate the strategies' safety after synthesis is done.
-    """)
-    exit()
+using ArgParse
+s = ArgParseSettings()
+
+# infix operator "\join" redefined to signify joinpath
+⨝ = joinpath
+
+@add_arg_table s begin
+    "--test"
+        help="""Test-mode. Produce potentially useless results, but fast.
+                Useful for testing if everything is set up."""
+        action=:store_true
+    
+    "--results-dir"
+        help="""Results will be saved in an appropriately named subdirectory.
+                Directory will be created if it does not exist."""            
+        default=homedir() ⨝ "Results"
+
+    "--skip-shield-synthesis"
+        help="""Skip synthesising shields. Presumes shields to be in the results dir already."""
+        action=:store_true
+
+    "--skip-evaluation"
+        help="""Skip evaluation of shields. Presumes that some results already exist. Use with --skip-shield-synthesis to generate figures from existing data."""
+        action=:store_true
 end
-test = haskey(args, "test")
-results_dir = get(args, "results-dir", "$(homedir())/Results")
-table_name = "tab-CCSynthesis"
+
+args = parse_args(s)
+test = args["test"]
+results_dir = args["results-dir"]
+table_name = "tab-OPSynthesis"
 results_dir = joinpath(results_dir, table_name)
 shields_dir = joinpath(results_dir, "Exported Strategies")
 mkpath(shields_dir)
 evaluations_dir = joinpath(results_dir, "Safety Evaluations")
 mkpath(evaluations_dir)
 
-make_barbaric_shields = !haskey(args, "skip-barbaric")
-test_shields = !haskey(args, "skip-evaluation")
+make_barbaric_shields = !args["skip-shield-synthesis"]
+test_shields = !args["skip-evaluation"]
 
 progress_update("Estimated total time to commplete: 2 hours. (5 minutes if run with --test)")
-
 
 #########
 # Setup #
 #########
 
-include("CC Synthesize Set of Shields.jl")
-include("CC Statistical Checking of Shield.jl")
+include("OP Synthesize Set of Shields.jl")
+include("OP Statistical Checking of Shield.jl")
 
 if !test
     # HARDCODED: Parameters to generate shield. All variations will be used.
-    samples_per_axiss = [1, 2, 3, 4, 8, 16]
-    Gs = [1, 0.5]
+    samples_per_axiss = [1, 2, 3, 4]
+    Gs = [1, 0.5, 0.1, 0.05]
 
     # HARDCODED: Safety checking parameters.
-    runs_per_shield = 1000000
+    runs_per_shield = 1E6
 else 
     # Test params that produce uninteresting results quickly
     samples_per_axiss = [1]
-    Gs = [1]
+    Gs = [1, 2]
     
     runs_per_shield = 100
 end
 
+# samples per axis and granularities are individually defined for each axis. The 3rd axis, p, only has discrete values 0 and 1, and therefore should not be sampled at other points.
+samples_per_axiss = [ (s, s, 1, s) for s in samples_per_axiss ]
+Gs = [ (G, G, 1, G) for G in Gs]
 ##############
 # Mainmatter #
 ##############
@@ -76,7 +90,7 @@ else
 end
 
 if test_shields
-    test_shields_and_save_results(shields_dir, evaluations_dir, runs_per_shield)
+    test_shields_and_save_results(OPMechanics(), shields_dir, evaluations_dir, runs_per_shield)
 else
     progress_update("Skipping tests of shields")
 end
