@@ -19,8 +19,10 @@ begin
 	using Pkg
 	Pkg.activate("..")
 	Pkg.develop("GridShielding")
-
+	using GridShielding
+	
 	include("../Shared Code/OilPump.jl")
+	include("../Shared Code/OPShielding.jl")
 	include("../Shared Code/FlatUI.jl");
 	using Plots
 	using PlutoLinks
@@ -29,11 +31,6 @@ begin
 	using Printf
 	using StatsBase
 	TableOfContents()
-end
-
-# ╔═╡ 515c5c0b-a734-406c-b89d-6c921001a777
-begin
-	@revise using GridShielding
 end
 
 # ╔═╡ 6f5584c1-ea5e-49ee-afc0-25abde4e295a
@@ -111,21 +108,8 @@ Note that the variable $p$ represents an automaton location and can therefore on
 # ╔═╡ 1c3a6140-cd65-4081-99f3-397b74e6bf89
 granularity = [granularity_t, granularity_v, 1, granularity_l]
 
-# ╔═╡ b57bac6c-87e2-49a8-a771-46f2b9e82f59
-is_safe(bounds::Bounds) = is_safe(bounds.lower, m) && is_safe(bounds.upper, m)
-
 # ╔═╡ ae621a99-56e3-4a93-8af0-096c3a6f00f0
-begin
-	grid = Grid(granularity, 
-		# [t, v, p, l]
-		[0, floor(m.v_min - granularity[2]), 0, -granularity[4]], 
-		[m.period, ceil(m.v_max + granularity[2]), 2, m.latency + granularity[4]])
-
-	
-	initialize!(grid, x -> is_safe(x) ?
-		actions_to_int([on off]) : actions_to_int([]))
-	grid
-end
+grid = get_op_grid(m, granularity)
 
 # ╔═╡ be055e02-7ef6-4a63-8c95-d6c2bfdc799a
 md"""
@@ -138,7 +122,7 @@ md"""
 """
 
 # ╔═╡ d2300c36-906c-4351-952a-3a5176338649
-randomness_space = Bounds((-m.fluctuation,), (m.fluctuation,))
+randomness_space = get_randomness_space(m)
 
 # ╔═╡ ce2ecf63-c2dc-4c6b-9a60-1a934e915ba2
 md"""
@@ -153,19 +137,8 @@ $(@bind samples_per_axis_selected NumberField(1:30, default=2))
 # ╔═╡ f998df54-b9d8-4ab5-85c4-8266c4e7a01c
 samples_per_axis = [samples_per_axis_selected, samples_per_axis_selected, 1, samples_per_axis_selected]
 
-# ╔═╡ cf288323-6a83-43d3-bfc8-04bf595ad5f7
-function clamp_state(grid, state)
-	t, v, p, l = state
-	v = clamp(v, grid.bounds.lower[2], grid.bounds.upper[2] - 0.1*grid.granularity[2])
-	l = clamp(l, grid.bounds.lower[4], grid.bounds.upper[4] - 0.1*grid.granularity[4])
-	t, v, p, l
-end
-
 # ╔═╡ 04f6c10f-ee06-40f3-969d-9197504c9f61
-simulation_function(state, action, r) = begin
-	state′ = simulate_point(m, state, action, r)
-	clamp_state(grid, state′)
-end
+simulation_function = get_simulation_function(m)
 
 # ╔═╡ 90efd733-ea84-46c4-80a5-556f23dc4192
 simulation_model = SimulationModel(simulation_function, randomness_space, samples_per_axis)
@@ -331,7 +304,6 @@ possible_outcomes(simulation_model, partition, action)
 
 # ╔═╡ fd2b4c23-e373-43e7-9a4f-63203ef2b83b
 let
-	
 	draw(something(shield, grid), slice,
 		legend=:outerright, 
 		colors=opshieldcolors,
@@ -374,20 +346,7 @@ md"""
 random_agent(_...) = sample([on, off], [1 - off_chance, off_chance] |> Weights)
 
 # ╔═╡ 87d7a2f0-4602-489e-8dba-6cd0f71fdad7
-function shielded(shield, policy)
-	return (state) -> begin
-		suggested = policy(state)
-		state = clamp_state(shield, state)
-		partition = box(shield, state)
-		allowed = int_to_actions(PumpStatus, get_value(partition))
-		if state ∉ shield || length(allowed) == 0 || suggested ∈ allowed
-			return suggested
-		else
-			corrected = rand(allowed)
-			return corrected
-		end
-	end
-end
+
 
 # ╔═╡ a57c6670-6d88-4119-b5b1-7509a8806dae
 shielded(something(shield, grid), (_...) -> action)((t, v, p, l))
@@ -545,21 +504,18 @@ end
 # ╟─e4f088b7-b48a-4c6f-aa36-fc9fd4746d9b
 # ╠═bb902940-a858-11ed-2f11-1d6f5af61e4a
 # ╠═5ae3173f-6abb-4f38-94f8-90300c93d0e9
-# ╠═515c5c0b-a734-406c-b89d-6c921001a777
 # ╟─35fbdec7-b673-40a9-8e49-2e19c596b71b
 # ╠═67d83ab6-8d99-4067-aafc-dee1026eb1dc
 # ╟─3e447971-62d4-4d34-95de-c6dcfe1a281f
 # ╟─1687a47c-c3f6-4518-ac46-e97b240ad323
 # ╠═1c3a6140-cd65-4081-99f3-397b74e6bf89
 # ╟─be055e02-7ef6-4a63-8c95-d6c2bfdc799a
-# ╠═b57bac6c-87e2-49a8-a771-46f2b9e82f59
 # ╠═ae621a99-56e3-4a93-8af0-096c3a6f00f0
 # ╟─cfe8387f-a127-4e46-88a6-40d9442fe4b1
 # ╠═d2300c36-906c-4351-952a-3a5176338649
 # ╟─ce2ecf63-c2dc-4c6b-9a60-1a934e915ba2
 # ╠═f998df54-b9d8-4ab5-85c4-8266c4e7a01c
 # ╠═5d35a493-0195-46f7-bdf6-013fde056a1e
-# ╠═cf288323-6a83-43d3-bfc8-04bf595ad5f7
 # ╠═04f6c10f-ee06-40f3-969d-9197504c9f61
 # ╠═90efd733-ea84-46c4-80a5-556f23dc4192
 # ╟─f81f53ce-d81e-429d-ac80-a3edd2f76eac
@@ -594,7 +550,7 @@ end
 # ╠═87d7a2f0-4602-489e-8dba-6cd0f71fdad7
 # ╠═a57c6670-6d88-4119-b5b1-7509a8806dae
 # ╠═1b447b3e-0565-4dc5-b679-5102c946dec2
-# ╠═fdfa1b59-217e-4504-9d4f-2ad44c39cfd8
+# ╟─fdfa1b59-217e-4504-9d4f-2ad44c39cfd8
 # ╠═dad2155a-562d-4340-afa3-cd6889ba216b
 # ╠═aeba4953-dee5-4810-a3de-0fc191711e16
 # ╠═f241c723-948e-4ffb-a425-b36f1f9f71f5
@@ -604,6 +560,5 @@ end
 # ╠═e5a18013-48a1-4329-b238-65a606a82c9b
 # ╟─f0a96c74-c73b-4763-992e-73d4aa542976
 # ╠═4af0b349-5894-4da5-8c3b-9fbc466d94f5
-# ╠═dd189511-be2c-4e6f-b6ac-8ebb4da29749
 # ╟─16598016-eb21-43da-a45b-bd09692125ca
 # ╟─63b217ad-bb2c-420b-b327-2c9a28be0a90

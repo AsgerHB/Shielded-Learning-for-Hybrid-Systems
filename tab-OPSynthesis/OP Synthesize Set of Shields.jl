@@ -7,13 +7,14 @@ using InteractiveUtils
 # ╔═╡ 8617b0cb-b308-4fe2-9a23-d7b4823b2f9d
 begin
 	using Pkg
-	if isdefined(Main, :PlutoRunner)
+	if isdefined(Main, :PlutoRunner) # Check if run as notebook
 		Pkg.activate("..")
 	end
 	Pkg.develop("GridShielding")
 	using GridShielding
 
 	include("../Shared Code/OilPump.jl")
+	include("../Shared Code/OPShielding.jl")
 	include("../Shared Code/FlatUI.jl");
 	include("../Shared Code/ExperimentUtilities.jl")
 	
@@ -76,33 +77,13 @@ Note that the variable $p$ represents an automaton location and can therefore on
 granularity = [granularity_t, granularity_v,  1.0, granularity_l]
   ╠═╡ =#
 
-# ╔═╡ 7232a87a-5ee5-43d5-b58c-90b463679f10
-begin
-	is_safe(state) = m.v_min <= state[2] <= m.v_max
-	
-	is_safe(bounds::Bounds) = is_safe(bounds.lower) && is_safe(bounds.upper)
-end
-
-# ╔═╡ 868bb66d-79fa-427c-ac43-2033e3324d07
-function get_op_grid(granularity)
-	grid = Grid(granularity, 
-		# [t, v, p, l]
-		[0, floor(m.v_min - granularity[2]), 0, -granularity[4]], 
-		[m.period, ceil(m.v_max + granularity[2]), 2, m.latency + granularity[4]])
-
-	
-	initialize!(grid, x -> is_safe(x) ?
-		actions_to_int([on off]) : actions_to_int([]))
-	grid
-end
-
 # ╔═╡ 6b2933a2-ab85-47a0-945c-6043da25e7b6
 #=╠═╡
-grid = get_op_grid(granularity)
+grid = get_op_grid(m, granularity)
   ╠═╡ =#
 
 # ╔═╡ 6a78d494-ce7b-437c-a529-ef245f4d5e71
-randomness_space = Bounds((-m.fluctuation,), (m.fluctuation,))
+randomness_space = get_randomness_space(m)
 
 # ╔═╡ a13bc371-4748-4afa-988f-8b421935de91
 # ╠═╡ skip_as_script = true
@@ -123,19 +104,10 @@ samples_per_axis = [samples_per_axis_selected, samples_per_axis_selected, 1, sam
   ╠═╡ =#
 
 # ╔═╡ 8b166982-79fd-49bf-8d76-302c2383682d
-function clamp_state(state)
-	ϵ = 0.0001
-	t, v, p, l = state
-	v = clamp(v, floor(m.v_min - ϵ), ceil(m.v_max + ϵ))
-	l = clamp(l, -ϵ, m.latency)
-	t, v, p, l
-end
+
 
 # ╔═╡ 087973b4-4366-4968-a918-704a6d635689
-simulation_function(state, action, r) = begin
-	state′ = simulate_point(m, state, action, r)
-	clamp_state(state′)
-end
+simulation_function = get_simulation_function(m)
 
 # ╔═╡ 041f227a-30c1-4bb1-949a-a9af31180cff
 #=╠═╡
@@ -171,20 +143,6 @@ begin
 		xlabel="t", ylabel="v")
 end
   ╠═╡ =#
-
-# ╔═╡ c5e6c0e6-c979-48c9-881a-b5a61ca955b9
-
-
-# ╔═╡ 7d0baf6d-e2e1-4776-844a-d3aefa48a39f
-# Shield is invalid if the initial state is considered unsafe.
-function shield_is_valid(shield)
-	square = box(shield, initial_state)
-	if get_value(square) == actions_to_int([])
-		return false
-	end
-
-	return true
-end
 
 # ╔═╡ fc158839-cd54-464c-bd7f-3fc97257ea93
 #=╠═╡
@@ -354,8 +312,6 @@ end
 # ╟─011370e4-e238-4f3a-a409-b9e6daf08417
 # ╟─8213b25c-483a-4fbc-ac99-5adc103eadf0
 # ╠═a0957a89-dc5e-4602-949f-85cbd572926a
-# ╠═7232a87a-5ee5-43d5-b58c-90b463679f10
-# ╠═868bb66d-79fa-427c-ac43-2033e3324d07
 # ╠═6b2933a2-ab85-47a0-945c-6043da25e7b6
 # ╠═6a78d494-ce7b-437c-a529-ef245f4d5e71
 # ╟─a13bc371-4748-4afa-988f-8b421935de91
@@ -369,8 +325,6 @@ end
 # ╠═f7535470-76f6-4f90-ae5d-c684c28dc0cd
 # ╠═0984a1e6-df91-4112-aaef-d63f427650fa
 # ╠═fc158839-cd54-464c-bd7f-3fc97257ea93
-# ╠═c5e6c0e6-c979-48c9-881a-b5a61ca955b9
-# ╠═7d0baf6d-e2e1-4776-844a-d3aefa48a39f
 # ╟─87a9bb3a-bdc7-4769-b930-b4697efc0736
 # ╠═815eb159-b92a-4de8-953f-fc5c8aeed323
 # ╠═061630a8-828c-4136-8c66-c71fe96a1784
@@ -379,6 +333,5 @@ end
 # ╠═451aa409-aff6-4104-8108-44600971fad0
 # ╟─6cd2dced-fab7-4ef0-a72c-8cb58d773935
 # ╠═84351342-3c6a-491a-bde3-ef9a90b7ef14
-# ╠═0ecef346-51bf-423e-ab97-555495b3a23a
 # ╠═1ea060e2-d10c-454a-b6e3-85f54796c793
 # ╠═15c07be8-c422-407c-94d4-ebe6829ae6cc
