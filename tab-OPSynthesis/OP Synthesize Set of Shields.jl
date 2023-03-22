@@ -132,8 +132,8 @@ function clamp_state(state)
 end
 
 # ╔═╡ 087973b4-4366-4968-a918-704a6d635689
-simulation_function(state, action, _) = begin
-	state′ = simulate_point(m, state, action)
+simulation_function(state, action, r) = begin
+	state′ = simulate_point(m, state, action, r)
 	clamp_state(state′)
 end
 
@@ -272,14 +272,6 @@ draw(shield, slice,
 		colors=opshieldcolors,
 		color_labels=opshieldlabels;
 		xlabel="t", ylabel="v")
-  ╠═╡ =#
-
-# ╔═╡ 0ecef346-51bf-423e-ab97-555495b3a23a
-# ╠═╡ disabled = true
-# ╠═╡ skip_as_script = true
-#=╠═╡
-make_and_save_barbaric_shields([samples_per_axis, samples_per_axis], [granularity], 
-	test_dir)
   ╠═╡ =#
 
 # ╔═╡ 1ea060e2-d10c-454a-b6e3-85f54796c793

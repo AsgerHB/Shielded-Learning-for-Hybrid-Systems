@@ -162,8 +162,8 @@ function clamp_state(grid, state)
 end
 
 # ╔═╡ 04f6c10f-ee06-40f3-969d-9197504c9f61
-simulation_function(state, action, _) = begin
-	state′ = simulate_point(m, state, action)
+simulation_function(state, action, r) = begin
+	state′ = simulate_point(m, state, action, r)
 	clamp_state(grid, state′)
 end
 
@@ -300,7 +300,7 @@ $(@bind action Select(instances(PumpStatus) |> collect))
 """
 
 # ╔═╡ 8751340a-f41a-46fa-8f6d-cc9ca132e260
-partition = box(grid, (t, v, p, l))
+partition = box(shield, (t, v, p, l))
 
 # ╔═╡ 5d35a493-0195-46f7-bdf6-013fde056a1e
 sample_count = (length(SupportingPoints(samples_per_axis, partition)))
@@ -347,6 +347,19 @@ let
 		label="consumption ") =#
 	plot!()
 end
+
+# ╔═╡ f6bab622-4b1d-41ec-ae54-61915fca3b2c
+reachability_function′(partition, a) = begin
+	result = reachability_function(partition, a)
+	result = map(r -> Partition(partition.grid, r), result)
+	result = map(r -> (opshieldcolors[get_value(r)+1], (Bounds(r))), result)
+end
+
+# ╔═╡ 7358338f-47d9-4cb1-a868-f89b0162e72d
+reachability_function′(partition, off)
+
+# ╔═╡ 258ec4cf-4193-4b14-bf4c-53f83eca96ae
+reachability_function′(partition, on)
 
 # ╔═╡ 4d169b72-54f8-4325-adec-f53d18e54fae
 md"""
@@ -572,6 +585,9 @@ end
 # ╠═bf83ba44-8900-48c8-a172-161337181e41
 # ╠═fd2b4c23-e373-43e7-9a4f-63203ef2b83b
 # ╟─7692cddf-6b37-4be2-847f-afb6d34e44ab
+# ╠═f6bab622-4b1d-41ec-ae54-61915fca3b2c
+# ╠═7358338f-47d9-4cb1-a868-f89b0162e72d
+# ╠═258ec4cf-4193-4b14-bf4c-53f83eca96ae
 # ╟─4d169b72-54f8-4325-adec-f53d18e54fae
 # ╠═dae2fc1d-38d0-48e1-bddc-3b490648648b
 # ╠═4f01a075-b44b-467c-9f87-55df435b7bdd
