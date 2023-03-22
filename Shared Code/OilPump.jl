@@ -96,7 +96,10 @@ mechanics = OPMechanics()
 
 # ╔═╡ 1f052f6e-5676-4f66-aa9b-a3514bc20525
 # Our action space
-@enum PumpStatus on off
+@enum PumpStatus off on
+
+# ╔═╡ 01f7306b-d0de-4979-b0ca-9e5297ee5a16
+PumpStatus
 
 # ╔═╡ 23667919-c5b2-41d8-b4fd-92dd1c95e8cb
 # Consumption rate
@@ -1391,6 +1394,7 @@ version = "1.4.1+0"
 # ╠═ebd20f9c-a927-4a50-98e4-2aec1f2c8e1b
 # ╠═23041c74-867a-4990-9193-149bb006572d
 # ╠═1f052f6e-5676-4f66-aa9b-a3514bc20525
+# ╠═01f7306b-d0de-4979-b0ca-9e5297ee5a16
 # ╠═23667919-c5b2-41d8-b4fd-92dd1c95e8cb
 # ╠═9edd10ec-ec79-4bfa-8c04-2eaed8738335
 # ╟─96d053e5-0963-43c1-8b9a-82bcb021d5ef

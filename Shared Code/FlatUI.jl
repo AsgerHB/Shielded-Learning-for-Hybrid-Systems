@@ -36,8 +36,8 @@ bbshieldcolors = 	[colorant"#ffffff", colorant"#a1eaff", colorant"#ff9178"]
 rwshieldlabels = 	["{fast, slow}", "{fast}", "{}"]
 rwshieldcolors = 	[colorant"#ffffff", colorant"#a1eaff", colorant"#ff9178"]
 
-opshieldlabels = ["{}", "{on}", "{off}", "{on, off}"]
-opshieldcolors = [colorant"#ff9178", colorant"#a1eaff", colorant"#a1ffea", colorant"#ffffff", ]
+opshieldlabels = ["{}", "{off}", "{on}", "{on, off}"]
+opshieldcolors = [colorant"#ff9178", colorant"#a1ffea", colorant"#a1eaff", colorant"#ffffff", ]
 
 
 ccshieldcolors=[

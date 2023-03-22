@@ -76,12 +76,6 @@ md"""
 # ╔═╡ 5ae3173f-6abb-4f38-94f8-90300c93d0e9
 call(f) = f()
 
-# ╔═╡ 82052f6b-7826-485a-afee-1281aa9472fe
-begin
-	opshieldlabels = ["{}", "{on}", "{off}", "{on, off}"]
-	opshieldcolors = [colorant"#ff9178", colorant"#a1eaff", colorant"#a1ffea", colorant"#ffffff", ]
-end
-
 # ╔═╡ 35fbdec7-b673-40a9-8e49-2e19c596b71b
 md"""
 ## Mechanics and Gridification
@@ -347,6 +341,10 @@ let
 	if show_tv
 		draw_barbaric_transition!(simulation_model, partition, action, slice)
 	end
+	
+	#= plot!(t -> consumption_rate(abs(t%m.period)), 
+		line=(3, colors.PETER_RIVER),
+		label="consumption ") =#
 	plot!()
 end
 
@@ -488,6 +486,19 @@ if unsafe_trace != nothing let
 	shielded_random_agent((ts[state_index], vs[state_index], ps[state_index], ls[state_index])),  actions[state_index - 1]
 end end
 
+# ╔═╡ dd189511-be2c-4e6f-b6ac-8ebb4da29749
+# ╠═╡ disabled = true
+#=╠═╡
+let
+	debug(t, v, p, l) = @info "👉\t$(get_value(box(shield, (t, v, p, l))))"
+	debug(1, 10, 0, 0)
+	debug(1, 6, 0, 0)
+	debug(1, 6, 1, 0)
+	debug(1, 20, 0, 0)
+	debug(1, 20, 1, 0)
+end
+  ╠═╡ =#
+
 # ╔═╡ 16598016-eb21-43da-a45b-bd09692125ca
 call(() -> begin
 	
@@ -522,7 +533,6 @@ end
 # ╠═bb902940-a858-11ed-2f11-1d6f5af61e4a
 # ╠═5ae3173f-6abb-4f38-94f8-90300c93d0e9
 # ╠═515c5c0b-a734-406c-b89d-6c921001a777
-# ╠═82052f6b-7826-485a-afee-1281aa9472fe
 # ╟─35fbdec7-b673-40a9-8e49-2e19c596b71b
 # ╠═67d83ab6-8d99-4067-aafc-dee1026eb1dc
 # ╟─3e447971-62d4-4d34-95de-c6dcfe1a281f
@@ -560,7 +570,7 @@ end
 # ╟─1e2dcb19-8e61-45b9-a033-0e28406b1511
 # ╟─d099b12b-9e8e-482f-82ed-a4681a424d2e
 # ╠═bf83ba44-8900-48c8-a172-161337181e41
-# ╟─fd2b4c23-e373-43e7-9a4f-63203ef2b83b
+# ╠═fd2b4c23-e373-43e7-9a4f-63203ef2b83b
 # ╟─7692cddf-6b37-4be2-847f-afb6d34e44ab
 # ╟─4d169b72-54f8-4325-adec-f53d18e54fae
 # ╠═dae2fc1d-38d0-48e1-bddc-3b490648648b
@@ -578,5 +588,6 @@ end
 # ╠═e5a18013-48a1-4329-b238-65a606a82c9b
 # ╟─f0a96c74-c73b-4763-992e-73d4aa542976
 # ╠═4af0b349-5894-4da5-8c3b-9fbc466d94f5
+# ╠═dd189511-be2c-4e6f-b6ac-8ebb4da29749
 # ╟─16598016-eb21-43da-a45b-bd09692125ca
 # ╟─63b217ad-bb2c-420b-b327-2c9a28be0a90
