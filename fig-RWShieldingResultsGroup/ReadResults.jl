@@ -200,8 +200,8 @@ md"""
 
 # ╔═╡ 74c5ce02-5171-425a-9bbd-14eb60c77504
 begin
-	avg_cost_description = "Average swings per 120s"
-	avg_deaths_description = "Percent unsafe runs"
+	avg_cost_description = "Average cost per walk"
+	avg_deaths_description = "Percent unsafe walks"
 	avg_interventions_description = "Percent interventions"
 end
 
