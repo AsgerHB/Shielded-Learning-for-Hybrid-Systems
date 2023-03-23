@@ -1,6 +1,9 @@
 is_safe(bounds::Bounds, m::OPMechanics) = is_safe(bounds.lower, m) && is_safe(bounds.upper, m)
 
 function get_op_grid(m::OPMechanics, granularity)
+	if granularity isa Number
+		granularity = [i == 3 ? 1 : granularity for i in 1:4]
+	end
 	grid = Grid(granularity, 
 		# [t, v, p, l]
 		[0, floor(m.v_min - granularity[2]), 0, -granularity[4]], 

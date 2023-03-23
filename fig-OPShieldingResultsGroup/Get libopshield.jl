@@ -1,16 +1,14 @@
 # Plots required by BBShieldSynthesis. fml.
 using Plots
 using Serialization
+Pkg.develop("GridShielding")
+using GridShielding
 include("../Shared Code/ExperimentUtilities.jl")
-include("../Shared Code/Ball.jl")
-include("../Shared Code/BBSquares.jl")
-include("../Shared Code/BBBarbaricReachabilityFunction.jl")
-include("../Shared Code/BBShieldSynthesis.jl")
-
+include("../Shared Code/OilPump.jl")
+include("../Shared Code/OPShielding.jl")
 
 # infix operator "\join" redefined to signify joinpath
 ⨝ = joinpath
-
 """
     get_shield(possible_shield_file, working_dir, [test])
 
@@ -33,78 +31,77 @@ function get_shield(possible_shield_file, working_dir; test)
     # If you want something done...
     progress_update("No shield was provided. Synthesising a new shield instead.")
 
+    m = OPMechanics()
     if test
-        grid = Grid(0.02, -13, 13, 0, 8) 
-        samples_per_axis = 2
+        grid = get_op_grid(m, 1)
+        samples_per_axis = [1, 1, 1, 1] # This won't be a safe shield
     else
-        grid = Grid(0.01, -13, 13, 0, 8)
-        samples_per_axis = 16
+        grid = get_op_grid(m, 0.1)
+        samples_per_axis = [2, 2, 1, 2]
     end
-    
-    progress_update("Synthesising shield: $(samples_per_axis^2) samples $(grid.G) G")
-    progress_update("Estimated time to synthesise: 50 minutes (3 minutes if run with --test)")
 
-    shield_dir = working_dir ⨝ "$(samples_per_axis^2) samples $(grid.G) G.shield"
+    simulation_model = SimulationModel(get_simulation_function(m), get_randomness_space(m), samples_per_axis)
     
-    initialize!(grid, standard_initialization_function)
+    progress_update("Synthesising shield: $(prod(samples_per_axis)) samples $(grid.granularity) G")
+    progress_update("Estimated time to synthesise: 16 minutes (2 minutes if run with --test)")
 
-    reachability_function = get_barbaric_reachability_function(samples_per_axis, bbmechanics)
-    shield, terminated_early, animation = make_shield(reachability_function, grid)
+    shield_dir = working_dir ⨝ "$(prod(samples_per_axis)) samples $(grid.granularity) G.shield"
+    
+    reachability_function = get_barbaric_reachability_function(simulation_model)
+    shield, terminated_early = make_shield(reachability_function, PumpStatus, grid)
+    terminated_early && @warn "Shield didn't finish synthesising. This is surprising. The default max iterations is very large, so maybe it is in the process of very slowly colouring the whole play-space red."
     robust_grid_serialization(shield_dir, shield)
     return shield_dir
 end
 
 """
-    compile_libbbshield(working_dir, shield_dir, lib_source_code_dir)
+    compile_libopshield(working_dir, shield_dir, lib_source_code_dir)
 
-Load shield from `shield_dir`, and bake it into a `libbbshield.so` file.
+Load shield from `shield_dir`, and bake it into a `libopshield.so` file.
 The C source code is copied from `lib_source_code_dir` into `working_dir` 
 where the given shield is written to `shield_dump.c` and compilation takes place.
-Returns the path to `libbshield.so` which will be somewhere within `working_dir`.
+Returns the path to `libopshield.so` which will be somewhere within `working_dir`.
 """
-function compile_libbbshield(working_dir, shield_dir, lib_source_code_dir)
+function compile_libopshield(working_dir, shield_dir, lib_source_code_dir)
     shield = robust_grid_deserialization(shield_dir)
 
-    # Bake it into the C-library. 
-    # Make a copy first so we don't overwrite the original files
-    for file in glob(lib_source_code_dir ⨝ "*")
-        cp(file, working_dir ⨝ basename(file), force=true)
-    end
+    # Copy over to our working directory.
+    cp(lib_source_code_dir ⨝ "shield.c", working_dir ⨝ "shield.c", force=true)
     
     # Write to shield dump
-    write(working_dir ⨝ "shield_dump.c", get_c_library_header(shield, "Retrieved with get_libbbshield"))'
+    write(working_dir ⨝ "shield_dump.c", get_c_library_header(shield, "Retrieved with get_libopshield"))'
     
     previous_working_dir = pwd()
     cd(working_dir)
     
     # Good luck.
     run(`gcc -c -fPIC shield.c -o shield.o`)
-    run(`gcc -shared -o libbbshield.so shield.o`)
+    run(`gcc -shared -o libopshield.so shield.o`)
 
     cd(previous_working_dir)
-    working_dir ⨝ "libbbshield.so"
+    working_dir ⨝ "libopshield.so"
 end
 
-function get_libbbshield(possible_shield_file, lib_source_code_dir, lib_destination_dir; working_dir, test=false)
+function get_libopshield(possible_shield_file, lib_source_code_dir, lib_destination_dir; working_dir, test=false)
     
     # Getting shield
     shield_dir = get_shield(possible_shield_file, working_dir; test)
 
-    lib_destination_dirʹ = compile_libbbshield(working_dir, shield_dir, lib_source_code_dir)
+    lib_destination_dirʹ = compile_libopshield(working_dir, shield_dir, lib_source_code_dir)
     if lib_destination_dir != lib_destination_dirʹ
         cp(lib_destination_dirʹ, lib_destination_dir, force=true)
     end
 end
 
 if abspath(PROGRAM_FILE) == @__FILE__
-    possible_shield_file = homedir() ⨝ "/Results/tab-BBSynthesis/Exported Strategies/25 Samples 0.02 G.shield"
+    possible_shield_file = "path/to/shield"
     test = true
-    lib_destination_dir = homedir() ⨝ "/libbbshield.2.so"
-    lib_source_code_dir = "N/A" # Removed because it was nonsense
+    lib_destination_dir = homedir() ⨝ "/libopshield.so"
+    lib_source_code_dir = "/some/folder/"
     println("Running as standalone script. This is suitable for testing.")
-    result = get_libbbshield(possible_shield_file, lib_source_code_dir, lib_destination_dir; test)
+    result = get_libopshield(possible_shield_file, lib_source_code_dir, lib_destination_dir; test)
 
-    println("Running result 👉 $result")
+    println("Result 👉 $result")
     print("Enter to quit > ")
     readline()
 end
