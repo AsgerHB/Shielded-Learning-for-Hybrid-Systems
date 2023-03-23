@@ -122,7 +122,7 @@ if __name__ == "__main__":
 
         # No learning occurs in the Layabout model, so it is only run once.
         run_experiment( experiment = "Layabout",
-                        model = "BB__ShieldedLayabout.xml",          # shield_enabled = true; layabout = true
+                        model = "OP__ShieldedLayabout.xml",          # shield_enabled = true; layabout = true
                         queries = "NoStrategyEvaluate.q",    # Run the three queries without a strategy.
                         runs = None,
                         iteration = i)
@@ -130,7 +130,7 @@ if __name__ == "__main__":
         for runs in  learning_runs:
 
             run_experiment( experiment = "PreShielded",
-                            model = "BB__Shielded.xml",      # shield_enabled = true
+                            model = "OP__Shielded.xml",      # shield_enabled = true
                             queries = "TrainSaveEvaluateSingle.q", # Train a strategy, save it, then evaluate it.
                             runs = runs,
                             iteration = i)
@@ -138,13 +138,13 @@ if __name__ == "__main__":
             cleanup_strategies("PreShielded", runs, i)
             
             run_experiment( experiment = "NoShield",
-                            model = "BB__Unshielded.xml",    # shield_enabled = false
+                            model = "OP__Unshielded.xml",    # shield_enabled = false
                             queries = "TrainSaveEvaluate.q", # Train a strategy, save it, then evaluate it.
                             runs = runs,
                             iteration = i)
 
             run_experiment( experiment = "PostShielded",
-                            model = "BB__Shielded.xml",      # shield_enabled = true
+                            model = "OP__Shielded.xml",      # shield_enabled = true
                             queries = "LoadEvaluate.q",      # Load the previous strategy, then evaluate it.
                             runs = runs,
                             iteration = i)

@@ -20,11 +20,60 @@ const int ON = 1;
 const double v_min = 4.9;
 const double v_max = 25.1; 
 
-// Stub function to make the edges identical
-int shield(int action) {
-    return action;
+// Shielding
+import "%shieldfile%"
+{
+    int get_value(double t, double v, int p, double l);
+};
+
+// Int-encoded set of actions.
+const int RED = 0;    // {}
+const int BLUE = 1;   // {off}
+const int GREEN = 2;  // {on}
+const int WHITE = 3;  // {on,off}
+
+// I can't get UPPAAL to not include t=20 even though that value is not defined in the shield. 
+double clamp_t(double t) {
+    return t == 20 ? 0.0 : t;
 }
-</declaration>
+
+double clamp_l(double l) {
+    // Apparently UPPAAL has min &lt;? and max &gt;? operators. 
+    return -0.001 &gt;? l &lt;? 2;
+}
+
+/* v really shouldn't go out of bounds while the shield is active.
+double clamp_v(double v) {
+    return 4.8 &gt;? v &lt;? 25.2;
+}
+*/
+
+int shield(int action) {
+    int color = get_value(clamp_t(t), v, p, clamp_l(l));
+    if (color == RED)
+        return action;
+    else if (color == BLUE){
+        if (action != OFF)
+            interventions++;
+        return OFF;
+    }
+    else if (color == GREEN) {
+        if (action != ON)
+            interventions++;
+        return ON;
+    }
+    else if (color == WHITE)
+        return action;
+    else
+        return action;
+}
+
+/*
+int debug1 = get_value(1, 10, 0, 0);
+int debug2 = get_value(1, 6, 0, 0);
+int debug3 = get_value(1, 6, 1, 0);
+int debug4 = get_value(1, 20, 0, 0);
+int debug5 = get_value(1, 20, 1, 0); */</declaration>
 	<template>
 		<name>Controller</name>
 		<declaration>clock x;
@@ -61,14 +110,7 @@ x' == 5</label>
 shield(OFF)</label>
 			<nail x="42" y="-127"/>
 		</transition>
-		<transition id="id6">
-			<source ref="id1"/>
-			<target ref="id0"/>
-			<label kind="assignment" x="-161" y="-144">next_action = 
-shield(ON)</label>
-			<nail x="-42" y="-127"/>
-		</transition>
-		<transition id="id7" controllable="false">
+		<transition id="id6" controllable="false">
 			<source ref="id2"/>
 			<target ref="id1"/>
 			<label kind="guard" x="-17" y="-51">x &gt;= 1</label>
@@ -79,22 +121,22 @@ shield(ON)</label>
 		<name x="5" y="5">Pump</name>
 		<declaration>// Place local declarations here.
 </declaration>
-		<location id="id8" x="-51" y="0">
+		<location id="id7" x="-51" y="0">
 			<name x="-85" y="-34">pump_off</name>
 			<label kind="invariant" x="-85" y="-68">l' == -1 &amp;&amp;
 v' == -c - f</label>
 			<label kind="exponentialrate" x="-9" y="-34">1</label>
 		</location>
-		<location id="id9" x="195" y="0">
+		<location id="id8" x="195" y="0">
 			<name x="161" y="-34">pump_on</name>
 			<label kind="invariant" x="161" y="-68">l' == -1 &amp;&amp;
 v' == 2.2 - c - f</label>
 			<label kind="exponentialrate" x="229" y="-34">1</label>
 		</location>
-		<init ref="id8"/>
-		<transition id="id10">
-			<source ref="id8"/>
-			<target ref="id9"/>
+		<init ref="id7"/>
+		<transition id="id9">
+			<source ref="id7"/>
+			<target ref="id8"/>
 			<label kind="guard" x="34" y="8">l &lt;= 0</label>
 			<label kind="synchronisation" x="34" y="-8">on?</label>
 			<label kind="assignment" x="34" y="25">l = 2,
@@ -105,9 +147,9 @@ switches++</label>
 			<nail x="127" y="-9"/>
 			<nail x="135" y="8"/>
 		</transition>
-		<transition id="id11">
-			<source ref="id9"/>
-			<target ref="id8"/>
+		<transition id="id10">
+			<source ref="id8"/>
+			<target ref="id7"/>
 			<label kind="guard" x="25" y="-110">l &lt;= 0</label>
 			<label kind="synchronisation" x="25" y="-127">off?</label>
 			<label kind="assignment" x="25" y="-93">l = 2,
@@ -121,49 +163,49 @@ switches++</label>
 	</template>
 	<template>
 		<name>Machine</name>
-		<location id="id12" x="127" y="-467">
+		<location id="id11" x="127" y="-467">
 			<label kind="invariant" x="102" y="-501">t &lt;= 16</label>
 		</location>
-		<location id="id13" x="221" y="-467">
+		<location id="id12" x="221" y="-467">
 			<label kind="invariant" x="195" y="-501">t &lt;= 18</label>
 		</location>
-		<location id="id14" x="-68" y="-467">
+		<location id="id13" x="-68" y="-467">
 			<label kind="invariant" x="-93" y="-501">t &lt;= 12</label>
 		</location>
-		<location id="id15" x="-161" y="-467">
+		<location id="id14" x="-161" y="-467">
 			<label kind="invariant" x="-187" y="-501">t &lt;= 10</label>
 		</location>
-		<location id="id16" x="-306" y="-467">
+		<location id="id15" x="-306" y="-467">
 			<label kind="invariant" x="-332" y="-501">t &lt;= 8</label>
 		</location>
-		<location id="id17" x="-391" y="-467">
+		<location id="id16" x="-391" y="-467">
 			<label kind="invariant" x="-416" y="-501">t &lt;= 4</label>
 		</location>
-		<location id="id18" x="-484" y="-467">
+		<location id="id17" x="-484" y="-467">
 			<label kind="invariant" x="-510" y="-501">t &lt;= 2</label>
 		</location>
-		<location id="id19" x="314" y="-467">
+		<location id="id18" x="314" y="-467">
 			<label kind="invariant" x="288" y="-501">t &lt;= 20</label>
 		</location>
-		<location id="id20" x="34" y="-467">
+		<location id="id19" x="34" y="-467">
 			<label kind="invariant" x="9" y="-501">t &lt;= 14</label>
 		</location>
-		<init ref="id18"/>
-		<transition id="id21" controllable="false">
-			<source ref="id12"/>
-			<target ref="id13"/>
+		<init ref="id17"/>
+		<transition id="id20" controllable="false">
+			<source ref="id11"/>
+			<target ref="id12"/>
 			<label kind="guard" x="144" y="-450">t &gt;= 16</label>
 			<label kind="assignment" x="145" y="-467">c = 0.5</label>
 		</transition>
-		<transition id="id22" controllable="false">
-			<source ref="id20"/>
-			<target ref="id12"/>
+		<transition id="id21" controllable="false">
+			<source ref="id19"/>
+			<target ref="id11"/>
 			<label kind="guard" x="51" y="-450">t &gt;= 14</label>
 			<label kind="assignment" x="52" y="-467">c = 1.7</label>
 		</transition>
-		<transition id="id23" controllable="false">
-			<source ref="id19"/>
-			<target ref="id18"/>
+		<transition id="id22" controllable="false">
+			<source ref="id18"/>
+			<target ref="id17"/>
 			<label kind="guard" x="357" y="-459">t &gt;= 20</label>
 			<label kind="assignment" x="357" y="-518">c = 0,
 f = 0,
@@ -173,42 +215,42 @@ t = 0</label>
 			<nail x="-527" y="-510"/>
 			<nail x="-527" y="-467"/>
 		</transition>
-		<transition id="id24" controllable="false">
-			<source ref="id13"/>
-			<target ref="id19"/>
+		<transition id="id23" controllable="false">
+			<source ref="id12"/>
+			<target ref="id18"/>
 			<label kind="guard" x="238" y="-433">t &gt;= 18</label>
 			<label kind="assignment" x="236" y="-467">c = 0, 
 f = 0</label>
 		</transition>
-		<transition id="id25" controllable="false">
-			<source ref="id14"/>
-			<target ref="id20"/>
+		<transition id="id24" controllable="false">
+			<source ref="id13"/>
+			<target ref="id19"/>
 			<label kind="guard" x="-51" y="-433">t &gt;= 12</label>
 			<label kind="assignment" x="-50" y="-467">c = 0, 
 f = 0</label>
 		</transition>
+		<transition id="id25" controllable="false">
+			<source ref="id14"/>
+			<target ref="id13"/>
+			<label kind="guard" x="-144" y="-450">t &gt;= 10</label>
+			<label kind="assignment" x="-144" y="-467">c = 2.5</label>
+		</transition>
 		<transition id="id26" controllable="false">
 			<source ref="id15"/>
 			<target ref="id14"/>
-			<label kind="guard" x="-144" y="-450">t &gt;= 10</label>
-			<label kind="assignment" x="-144" y="-467">c = 2.5</label>
+			<label kind="guard" x="-290" y="-450">t &gt;= 8</label>
+			<label kind="assignment" x="-289" y="-467">c = 1.2</label>
 		</transition>
 		<transition id="id27" controllable="false">
 			<source ref="id16"/>
 			<target ref="id15"/>
-			<label kind="guard" x="-290" y="-450">t &gt;= 8</label>
-			<label kind="assignment" x="-289" y="-467">c = 1.2</label>
-		</transition>
-		<transition id="id28" controllable="false">
-			<source ref="id17"/>
-			<target ref="id16"/>
 			<label kind="guard" x="-374" y="-433">t &gt;= 4</label>
 			<label kind="assignment" x="-374" y="-467">c = 0,
 f = 0</label>
 		</transition>
-		<transition id="id29" controllable="false">
-			<source ref="id18"/>
-			<target ref="id17"/>
+		<transition id="id28" controllable="false">
+			<source ref="id17"/>
+			<target ref="id16"/>
 			<label kind="guard" x="-467" y="-450">t &gt;= 2</label>
 			<label kind="assignment" x="-467" y="-467">c = 1.2</label>
 		</transition>
@@ -216,15 +258,15 @@ f = 0</label>
 	<template>
 		<name>Fluctuation</name>
 		<declaration>clock x;</declaration>
-		<location id="id30" x="178" y="136">
+		<location id="id29" x="178" y="136">
 			<label kind="invariant" x="144" y="85">x  &lt;= 1 &amp;&amp;
 x' == 5</label>
 			<label kind="exponentialrate" x="144" y="68">1</label>
 		</location>
-		<init ref="id30"/>
-		<transition id="id31" controllable="false">
-			<source ref="id30"/>
-			<target ref="id30"/>
+		<init ref="id29"/>
+		<transition id="id30" controllable="false">
+			<source ref="id29"/>
+			<target ref="id29"/>
 			<label kind="guard" x="42" y="118">x &gt;= 1 &amp;&amp;
 c == 0</label>
 			<label kind="assignment" x="42" y="161">x = 0,
@@ -232,9 +274,9 @@ f = 0</label>
 			<nail x="119" y="195"/>
 			<nail x="119" y="136"/>
 		</transition>
-		<transition id="id32" controllable="false">
-			<source ref="id30"/>
-			<target ref="id30"/>
+		<transition id="id31" controllable="false">
+			<source ref="id29"/>
+			<target ref="id29"/>
 			<label kind="guard" x="243" y="114">x &gt;= 1 &amp;&amp; 
 c &gt; 0</label>
 			<label kind="assignment" x="246" y="161">x = 0, 
@@ -245,23 +287,23 @@ f = -0.1 + random(0.2)</label>
 	</template>
 	<template>
 		<name>AccumulatedVolume</name>
-		<location id="id33" x="0" y="0">
+		<location id="id32" x="0" y="0">
 			<label kind="invariant" x="-42" y="-34">aov' == v</label>
 		</location>
-		<init ref="id33"/>
+		<init ref="id32"/>
 	</template>
 	<template>
 		<name>SafetyMonitor</name>
 		<declaration>clock x;</declaration>
-		<location id="id34" x="-34" y="-8">
+		<location id="id33" x="-34" y="-8">
 			<label kind="invariant" x="-68" y="8">x  &lt;= 1 &amp;&amp;
 x' == 5</label>
 			<label kind="exponentialrate" x="-42" y="42">1</label>
 		</location>
-		<init ref="id34"/>
-		<transition id="id35" controllable="false">
-			<source ref="id34"/>
-			<target ref="id34"/>
+		<init ref="id33"/>
+		<transition id="id34" controllable="false">
+			<source ref="id33"/>
+			<target ref="id33"/>
 			<label kind="guard" x="-178" y="-42">x &gt;= 1 &amp;&amp;
 v &lt; v_min</label>
 			<label kind="assignment" x="-238" y="0">number_deaths = 1,
@@ -269,9 +311,9 @@ x = 0</label>
 			<nail x="-93" y="-34"/>
 			<nail x="-93" y="-8"/>
 		</transition>
-		<transition id="id36" controllable="false">
-			<source ref="id34"/>
-			<target ref="id34"/>
+		<transition id="id35" controllable="false">
+			<source ref="id33"/>
+			<target ref="id33"/>
 			<label kind="guard" x="-76" y="-102">x &gt;= 1 &amp;&amp;
 v &gt;= v_min &amp;&amp;
 v &lt;= v_max</label>
@@ -279,9 +321,9 @@ v &lt;= v_max</label>
 			<nail x="-68" y="-42"/>
 			<nail x="0" y="-42"/>
 		</transition>
-		<transition id="id37" controllable="false">
-			<source ref="id34"/>
-			<target ref="id34"/>
+		<transition id="id36" controllable="false">
+			<source ref="id33"/>
+			<target ref="id33"/>
 			<label kind="guard" x="34" y="-42">x &gt;= 1 &amp;&amp; 
 v &gt; v_max</label>
 			<label kind="assignment" x="34" y="0">number_deaths = 1,
@@ -319,11 +361,11 @@ system Controller, Pump, Machine, Fluctuation, AccumulatedVolume, SafetyMonitor;
 			<comment/>
 		</query>
 		<query>
-			<formula>strategy LowVolume = minE (aov/120 + number_deaths*1000) [&lt;=120] {} -&gt; {t, v, p, l}: &lt;&gt; elapsed &gt;= 120</formula>
+			<formula>strategy LowVolume = minE (aov/120) [&lt;=120] {} -&gt; {t, v, p, l}: &lt;&gt; elapsed &gt;= 120</formula>
 			<comment/>
 		</query>
 		<query>
-			<formula>strategy SmartSwitching = minE (aov/120 + switches/2 + number_deaths*1000) [&lt;=120] {} -&gt; {t, v, p, l}: &lt;&gt; elapsed &gt;= 120</formula>
+			<formula>strategy SmartSwitching = minE (aov/120 + switches/2) [&lt;=120] {} -&gt; {t, v, p, l}: &lt;&gt; elapsed &gt;= 120</formula>
 			<comment/>
 		</query>
 		<query>
@@ -339,23 +381,23 @@ system Controller, Pump, Machine, Fluctuation, AccumulatedVolume, SafetyMonitor;
 			<comment/>
 		</query>
 		<query>
-			<formula>E[&lt;=120;1000] (max:aov/120 + switches/2 + number_deaths*1000)</formula>
+			<formula>E[&lt;=120;1000] (max:aov/120 + switches/2)</formula>
 			<comment/>
 		</query>
 		<query>
-			<formula>E[&lt;=120;1000] (max:aov/120 + switches/2 + number_deaths*1000) under LowVolume</formula>
+			<formula>E[&lt;=120;1000] (max:aov/120 + switches/2) under LowVolume</formula>
 			<comment/>
 		</query>
 		<query>
-			<formula>E[&lt;=120;1000] (max:aov/120 + number_deaths*1000) under LowVolume</formula>
+			<formula>E[&lt;=120;1000] (max:aov/120) under LowVolume</formula>
 			<comment/>
 		</query>
 		<query>
-			<formula>E[&lt;=120;1000] (max:aov/120 + number_deaths*1000)</formula>
+			<formula>E[&lt;=120;1000] (max:aov/120)</formula>
 			<comment/>
 		</query>
 		<query>
-			<formula>E[&lt;=120;1000] (max:aov/120 + switches/2 + number_deaths*1000) under SmartSwitching</formula>
+			<formula>E[&lt;=120;1000] (max:aov/120 + switches/2) under SmartSwitching</formula>
 			<comment/>
 		</query>
 		<query>

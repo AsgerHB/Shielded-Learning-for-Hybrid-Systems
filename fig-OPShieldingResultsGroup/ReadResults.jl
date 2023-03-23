@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.19
+# v0.19.22
 
 using Markdown
 using InteractiveUtils
@@ -89,7 +89,7 @@ end
 
 # ╔═╡ 74c5ce02-5171-425a-9bbd-14eb60c77504
 begin
-	avg_cost_description = "Average swings per 120s"
+	avg_cost_description = "Average cost per run"
 	avg_deaths_description = "Percent unsafe runs"
 	avg_interventions_description = "Percent interventions"
 end
