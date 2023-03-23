@@ -60,7 +60,7 @@ mkpath(libbbshield_dir)
 
 possible_shield_file = args["shield"] #results_dir ⨝ "../tab-BBSynthesis/Exported Strategies/400 Samples 0.01 G.shield"
 
-checks = args["test"] ? 10 : 1000 # Number of checks to use for estimating½ expected outcomes in the UPPAAL queries
+checks = args["test"] ? 10 : 1000 # Number of checks to use for estimating expected outcomes in the UPPAAL queries
 
 if !args["skip-experiment"]
     # Get the nondeterministic safe strategy that will be used for shielding.

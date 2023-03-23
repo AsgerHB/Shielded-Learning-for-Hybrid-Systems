@@ -356,16 +356,16 @@ shielded_random_agent = shielded(shield, random_agent)
 
 # ╔═╡ fdfa1b59-217e-4504-9d4f-2ad44c39cfd8
 let
-	draw(shield, [:, :, 1, 1],
+	draw(shield, [:, :, 2, 1],
 		colorbar=:right, 
 		colors=opshieldcolors,
 		color_labels=opshieldlabels)
 
 	for _ in 1:10
 		trace = 
-			simulate_trace(m, (0., 10., Int(off), 0.), shielded(shield, random_agent)) 
+			simulate_trace(m, (0., 10., Int(off), 0.), shielded(shield, shielded_random_agent), duration=19.9)
 		
-		plot!(trace.elapsed, trace.vs,
+		plot!(trace.ts, trace.vs,
 			line=(colors.WET_ASPHALT, 2),
 			label=nothing)
 	end
@@ -562,3 +562,4 @@ end
 # ╠═4af0b349-5894-4da5-8c3b-9fbc466d94f5
 # ╟─16598016-eb21-43da-a45b-bd09692125ca
 # ╟─63b217ad-bb2c-420b-b327-2c9a28be0a90
+# ╠═dd189511-be2c-4e6f-b6ac-8ebb4da29749

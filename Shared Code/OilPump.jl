@@ -124,14 +124,6 @@ end
 
 # ╔═╡ ca873c15-677d-45f8-a5ee-c936de1b7094
 md"""
-That's all we need for the **simulation function.** I'm trying to simulate the following automaton:
-
-![automaton](https://i.imgur.com/pc3A3iU.png)
-
-Where `c` is the consumption given by the consumption rate, modelled in the following way:
-
-![automaton](https://i.imgur.com/MfiEufs.png)
-
 The state is represented by the tuple $(t, v, p, l)$ where
 
  - ⁣$t$ is the time in the consumption cycle
