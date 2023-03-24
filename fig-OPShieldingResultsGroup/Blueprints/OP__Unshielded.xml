@@ -319,11 +319,11 @@ system Controller, Pump, Machine, Fluctuation, AccumulatedVolume, SafetyMonitor;
 			<comment/>
 		</query>
 		<query>
-			<formula>strategy LowVolume = minE (aov/120 + number_deaths*1000) [&lt;=120] {} -&gt; {t, v, p, l}: &lt;&gt; elapsed &gt;= 120</formula>
+			<formula>strategy LowVolume = minE (aov/120 + number_deaths*1000) [&lt;=120] {p} -&gt; {t, v, l}: &lt;&gt; elapsed &gt;= 120</formula>
 			<comment/>
 		</query>
 		<query>
-			<formula>strategy SmartSwitching = minE (aov/120 + switches/2 + number_deaths*1000) [&lt;=120] {} -&gt; {t, v, p, l}: &lt;&gt; elapsed &gt;= 120</formula>
+			<formula>strategy SmartSwitching = minE (aov/120 + switches/2 + number_deaths*1000) [&lt;=120] {p} -&gt; {t, v, l}: &lt;&gt; elapsed &gt;= 120</formula>
 			<comment/>
 		</query>
 		<query>

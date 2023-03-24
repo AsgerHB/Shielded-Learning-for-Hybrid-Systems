@@ -1,7 +1,7 @@
 // Train a single strategy, save it, then evaluate it.
 
 /* formula 1 */
-strategy PreShielded = minE (aov/120 + switches/2) [<=120] {} -> {t, v, p, l}: <> elapsed >= 120
+strategy PreShielded = minE (aov/120 + switches/2) [<=120] {p} -> {t, v, l}: <> elapsed >= 120
 
 /* formula 2 */
 saveStrategy("%resultsdir%/PreShielded.strategy.json", PreShielded)
