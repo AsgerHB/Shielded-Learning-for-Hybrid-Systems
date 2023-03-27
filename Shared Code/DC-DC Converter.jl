@@ -20,12 +20,15 @@ begin
 end
   ╠═╡ =#
 
-# ╔═╡ 74e346b6-b9d4-4901-99c7-f34c225677d6
-md"""
-# TODO: Specialized function for euler method
-
-My current approach was wrong, but a good start. I should let myself inspire by the [code from the cartpole problem](https://github.com/openai/gym/blob/dcd185843a62953e27c2d54dc8c2d647d604b635/gym/envs/classic_control/cartpole.py#L149).
-"""
+# ╔═╡ e6bc04b3-d768-409f-aa64-0a5cbed84456
+begin
+    using Logging
+    using LoggingExtras
+	debug_logger() = LevelOverrideLogger(Logging.Debug, current_logger())
+	
+    Logging.min_enabled_level(::PlutoRunner.PlutoCellLogger) = 
+            PlutoRunner.stdout_log_level
+end
 
 # ╔═╡ 484bbefc-c519-4d8f-9f25-df8596deecd9
 md"""
@@ -76,6 +79,8 @@ struct DCMechanics
 	R_fluctuation # Output consumption R can fluctuate ± this amount each step
 	R_min
 	R_max
+	x1_ref
+	x2_ref
 	# Safety constraints:
 	x1_min
 	x1_max
@@ -96,12 +101,16 @@ struct DCMechanics
 			R_fluctuation=10,
 			R_min=60,
 			R_max=80,
+			x1_ref=0.35,
+			x2_ref=15,
 			x1_min=0,
 			x1_max=0.7,
 			x2_min=14.8,
 			x2_max=15.2,)
 		
-		DCMechanics(L, RL, Co, vs, time_step, scale, R_fluctuation, R_min, R_max, x1_min, x1_max, x2_min, x2_max)
+		DCMechanics(L, RL, Co, vs, time_step, scale, R_fluctuation, R_min, R_max, 
+			x1_ref, x2_ref,
+			x1_min, x1_max, x2_min, x2_max)
 	end
 end
 
@@ -127,97 +136,61 @@ The state is represented by the tuple $(x_1, x_2)$ where
  -  $x_2$ is the output voltage $v(t)$
 """
 
-# ╔═╡ 8069b332-cb00-41a2-ae2f-b2e17efb2847
+# ╔═╡ ed6df85f-96e6-430a-8c7a-e8bc8e940cd8
 md"""
-## Aside: Explicit Euler Method
-
-Alright, I'm using the explicit euler method for this one. Not in the mood for solving those equations.
-
-![figure ilustrating the explicit euler method](https://pythonnumericalmethods.berkeley.edu/_images/22.03.01-Euler-method-illustration.png)
+## The Simulate-point Function
 """
-
-# ╔═╡ 492ee61f-f919-49e9-bbdb-7d52a6b1a116
-"""
-	function explicit_euler(ode::Function, x, y, δ, h=0.1)
-
- - `ode` Function representing ordinary differential equation. (x, y) -> slope
- - `x` first axis
- - `y` second axis
- - `δ` how far to go along first axis
- - `h=0.1` increment size
-"""
-function explicit_euler(ode::Function, x, y, δ; h=0.1, debug=false)
-	for x in x:h:(x + δ)
-		y += h*ode(x, y)
-		debug && @show x, y, ode(x, y)
-	end
-	y
-end;
-
-# ╔═╡ 803ee344-a122-4935-8574-0d64a4650abf
-begin
-	plot(z -> explicit_euler((x, y) -> exp(x), 0, 0, z), 
-		line=(2, colors.PETER_RIVER),
-		xlims=(0, 8),
-		label="approximated")
-	plot!(z -> exp(z), label="actual, eˣ",
-		line=(2, colors.ALIZARIN))
-end
 
 # ╔═╡ a2a0991c-7485-4bf3-8353-b33d2f4e9688
 function simulate_point(mechanics::DCMechanics, 
 		state, 
 		action::SwitchStatus, 
-		random_outcomes)
+		random_outcomes;
+		h=0.1, # h is short for "euler method step size"
+		)
 
+	# Nice syntax for unpacking structs
 	(;L, RL, Co, vs, time_step, scale, R_min, R_max) = mechanics
 	x1, x2, R = state
 
 	R = clamp(random_outcomes[1] + R, R_min, R_max)
-	
+		
 	# action == on
-	# x1'==(((-x_RL/x_L)*x1)+(x_vs/x_L))/scale
-	# x2'==(-(1.0/(x_Co*x_R))*x2)/scale
-	on_x1(x2, x1) = (((-RL/L)*x1)+(vs/L))/scale 
-	on_x2(x1, x2) = (-(1.0/(Co*R))*x2)/scale
-	# TODO: Rewrite to not require a precompile each step
-
-	# action == off and x1 > 0
-	# x1'==((-x_RL/x_L)*x1+(-1.0/x_L)*x2+(x_vs/x_L))/scale
-	# x2'==((1.0/x_Co)*x1+(-1.0/(x_Co*x_R))*x2)/scale
-	# action == off and x1 == 0
-	# x1'==0
-	# x2'==((-1.0/(x_Co*x_R))*x2)/scale
-	off_x1(x2, x1) = if x1 > 0
-			((-RL/L)*x1+(-1.0/L)*x2+(vs/L))/scale
-		else
-			0
-		end
-	
-	off_x2(x1, x2) = if x1 > 0
-			((1.0/Co)*x1+(-1.0/(Co*R))*x2)/scale
-		else
-			((-1.0/(Co*R))*x2)/scale
-		end
-	
+	#   x1'==(((-x_RL/x_L)*x1)+(x_vs/x_L))/scale
+	#   x2'==(-(1.0/(x_Co*x_R))*x2)/scale
 	if action == on
-		x1′ = x1
-		x1 = explicit_euler(on_x1, x2, x1, time_step)
-		x2 = explicit_euler(on_x2, x1′, x2, time_step)
+		for t in 0:h:time_step
+			x1 += h*(((-RL/L)*x1)+(vs/L))/scale
+			x2 += h*(-(1.0/(Co*R))*x2)/scale
+		end
+		
+	# action == off and x1 > 0
+	#   x1'==((-x_RL/x_L)*x1+(-1.0/x_L)*x2+(x_vs/x_L))/scale
+	#   x2'==((1.0/x_Co)*x1+(-1.0/(x_Co*x_R))*x2)/scale
+	# action == off and x1 == 0
+	#   x1'==0
+	#   x2'==((-1.0/(x_Co*x_R))*x2)/scale
+	elseif action == off
+		for t in 0:h:time_step
+			if x1 > 0
+				x1 += h*((-RL/L)*x1+(-1.0/L)*x2+(vs/L))/scale
+				x2 += h*((1.0/Co)*x1+(-1.0/(Co*R))*x2)/scale
+			else
+				x1 += 0
+				x2 += h*((-1.0/(Co*R))*x2)/scale
+			end
+		end
 	else
-		x1′ = x1
-		x1 = explicit_euler(off_x1, x2, x1, time_step)
-		x1 = max(0, x1)
-		x2 = explicit_euler(off_x2, x1′, x2, time_step, debug=true)
+		error("Unexpected value: action=$action")
 	end
-		return x1, x2, R
+	return x1, x2, R
 end
 
 # ╔═╡ 5ed3810f-dedd-4844-a491-3a0ad3547b15
-function simulate_point(mechanics::DCMechanics, state, action::SwitchStatus)
+function simulate_point(mechanics::DCMechanics, state, action::SwitchStatus; h=0.1)
 	(;R_fluctuation) = mechanics
 	random_outcomes = [rand(-R_fluctuation:R_fluctuation)]
-	simulate_point(mechanics::DCMechanics, state, action::SwitchStatus, random_outcomes)
+	simulate_point(mechanics::DCMechanics, state, action::SwitchStatus, random_outcomes; h)
 end
 
 # ╔═╡ a490bc63-a9d9-4261-aca8-0a1f877d09ce
@@ -227,7 +200,9 @@ end
 
 # ╔═╡ a214953e-b4d2-482c-aaad-7fc22a6b8feb
 #=╠═╡
-simulate_point(mechanics, (.0, 15, 60), action)
+with_logger(debug_logger()) do 
+	simulate_point(mechanics, (.0, 15, 60), action)
+end
   ╠═╡ =#
 
 # ╔═╡ 6c41264e-db32-4a5f-aa82-438a82824681
@@ -250,13 +225,13 @@ end
 initial_state = (0., 10., 0., 0.)
 
 # ╔═╡ 5e2912de-768c-4711-82a9-d809f78e93ff
-function simulate_trace(mechanics::DCMechanics, state, policy; duration=20)
+function simulate_trace(mechanics::DCMechanics, state, policy; duration=20, h=0.1)
 	x1, x2, R = state
 	x1s, x2s, Rs, elapsed, actions = [x1], [x2], [R], [0.], []
 	
 	while elapsed[end] < duration
 		a = policy((x1, x2, R))
-		x1, x2, R = simulate_point(mechanics, (x1, x2, R), a)
+		x1, x2, R = simulate_point(mechanics, (x1, x2, R), a; h)
 		push!(x1s, x1)
 		push!(x2s, x2)
 		push!(Rs, R)
@@ -270,7 +245,7 @@ end
 #=╠═╡
 trace = simulate_trace(mechanics, 
 		(0.35, 15., 60), 
-		(_...) -> rand([ off]),
+		(_...) -> rand([action]),
 		duration = 120
 	)
   ╠═╡ =#
@@ -317,24 +292,16 @@ function plot_trace!(trace::DCTrace; show_actions=true, params...)
 	plot!()
 end
 
-# ╔═╡ 3b049ee6-f6c0-4b03-ab7b-aa5d7b72d387
-#=╠═╡
-begin
-	plot()
-	plot_trace!(trace, legend=:outerright, show_actions=false)
-end
-  ╠═╡ =#
-
 # ╔═╡ 501fbde2-57d4-48e7-ab46-af7ad8cce6e9
-# ╠═╡ disabled = true
 #=╠═╡
 begin
 	plot()
 	for i in 1:10
 		trace = simulate_trace(mechanics, 
 			(0.35, 15., 60), 
-			(_...) -> rand([off]),
-			duration = 120
+			(_...) -> rand([on off]),
+			duration = 120,
+			h=0.01
 		)
 		plot_trace!(trace, legend=:outerright, show_actions=false)
 	end
@@ -348,10 +315,16 @@ md"""
 """
 
 # ╔═╡ a775dad5-974c-4aae-b1dc-81535bf960cc
-is_safe(state, m::OPMechanics) = m.v_min <= state[2] <= m.v_max
+is_safe(state, m::DCMechanics) = 
+	m.x1_min <= state[1] <= m.x1_max && 
+	m.x2_min <= state[2] <= m.x2_max
+
+# ╔═╡ 19967ff1-f10e-4efe-89ce-120a45d2d7b7
+is_safe(trace::DCTrace, m::DCMechanics) = 
+	all(is_safe(state, m) for state in zip(trace.x1s, trace.x2s))
 
 # ╔═╡ e362439c-716f-4dcb-91b4-3eaddceab0ea
-function count_unsafe_traces(mechanics::OPMechanics, policy::Function; 
+function count_unsafe_traces(mechanics::DCMechanics, policy::Function; 
 	runs=1000,
 	run_duration=120)
 
@@ -359,9 +332,8 @@ function count_unsafe_traces(mechanics::OPMechanics, policy::Function;
 	unsafe_trace = nothing
 	for i in 1:runs
 		trace = simulate_trace(mechanics, initial_state, policy, duration=run_duration)
-		(;ts, vs, ps, ls, elapsed, actions) = trace
 
-		if !all([mechanics.v_min < v < mechanics.v_max for v in vs])
+		if !is_safe(trace, mechanics)
 			unsafe_count += 1
 			unsafe_trace = trace
 		end
@@ -370,70 +342,75 @@ function count_unsafe_traces(mechanics::OPMechanics, policy::Function;
 	return (unsafe=unsafe_count, total=runs, unsafe_trace)
 end
 
+# ╔═╡ 795e4d30-6bda-433d-8de5-b90c2a67bd50
+#=╠═╡
+count_unsafe_traces(mechanics, (_...) -> rand([on off]))
+  ╠═╡ =#
+
 # ╔═╡ 64084492-f5f7-4f5c-b21c-8191d512f9c4
 md"""
 # Cost Function
 
-Minimize the average accumulated oil volume in the limit, i.e. minimize
+Minimize the absolute distance $d$ (or `dist`) to the reference current `x1_ref` and the squared distance to the voltage `x2_ref`. Furthermore, it seems that some kind of weight has been applied to the current, so that  the cost grows as
 
-$\displaystyle\lim_{{{T}\to\infty}}\frac{1}{{T}}{\int_{{{t}={0}}}^{{T}}}{v}{\left({t}\right)}\text{d}{t}$
-
-And since this notebook works on discretized time, I am rewriting it to be 
-
-$\displaystyle\frac{\Delta_{{t}}}{{T}}{\sum_{{{i}={0}}}^{{{T}/\Delta_{{t}}}}}{v}{\left({i}\Delta_{{t}}\right)}$
-
-Where $\Delta_t$ is the `time_step` variable from the mechanics.
+$\dot{d} = (x_2 - x_{2ref})^2 + {|{x_1 - x_{1ref}|} \over 3}$
 
 """
 
 # ╔═╡ f1f39983-dd7e-4169-a3e3-1b63bc21ea2c
-function cost(trace::OPTrace, time_step)
-	(;ts, vs, ps, ls, elapsed, actions) = trace
+function cost(m::DCMechanics, trace::DCTrace)
+	(;x1s, x2s) = trace
 
-	accumulator = 0
-	for v in vs
-		accumulator += v
+	# dist' == pow(x2-x2ref, 2.0)+fabs(x1-x1ref)/3.0
+	dist = 0
+	for (i, x1) in enumerate(x1s)
+		x2 = x2s[i]
+		
+		dist += (x2 - m.x2_ref)^2 + abs(x1 - m.x1_ref)/3
 	end
 
-	(time_step/elapsed[end])*accumulator
+	dist
 end
 
 # ╔═╡ b0ef9fe2-3cf8-413b-9950-328da3572d47
-function cost(mechanics::OPMechanics, policy::Function; runs=1000, run_duration=120)
+function cost(mechanics::DCMechanics, policy::Function; runs=1000, run_duration=120)
 	initial_state = (0., 10., 0, 0.)
 	accumulator = 0
 	for i in 1:runs
 		trace = simulate_trace(mechanics, initial_state, policy, 
 			duration=run_duration)
 
-		accumulator += cost(trace, mechanics.time_step)
+		accumulator += cost(mechanics, trace)
 	end
 
 	accumulator/runs
 end
 
-# ╔═╡ 98c3de3f-9d27-4a5d-acb5-02c5b6f42f97
-#=╠═╡
-cost(mechanics, (_...) -> rand([on off]), run_duration=20, runs=100)
-  ╠═╡ =#
-
 # ╔═╡ 9830b7bd-4561-4dcb-9ca5-2b32da5ef132
 #=╠═╡
-cost(simulate_trace(mechanics, 
+cost(mechanics,
+	simulate_trace(mechanics, 
 		(0., 10., 0, 0.), 
 		(_...) -> rand([on off]),
-		duration = 20
-	), 
-	mechanics.time_step)
+		duration = 120
+	))
+  ╠═╡ =#
+
+# ╔═╡ 98c3de3f-9d27-4a5d-acb5-02c5b6f42f97
+#=╠═╡
+cost(mechanics, (_...) -> rand([on off]), run_duration=120, runs=1000)
   ╠═╡ =#
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
+Logging = "56ddb016-857b-54e1-b83d-db4d58db5568"
+LoggingExtras = "e6f89c97-d47a-5376-807f-9c37f3926c36"
 Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
 PlutoUI = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
 
 [compat]
+LoggingExtras = "~1.0.0"
 Plots = "~1.38.8"
 PlutoUI = "~0.7.50"
 """
@@ -444,7 +421,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.8.2"
 manifest_format = "2.0"
-project_hash = "da8d7b07075b5311d15ead4dcb95ff194fce7a97"
+project_hash = "39afcf2b040be49686c7f83bd2f5c734d3656c45"
 
 [[deps.AbstractPlutoDingetjes]]
 deps = ["Pkg"]
@@ -1407,7 +1384,7 @@ version = "1.4.1+0"
 # ╔═╡ Cell order:
 # ╠═ca24fa88-c330-11ed-16b7-655126a8c62d
 # ╠═25fa7e5a-04f2-49df-a0b0-0a3f69d721c9
-# ╟─74e346b6-b9d4-4901-99c7-f34c225677d6
+# ╠═e6bc04b3-d768-409f-aa64-0a5cbed84456
 # ╟─484bbefc-c519-4d8f-9f25-df8596deecd9
 # ╟─7144e8f2-38af-4f32-8377-47841261bac5
 # ╠═ebd20f9c-a927-4a50-98e4-2aec1f2c8e1b
@@ -1415,9 +1392,7 @@ version = "1.4.1+0"
 # ╠═1f052f6e-5676-4f66-aa9b-a3514bc20525
 # ╠═f9779742-ec7b-43e5-ae5a-eaec30276ac0
 # ╟─ca873c15-677d-45f8-a5ee-c936de1b7094
-# ╟─8069b332-cb00-41a2-ae2f-b2e17efb2847
-# ╠═492ee61f-f919-49e9-bbdb-7d52a6b1a116
-# ╠═803ee344-a122-4935-8574-0d64a4650abf
+# ╟─ed6df85f-96e6-430a-8c7a-e8bc8e940cd8
 # ╠═a2a0991c-7485-4bf3-8353-b33d2f4e9688
 # ╠═a214953e-b4d2-482c-aaad-7fc22a6b8feb
 # ╠═5ed3810f-dedd-4844-a491-3a0ad3547b15
@@ -1428,17 +1403,18 @@ version = "1.4.1+0"
 # ╠═5e2912de-768c-4711-82a9-d809f78e93ff
 # ╠═675538d0-5291-4069-9363-57464ba1012f
 # ╠═a5c44feb-e5f5-4ce0-a911-7ad0c7bd4acf
-# ╠═3b049ee6-f6c0-4b03-ab7b-aa5d7b72d387
 # ╠═501fbde2-57d4-48e7-ab46-af7ad8cce6e9
 # ╠═9e9174d8-7634-4a2f-ad07-f89e6af6fa3f
 # ╠═1a071438-946e-48ea-be42-189c1dc66bae
 # ╟─a8d0fb4d-2a37-4c00-b14e-9ad929e75433
 # ╠═a775dad5-974c-4aae-b1dc-81535bf960cc
+# ╠═19967ff1-f10e-4efe-89ce-120a45d2d7b7
 # ╠═e362439c-716f-4dcb-91b4-3eaddceab0ea
+# ╠═795e4d30-6bda-433d-8de5-b90c2a67bd50
 # ╟─64084492-f5f7-4f5c-b21c-8191d512f9c4
 # ╠═f1f39983-dd7e-4169-a3e3-1b63bc21ea2c
 # ╠═b0ef9fe2-3cf8-413b-9950-328da3572d47
-# ╠═98c3de3f-9d27-4a5d-acb5-02c5b6f42f97
 # ╠═9830b7bd-4561-4dcb-9ca5-2b32da5ef132
+# ╠═98c3de3f-9d27-4a5d-acb5-02c5b6f42f97
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
