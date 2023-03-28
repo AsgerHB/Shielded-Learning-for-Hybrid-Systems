@@ -40,7 +40,7 @@ end
 args = parse_args(s)
 test = args["test"]
 results_dir = args["results-dir"]
-table_name = "tab-OPSynthesis"
+table_name = "tab-DCSynthesis"
 results_dir = joinpath(results_dir, table_name)
 shields_dir = joinpath(results_dir, "Exported Strategies")
 mkpath(shields_dir)
@@ -56,32 +56,33 @@ progress_update("Estimated total time to commplete: 2 hours. (5 minutes if run w
 # Setup #
 #########
 
-include("OP Synthesize Set of Shields.jl")
-include("OP Statistical Checking of Shield.jl")
+include("DC Synthesize Set of Shields.jl")
+include("DC Statistical Checking of Shield.jl")
 
 if !test
     # HARDCODED: Parameters to generate shield. All variations will be used.
     samples_per_axiss = [1, 2, 3, 4]
-    Gs = [1, 0.5, 0.1, 0.05]
+    Gs = [0.1, 0.05, 0.01, 0.005]
 
     # HARDCODED: Safety checking parameters.
     runs_per_shield = 1E6
 else 
     # Test params that produce uninteresting results quickly
-    samples_per_axiss = [1]
-    Gs = [1, 2]
+    samples_per_axiss = [2]
+    Gs = [0.1, 0.05]
     
     runs_per_shield = 100
 end
 
-# samples per axis and granularities are individually defined for each axis. The 3rd axis, p, only has discrete values 0 and 1, and therefore should not be sampled at other points.
-samples_per_axiss = [ (s, s, 1, s) for s in samples_per_axiss ]
-Gs = [ (G, G, 1, G) for G in Gs]
+# samples per axis and granularities are individually defined for each axis. The 3rd axis, R, only has discrete values, and therefore should not be sampled at other points.
+samples_per_axiss = [ (s, s, 1) for s in samples_per_axiss ]
+Gs = [ (G, G, 1) for G in Gs]
+
 ##############
 # Mainmatter #
 ##############
 
-progress_update("Estimated total time to complete: 3 hours. (2 minutes if run with --test.)")
+progress_update("Estimated total time to complete:  ¯\\_(ツ)_/¯")
 
 if make_barbaric_shields
     make_and_save_barbaric_shields(samples_per_axiss, Gs, shields_dir)
@@ -90,7 +91,7 @@ else
 end
 
 if test_shields
-    test_shields_and_save_results(OPMechanics(), shields_dir, evaluations_dir, runs_per_shield)
+    test_shields_and_save_results(DCMechanics(), shields_dir, evaluations_dir, runs_per_shield)
 else
     progress_update("Skipping tests of shields")
 end
@@ -116,7 +117,7 @@ progress_update("Saving  to $results_dir")
 
 include("Table from CSVs.jl")
 
-exported_table_name = "CCSynthesis"
+exported_table_name = "DCSynthesis"
 
 CSV.write(joinpath(results_dir, "$exported_table_name.csv"), joint_report)
 write(joinpath(results_dir, "$exported_table_name.txt"), "$joint_report")

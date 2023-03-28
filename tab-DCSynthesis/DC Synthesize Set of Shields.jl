@@ -13,8 +13,8 @@ begin
 	Pkg.develop("GridShielding")
 	using GridShielding
 
-	include("../Shared Code/OilPump.jl")
-	include("../Shared Code/OPShielding.jl")
+	include("../Shared Code/DC-DC Converter.jl")
+	include("../Shared Code/DCShielding.jl")
 	include("../Shared Code/FlatUI.jl");
 	include("../Shared Code/ExperimentUtilities.jl")
 	
@@ -35,17 +35,7 @@ Synthesize and export a set of shields from different given parameters.
 """
 
 # ╔═╡ fdbdf588-101d-4c12-940a-55072186ade6
-m = OPMechanics()
-
-# ╔═╡ bfa8c6a3-f25d-4c02-8ba0-ad16a1b7d9d2
-md"""
-The state variable is going to be: $(t, v, p, l)$ where
-
- - ⁣$t$ is the time in the consumption cycle
- - ⁣$v$ is the volume of oil in the tank
- - ⁣$p$ is the pump status (Corresponding to the automaton locations *on* and *off*.)
- - ⁣$l$ is the latency-timer controlling how often the pump can switch state
-"""
+m = DCMechanics()
 
 # ╔═╡ 09dca934-5613-4f77-a2e9-048bcc4dc26d
 call(f) = f()
@@ -59,27 +49,15 @@ md"""
 # ╠═╡ skip_as_script = true
 #=╠═╡
 md"""
-Note that the variable $p$ represents an automaton location and can therefore only assume the values $0$ and $1$. For this reason, the granularity is fixed to $1$.
 
-`granularity_t =` $(@bind granularity_t NumberField(0.001:0.001:4, default=1))
-
-`granularity_v =` $(@bind granularity_v NumberField(0.001:0.001:4, default=1))
-
-`granularity_p = 1.0`
-
-`granularity_l =` $(@bind granularity_l NumberField(0.001:0.001:m.time_step, default=1))
+`granularity =` $(@bind granularity NumberField(0.001:0.001:1, default=0.1))
 
 """
   ╠═╡ =#
 
-# ╔═╡ a0957a89-dc5e-4602-949f-85cbd572926a
-#=╠═╡
-granularity = [granularity_t, granularity_v,  1.0, granularity_l]
-  ╠═╡ =#
-
 # ╔═╡ 6b2933a2-ab85-47a0-945c-6043da25e7b6
 #=╠═╡
-grid = get_op_grid(m, granularity)
+grid = get_dc_grid(m, granularity)
   ╠═╡ =#
 
 # ╔═╡ 6a78d494-ce7b-437c-a529-ef245f4d5e71
@@ -124,13 +102,18 @@ slice = [:, :, 1, 1]
 
 # ╔═╡ f7535470-76f6-4f90-ae5d-c684c28dc0cd
 #=╠═╡
-R̂_precomputed = get_transitions(R̂, PumpStatus, grid);
+R̂_precomputed = get_transitions(R̂, SwitchStatus, grid);
   ╠═╡ =#
 
 # ╔═╡ 0984a1e6-df91-4112-aaef-d63f427650fa
 # ╠═╡ skip_as_script = true
 #=╠═╡
-shield, _ = make_shield(R̂_precomputed, PumpStatus, grid)
+shield, _ = make_shield(R̂_precomputed, SwitchStatus, grid)
+  ╠═╡ =#
+
+# ╔═╡ fc158839-cd54-464c-bd7f-3fc97257ea93
+#=╠═╡
+shield_is_valid(shield)
   ╠═╡ =#
 
 # ╔═╡ 4255b905-92f5-4e6b-a744-47eb9b9eb73e
@@ -142,11 +125,6 @@ begin
 		color_labels=opshieldlabels;
 		xlabel="t", ylabel="v")
 end
-  ╠═╡ =#
-
-# ╔═╡ fc158839-cd54-464c-bd7f-3fc97257ea93
-#=╠═╡
-shield_is_valid(shield)
   ╠═╡ =#
 
 # ╔═╡ 87a9bb3a-bdc7-4769-b930-b4697efc0736
@@ -176,11 +154,11 @@ function make_and_save_barbaric_shield(samples_per_axis, granularity, save_path)
 	# Prerequesites for synthesizing shield
 	R̂ = get_barbaric_reachability_function(simulation_model′)
 	
-	grid = get_op_grid(granularity)
+	grid = get_dc_grid(m, granularity)
 	
 	# Mainmatter
 	_, seconds_taken, bytes_used, gctime, gcstats = @timed begin
-		shield, max_steps_reached = make_shield(R̂, PumpStatus, grid)
+		shield, max_steps_reached = make_shield(R̂, SwitchStatus, grid)
 	end
 
 	max_steps_reached && @warn "Max steps reached! This should not happen."
@@ -234,7 +212,7 @@ draw(shield, slice,
 
 # ╔═╡ 1ea060e2-d10c-454a-b6e3-85f54796c793
 function estimate_time(samples_per_axis, G)
-	# Based on observations from a concrete run. 
+	# These time estimates are not from DC, but they are probably within the same order of magnitude
 	
 	# Time to compute R̂ with 45 samples and 968688 squares
 	secnods_per_sample = 2991/(135*968688)
@@ -247,17 +225,11 @@ function estimate_time(samples_per_axis, G)
 
 	# Number of squares
 	lower, upper = 
-		[0, # t
-		m.v_min, # v
-		0, # p
-		-G[4]], # l
-		[m.period, 
-		 m.v_max, 
-		 1,
-		 m.latency]
+		[m.x1_min, m.x2_min - G[2], m.R_min],
+		[m.x1_max + G[1], m.x2_max + G[2], m.R_max + 1]
 
 	
-	grid_size = zeros(Int, 4)
+	grid_size = zeros(Int, 3)
 	for (i, (lb, ub)) in enumerate(zip(lower, upper))
 		grid_size[i] = ceil((ub-lb)/G[i])
 	end
@@ -266,6 +238,11 @@ function estimate_time(samples_per_axis, G)
 
 	return squares*samples*secnods_per_sample + squares*additional_seconds_per_square
 end
+
+# ╔═╡ 11752808-f613-4082-aad4-2b12be33c7eb
+#=╠═╡
+estimate_time(samples_per_axis, [granularity, granularity, 1])
+  ╠═╡ =#
 
 # ╔═╡ 15c07be8-c422-407c-94d4-ebe6829ae6cc
 # Notice the "s" at the end of the name. This is a case where argument types can't save me I think.
@@ -306,12 +283,10 @@ end
 # ╔═╡ Cell order:
 # ╟─96aad91c-38c6-11ed-2211-bd576258e89c
 # ╠═fdbdf588-101d-4c12-940a-55072186ade6
-# ╟─bfa8c6a3-f25d-4c02-8ba0-ad16a1b7d9d2
 # ╠═8617b0cb-b308-4fe2-9a23-d7b4823b2f9d
 # ╠═09dca934-5613-4f77-a2e9-048bcc4dc26d
 # ╟─011370e4-e238-4f3a-a409-b9e6daf08417
-# ╟─8213b25c-483a-4fbc-ac99-5adc103eadf0
-# ╠═a0957a89-dc5e-4602-949f-85cbd572926a
+# ╠═8213b25c-483a-4fbc-ac99-5adc103eadf0
 # ╠═6b2933a2-ab85-47a0-945c-6043da25e7b6
 # ╠═6a78d494-ce7b-437c-a529-ef245f4d5e71
 # ╟─a13bc371-4748-4afa-988f-8b421935de91
@@ -321,10 +296,10 @@ end
 # ╠═041f227a-30c1-4bb1-949a-a9af31180cff
 # ╠═ab7f32ab-106e-4b8b-8c36-e7333bccaae3
 # ╠═5da4304b-6c0f-4de6-90e5-0358aeb6d9d7
-# ╠═4255b905-92f5-4e6b-a744-47eb9b9eb73e
 # ╠═f7535470-76f6-4f90-ae5d-c684c28dc0cd
 # ╠═0984a1e6-df91-4112-aaef-d63f427650fa
 # ╠═fc158839-cd54-464c-bd7f-3fc97257ea93
+# ╟─4255b905-92f5-4e6b-a744-47eb9b9eb73e
 # ╟─87a9bb3a-bdc7-4769-b930-b4697efc0736
 # ╠═815eb159-b92a-4de8-953f-fc5c8aeed323
 # ╠═061630a8-828c-4136-8c66-c71fe96a1784
@@ -333,5 +308,6 @@ end
 # ╠═451aa409-aff6-4104-8108-44600971fad0
 # ╟─6cd2dced-fab7-4ef0-a72c-8cb58d773935
 # ╠═84351342-3c6a-491a-bde3-ef9a90b7ef14
+# ╠═11752808-f613-4082-aad4-2b12be33c7eb
 # ╠═1ea060e2-d10c-454a-b6e3-85f54796c793
 # ╠═15c07be8-c422-407c-94d4-ebe6829ae6cc

@@ -23,7 +23,8 @@ begin
 	Pkg.develop("GridShielding")
 	using GridShielding
 
-	include("../Shared Code/OilPump.jl")
+	include("../Shared Code/DC-DC Converter.jl")
+	include("../Shared Code/DCShielding.jl")
 	include("../Shared Code/FlatUI.jl")
 	include("../Shared Code/ExperimentUtilities.jl")
 	
@@ -47,7 +48,10 @@ md"""
 call(f) = f()
 
 # ╔═╡ df61eece-81c4-48eb-8465-742f92593982
-m = OPMechanics()
+m = DCMechanics()
+
+# ╔═╡ facedf11-2020-412e-afdc-425e2bf292fc
+slice = [:, :, 1, 1]
 
 # ╔═╡ fc7fda02-669f-4c95-b1cb-b6a638727f44
 # ╠═╡ skip_as_script = true
@@ -58,9 +62,6 @@ md"""
 `selected_file` = $(@bind selected_file PlutoUI.FilePicker([MIME("application/octet-stream")]))
 """
   ╠═╡ =#
-
-# ╔═╡ facedf11-2020-412e-afdc-425e2bf292fc
-slice = [:, :, 1, 1]
 
 # ╔═╡ ed05be2d-abe3-484c-9d47-a1ca90812445
 #=╠═╡
@@ -81,45 +82,10 @@ else
 end
   ╠═╡ =#
 
-# ╔═╡ 7dd1b660-0b59-44ae-ba41-fed6a39501e7
-function clamp_state(grid, state)
-	t, v, p, l = state
-	v = clamp(v, grid.bounds.lower[2], grid.bounds.upper[2] - 0.1*grid.granularity[2])
-	l = clamp(l, grid.bounds.lower[4], grid.bounds.upper[4] - 0.1*grid.granularity[4])
-	t, v, p, l
-end
-
-# ╔═╡ 027f32f2-6caf-49d2-a4fe-7a62d89711b8
-function shielded(shield, policy)
-	return (state) -> begin
-		suggested = policy(state)
-		state = clamp_state(shield, state)
-		partition = box(shield, state)
-		allowed = int_to_actions(PumpStatus, get_value(partition))
-		if state ∉ shield || length(allowed) == 0 || suggested ∈ allowed
-			return suggested
-		else
-			corrected = rand(allowed)
-			return corrected
-		end
-	end
-end
-
 # ╔═╡ b4d72971-1a4c-4270-80b5-a5ae8d18ebf5
 #=╠═╡
 shield
   ╠═╡ =#
-
-# ╔═╡ 3a0f9b3e-3f89-4496-86e5-202170163f9e
-# Shield is invalid if the initial state is considered unsafe.
-function shield_is_valid(shield)
-	square = box(shield, initial_state)
-	if get_value(square) == actions_to_int([])
-		return false
-	end
-
-	return true
-end
 
 # ╔═╡ 03127da2-5690-4202-9950-5b1d5a55acaa
 #=╠═╡
@@ -144,24 +110,24 @@ end
 # ╔═╡ 5a4a59db-21f0-4ad3-b3ee-d7d14f2a74e0
 #=╠═╡
 call() do 
-	random_policy = get_random_policy(0.95)
+	random_policy = get_random_policy(0.5)
 	shielded_random_policy = shielded(shield, random_policy)
 	
 	anim = @animate for i in 1:30
 		trace = simulate_trace(m, initial_state, shielded_random_policy, duration=120)
 		plot(ylims=(0, 30))
-		plot_trace!(trace, legend=:topleft, show_actions=false)
-		
-		plot!(x -> consumption_rate(x%m.period), 
-			label="consumption",
-			line=(colors.PETER_RIVER, 3))
+		plot_trace!(trace, show_actions=false)
+
+		hline!([m.x1_max, m.x2_min, m.x2_max], 
+			color=colors.WET_ASPHALT,
+			label="safety constraints")
 	end
-	gif(anim, joinpath(tempdir(), "gif3.gif"), fps=2)
+	gif(anim, joinpath(tempdir(), "gif3.gif"), show_msg=false, fps=2)
 end
   ╠═╡ =#
 
 # ╔═╡ 65dfc820-e7be-4bc2-bae7-14f4991625a8
-function test_policies(m::OPMechanics, 
+function test_policies(m::DCMechanics, 
 		policy_functions, 
 		policy_labels, 
 		number_of_runs)	
@@ -190,7 +156,7 @@ begin
 
 	Test shield on random agents with different "hit" frequency.
 	"""
-	function test_shield(m::OPMechanics, shield::Grid, number_of_runs::Number)
+	function test_shield(m::DCMechanics, shield::Grid, number_of_runs::Number)
 
 		if !shield_is_valid(shield)
 			progress_update("This is not a valid shield. Skipping.")
@@ -216,7 +182,7 @@ begin
 	end
 
 	
-	function test_shield(m::OPMechanics, path_to_shield::AbstractString, number_of_runs::Number)
+	function test_shield(m::DCMechanics, path_to_shield::AbstractString, number_of_runs::Number)
 		if !isfile(path_to_shield)
 			throw(ArgumentError("Shield not found at path: $path_to_shield"))
 		end
@@ -231,12 +197,12 @@ end
 # ╔═╡ b5ec75ff-24e7-4b0d-8a5c-0bf1ae5225a0
 #=╠═╡
 if shield != nothing
-	test_shield(shield, 100)
+	test_shield(m, shield, 100)
 end
   ╠═╡ =#
 
 # ╔═╡ 965455ec-079a-4fad-a841-613ee7bf71b6
-@bind path_to_shield TextField((80, 1), placeholder="path to shield", default="/home/asger/Downloads/samples 8 granularity [0.1, 0.1, 1.0, 0.1].shield")
+@bind path_to_shield TextField((80, 1), placeholder="path to shield", default="/home/asger/Results/tab-DCSynthesis/Exported Strategies/DC samples 4 granularity 0.1.shield")
 
 # ╔═╡ 31a98389-5c53-49e1-866b-1d2a614d3062
 # ╠═╡ skip_as_script = true
@@ -260,7 +226,7 @@ Number of safety violations are counted and saved in `results_dir` as one big cs
 
 Additionally, the `rawdata` files are created for each run, and will contain an example of an unsafe trace if one was found.
 """
-function test_shields_and_save_results(m::OPMechanics, 
+function test_shields_and_save_results(m::DCMechanics, 
 		shields_dir, 
 		results_dir, 
 		runs_per_shield)
@@ -310,14 +276,11 @@ test_shields_and_save_results(m,
 # ╠═4f2b3a13-0160-45a1-930f-7028af1bb4e2
 # ╠═894124f6-12bd-4d38-9a58-fd6791fca109
 # ╠═df61eece-81c4-48eb-8465-742f92593982
-# ╟─fc7fda02-669f-4c95-b1cb-b6a638727f44
 # ╠═facedf11-2020-412e-afdc-425e2bf292fc
-# ╟─ed05be2d-abe3-484c-9d47-a1ca90812445
-# ╠═7dd1b660-0b59-44ae-ba41-fed6a39501e7
-# ╠═027f32f2-6caf-49d2-a4fe-7a62d89711b8
+# ╟─fc7fda02-669f-4c95-b1cb-b6a638727f44
 # ╠═b4d72971-1a4c-4270-80b5-a5ae8d18ebf5
-# ╠═3a0f9b3e-3f89-4496-86e5-202170163f9e
 # ╠═03127da2-5690-4202-9950-5b1d5a55acaa
+# ╟─ed05be2d-abe3-484c-9d47-a1ca90812445
 # ╟─96717e9a-0acb-4c8c-a237-2dbcb7fb85af
 # ╠═18870590-acc3-462b-8b45-3e90f82d9a77
 # ╠═b5ec75ff-24e7-4b0d-8a5c-0bf1ae5225a0

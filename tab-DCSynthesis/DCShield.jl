@@ -76,7 +76,7 @@ md"""
 """
 
 # ╔═╡ 3048a6f4-9a4a-488c-becc-6ab39d7894d1
-grid = get_dc_grid(m, [0.01, 0.01, 1.0])
+grid = get_dc_grid(m, [granularity, granularity, 1.0])
 
 # ╔═╡ be055e02-7ef6-4a63-8c95-d6c2bfdc799a
 md"""
@@ -464,7 +464,7 @@ end
 # ╠═5ae3173f-6abb-4f38-94f8-90300c93d0e9
 # ╟─35fbdec7-b673-40a9-8e49-2e19c596b71b
 # ╠═67d83ab6-8d99-4067-aafc-dee1026eb1dc
-# ╟─1687a47c-c3f6-4518-ac46-e97b240ad323
+# ╠═1687a47c-c3f6-4518-ac46-e97b240ad323
 # ╟─be055e02-7ef6-4a63-8c95-d6c2bfdc799a
 # ╠═3048a6f4-9a4a-488c-becc-6ab39d7894d1
 # ╠═33861602-0e64-4977-9c64-7ae42eb890d4
