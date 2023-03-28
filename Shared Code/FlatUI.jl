@@ -25,19 +25,23 @@ colors =
 	SILVER = colorant"#bdc3c7",
 	ASBESTOS = colorant"#7f8c8d")
 
+trans = [colorant"#FFFFFF", colorant"#5BCEFA", colorant"#F5A9B8"]
+enby =  [colorant"#FCF434", colorant"#FFFFFF", colorant"#9C59D1", colorant"#2C2C2C"]
 
-
-transitioncolors = [colorant"#93d0ff", colorant"#93ffb4", colorant"#FFFFFF"]
+transitioncolors = trans
 transitionlabels = ["Initial", "Reachable", "Not reachable"]
 
 bbshieldlabels = 	["{hit, nohit}", "{hit}", "{}"]
-bbshieldcolors = 	[colorant"#ffffff", colorant"#a1eaff", colorant"#ff9178"]
+bbshieldcolors = 	trans
 
 rwshieldlabels = 	["{fast, slow}", "{fast}", "{}"]
-rwshieldcolors = 	[colorant"#ffffff", colorant"#a1eaff", colorant"#ff9178"]
+rwshieldcolors = 	trans
 
 opshieldlabels = ["{}", "{off}", "{on}", "{on, off}"]
-opshieldcolors = [colorant"#ff9178", colorant"#a1ffea", colorant"#a1eaff", colorant"#ffffff", ]
+opshieldcolors = [enby[4], enby[3], enby[1], enby[2]]
+
+dcshieldlabels = ["{}", "{off}", "{on}", "{on, off}"]
+dcshieldcolors = [enby[4], enby[3], enby[1], enby[2]]
 
 
 ccshieldcolors=[
