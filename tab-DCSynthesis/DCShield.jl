@@ -22,6 +22,7 @@ begin
 	using GridShielding
 	
 	include("../Shared Code/DC-DC Converter.jl")
+	include("../Shared Code/DCShielding.jl")
 	include("../Shared Code/FlatUI.jl")
 	using Plots
 	using PlutoLinks
@@ -74,25 +75,8 @@ md"""
 `granularity =` $(@bind granularity NumberField(0.001:0.001:4, default=0.1))
 """
 
-# ╔═╡ a619d4e6-0b40-4819-9c24-62be2b789fad
-is_safe(bounds::Bounds, mechanics::DCMechanics) = 		
-		is_safe((bounds.lower[1], bounds.lower[2]), mechanics) &&
-		is_safe((bounds.upper[1], bounds.upper[2]), mechanics)
-
-# ╔═╡ ae621a99-56e3-4a93-8af0-096c3a6f00f0
-begin
-	grid = Grid([0.01, 0.01, 1.0], [
-			m.x1_min, 
-			m.x2_min - granularity,
-			m.R_min
-		], [
-			m.x1_max + granularity,
-			m.x2_max + granularity,
-			m.R_max + 1
-		])
-
-	initialize!(grid, (b -> is_safe(b, m)))
-end
+# ╔═╡ 3048a6f4-9a4a-488c-becc-6ab39d7894d1
+grid = get_dc_grid(m, [0.01, 0.01, 1.0])
 
 # ╔═╡ be055e02-7ef6-4a63-8c95-d6c2bfdc799a
 md"""
@@ -110,7 +94,7 @@ md"""
 """
 
 # ╔═╡ d2300c36-906c-4351-952a-3a5176338649
-randomness_space = Bounds((-m.R_fluctuation,), (m.R_fluctuation,))
+randomness_space = get_randomness_space(m)
 
 # ╔═╡ ce2ecf63-c2dc-4c6b-9a60-1a934e915ba2
 md"""
@@ -119,6 +103,12 @@ md"""
 
 # ╔═╡ 93664169-7b13-4d17-9658-007d4d5c6c48
 samples_per_axis = [samples_per_axis_input, samples_per_axis_input, 1]
+
+# ╔═╡ 04f6c10f-ee06-40f3-969d-9197504c9f61
+simulation_function = get_simulation_function(m)
+
+# ╔═╡ 90efd733-ea84-46c4-80a5-556f23dc4192
+simulation_model = SimulationModel(simulation_function, randomness_space, samples_per_axis)
 
 # ╔═╡ f81f53ce-d81e-429d-ac80-a3edd2f76eac
 md"""
@@ -152,8 +142,44 @@ md"""
 ## Synthesising Safe Strategy
 """
 
+# ╔═╡ 40116c98-2afb-48d8-a7d6-de03c5bc119c
+grid, simulation_model; @bind make_shield_button CounterButton("Make Shield")
+
+# ╔═╡ f65de4dd-438b-43c2-9571-adc3fa03fb09
+reachability_function = get_barbaric_reachability_function(simulation_model)
+
+# ╔═╡ d57587e2-a9f3-4e10-9679-325f716882e9
+if make_shield_button > 0
+	reachability_function_precomputed = 
+		get_transitions(reachability_function, SwitchStatus, grid)
+end
+
 # ╔═╡ 084c26b7-2786-4aea-af07-43e6adee06cf
 @bind max_steps NumberField(0:1000, default=10)
+
+# ╔═╡ 09496aef-95be-43b8-95d1-5cdaa9da50b9
+if make_shield_button > 0 && imported_shield === nothing
+
+	## The actual call to make_shield ##
+	
+	shield, max_steps_reached = 
+		make_shield(reachability_function_precomputed, SwitchStatus, grid; max_steps)
+	
+elseif imported_shield === nothing
+	shield, max_steps_reached = grid, true
+else
+	shield, max_steps_reached = imported_shield, false
+end
+
+# ╔═╡ 56781a46-51a5-425d-aea8-bcfd4820da88
+if max_steps_reached
+md"""
+!!! danger "NB"
+	Synthesis not complete. 
+
+	Either synthesis hasn't started, or `max_steps` needs to be increased to obtain an infinite-horizon strategy.
+"""
+end
 
 # ╔═╡ 1e2dcb19-8e61-45b9-a033-0e28406b1511
 md"""
@@ -201,73 +227,6 @@ $(@bind action Select(instances(SwitchStatus) |> collect))
 
 """
 
-# ╔═╡ 5d8cd954-3605-431a-bf85-1a03fa82497d
-
-
-# ╔═╡ 4d169b72-54f8-4325-adec-f53d18e54fae
-md"""
-## Check Safety
-"""
-
-# ╔═╡ dae2fc1d-38d0-48e1-bddc-3b490648648b
-# Probability that the random agents selects the action "off" at any given time
-@bind off_chance NumberField(0:0.01:1, default=0.3)
-
-# ╔═╡ 4f01a075-b44b-467c-9f87-55df435b7bdd
-random_agent(_...) = sample([on, off], [1 - off_chance, off_chance] |> Weights)
-
-# ╔═╡ 87d7a2f0-4602-489e-8dba-6cd0f71fdad7
-# Values v and l are unbounded, but we'd like to clamp them to roughly the bounds of the shield.
-function clamp_state(grid::Grid, state)
-	x1, x2, R = state
-	x1 = clamp(x1, grid.bounds.lower[1], grid.bounds.upper[1] - 0.1*grid.granularity[1])
-	x2 = clamp(x2, grid.bounds.lower[2], grid.bounds.upper[2] - 0.1*grid.granularity[2])
-	R = clamp(R, grid.bounds.lower[3], grid.bounds.upper[3] - 0.1*grid.granularity[3])
-	x1, x2, R
-end
-
-# ╔═╡ c6ef755f-e8ac-486c-890a-0613e3bb10e3
-function clamp_state(m::DCMechanics, state)
-	ϵ = 0.0001
-	x1, x2, R = state
-	x1 = clamp(x1, 0, m.x1_max + ϵ)
-	x2 = clamp(x2, m.x2_min - ϵ, m.x2_max + ϵ)
-	R = clamp(R, m.R_min - ϵ, m.R_max + ϵ)
-	x1, x2, R
-end
-
-# ╔═╡ 04f6c10f-ee06-40f3-969d-9197504c9f61
-simulation_function(s, a, r) = clamp_state(m, simulate_point(m, s, a, r))
-
-# ╔═╡ 90efd733-ea84-46c4-80a5-556f23dc4192
-simulation_model = SimulationModel(simulation_function, randomness_space, samples_per_axis)
-
-# ╔═╡ 40116c98-2afb-48d8-a7d6-de03c5bc119c
-grid, simulation_model; @bind make_shield_button CounterButton("Make Shield")
-
-# ╔═╡ f65de4dd-438b-43c2-9571-adc3fa03fb09
-reachability_function = get_barbaric_reachability_function(simulation_model)
-
-# ╔═╡ d57587e2-a9f3-4e10-9679-325f716882e9
-if make_shield_button > 0
-	reachability_function_precomputed = 
-		get_transitions(reachability_function, SwitchStatus, grid)
-end
-
-# ╔═╡ 09496aef-95be-43b8-95d1-5cdaa9da50b9
-if make_shield_button > 0 && imported_shield === nothing
-
-	## The actual call to make_shield ##
-	
-	shield, max_steps_reached = 
-		make_shield(reachability_function_precomputed, SwitchStatus, grid; max_steps)
-	
-elseif imported_shield === nothing
-	shield, max_steps_reached = grid, true
-else
-	shield, max_steps_reached = imported_shield, false
-end
-
 # ╔═╡ 8751340a-f41a-46fa-8f6d-cc9ca132e260
 partition = box(something(shield, grid), (x1, x2, R))
 
@@ -286,13 +245,6 @@ supporting_points = SupportingPoints(samples_per_axis, partition)
 # ╔═╡ 31699662-ddfc-45a8-b963-f0b03b7c71c2
 supporting_points |> collect
 
-# ╔═╡ b83a55ee-f2a3-4b0b-8e0a-12dc6caf5075
-possible_outcomes(simulation_model, partition, action)
-
-# ╔═╡ cd732487-5c1b-487e-b037-4523a7389365
-[Partition(grid, i) |> Bounds 
-	for i in reachability_function(partition, action)]
-
 # ╔═╡ d099b12b-9e8e-482f-82ed-a4681a424d2e
 slice = let
 	slice = Any[i for i in partition.indices]
@@ -301,28 +253,12 @@ slice = let
 	slice
 end
 
-# ╔═╡ 56781a46-51a5-425d-aea8-bcfd4820da88
-if max_steps_reached
-md"""
-!!! danger "NB"
-	Synthesis not complete. 
+# ╔═╡ b83a55ee-f2a3-4b0b-8e0a-12dc6caf5075
+possible_outcomes(simulation_model, partition, action)
 
-	Either synthesis hasn't started, or `max_steps` needs to be increased to obtain an infinite-horizon strategy.
-"""
-end
-
-# ╔═╡ f6bab622-4b1d-41ec-ae54-61915fca3b2c
-reachability_function′(partition, a) = begin
-	result = reachability_function(partition, a)
-	result = map(r -> Partition(partition.grid, r), result)
-	result = map(r -> (dcshieldcolors[get_value(r)+1], (Bounds(r))), result)
-end
-
-# ╔═╡ 7358338f-47d9-4cb1-a868-f89b0162e72d
-reachability_function′(partition, off)
-
-# ╔═╡ 258ec4cf-4193-4b14-bf4c-53f83eca96ae
-reachability_function′(partition, on)
+# ╔═╡ cd732487-5c1b-487e-b037-4523a7389365
+[Partition(grid, i) |> Bounds 
+	for i in reachability_function(partition, action)]
 
 # ╔═╡ fd2b4c23-e373-43e7-9a4f-63203ef2b83b
 let
@@ -339,21 +275,42 @@ let
 	plot!()
 end
 
-# ╔═╡ 186fb459-c758-473f-8510-e665cf3da7a8
-function shielded(shield, policy)
-	return (state) -> begin
-		suggested = policy(state)
-		state = clamp_state(shield, state)
-		partition = box(shield, state)
-		allowed = int_to_actions(SwitchStatus, get_value(partition))
-		if state ∉ shield || length(allowed) == 0 || suggested ∈ allowed
-			return suggested
-		else
-			corrected = rand(allowed)
-			return corrected
-		end
-	end
+# ╔═╡ 5d8cd954-3605-431a-bf85-1a03fa82497d
+
+
+# ╔═╡ f6bab622-4b1d-41ec-ae54-61915fca3b2c
+reachability_function′(partition, a) = begin
+	result = reachability_function(partition, a)
+	result = map(r -> Partition(partition.grid, r), result)
+	result = map(r -> (dcshieldcolors[get_value(r)+1], (Bounds(r))), result)
 end
+
+# ╔═╡ 7358338f-47d9-4cb1-a868-f89b0162e72d
+reachability_function′(partition, off)
+
+# ╔═╡ 258ec4cf-4193-4b14-bf4c-53f83eca96ae
+reachability_function′(partition, on)
+
+# ╔═╡ 4d169b72-54f8-4325-adec-f53d18e54fae
+md"""
+## Check Safety
+"""
+
+# ╔═╡ dae2fc1d-38d0-48e1-bddc-3b490648648b
+# Probability that the random agents selects the action "off" at any given time
+@bind off_chance NumberField(0:0.01:1, default=0.3)
+
+# ╔═╡ 4f01a075-b44b-467c-9f87-55df435b7bdd
+random_agent(_...) = sample([on, off], [1 - off_chance, off_chance] |> Weights)
+
+# ╔═╡ 87d7a2f0-4602-489e-8dba-6cd0f71fdad7
+
+
+# ╔═╡ c6ef755f-e8ac-486c-890a-0613e3bb10e3
+
+
+# ╔═╡ 186fb459-c758-473f-8510-e665cf3da7a8
+
 
 # ╔═╡ a57c6670-6d88-4119-b5b1-7509a8806dae
 shielded(something(shield, grid), (_...) -> action)((x1, x2, R))
@@ -391,11 +348,15 @@ begin
 		
 		plot!(trace.elapsed, trace.x2s,
 			line=(colors.SUNFLOWER, 2),
-			label="voltage")
+			label="voltage (V)")
 		
 		plot!(trace.elapsed, trace.x1s,
 			line=(colors.ALIZARIN, 2),
-			label="current")
+			label="current (A)")
+		
+		#= plot!(trace.elapsed, trace.Rs,
+			line=(colors.PETER_RIVER, 2),
+			label="consumption (Ω)") =#
 	end
 	hline!([m.x2_min, m.x2_max], color=colors.WET_ASPHALT, label="safety constraints")
 	plot!(xlabel="t (µs)", legend=:outerright)
@@ -505,9 +466,8 @@ end
 # ╠═67d83ab6-8d99-4067-aafc-dee1026eb1dc
 # ╟─1687a47c-c3f6-4518-ac46-e97b240ad323
 # ╟─be055e02-7ef6-4a63-8c95-d6c2bfdc799a
-# ╠═ae621a99-56e3-4a93-8af0-096c3a6f00f0
+# ╠═3048a6f4-9a4a-488c-becc-6ab39d7894d1
 # ╠═33861602-0e64-4977-9c64-7ae42eb890d4
-# ╠═a619d4e6-0b40-4819-9c24-62be2b789fad
 # ╠═ad6bc72c-f9f2-41a7-958b-a4be73a018d6
 # ╟─cfe8387f-a127-4e46-88a6-40d9442fe4b1
 # ╠═d2300c36-906c-4351-952a-3a5176338649
@@ -552,7 +512,7 @@ end
 # ╠═1b447b3e-0565-4dc5-b679-5102c946dec2
 # ╠═fdfa1b59-217e-4504-9d4f-2ad44c39cfd8
 # ╠═811efa40-bf3b-4597-b7dd-72862e63b8c9
-# ╟─aeba4953-dee5-4810-a3de-0fc191711e16
+# ╠═aeba4953-dee5-4810-a3de-0fc191711e16
 # ╠═d77f23be-3a54-4c48-ab6d-b1c31adc3e25
 # ╟─150d8707-e8ef-4476-9378-9dd1c63036bf
 # ╠═ac138da0-fd64-4e35-ab26-e5803fa2d9b5
