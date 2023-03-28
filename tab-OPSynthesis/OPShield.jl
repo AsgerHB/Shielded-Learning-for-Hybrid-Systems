@@ -458,19 +458,6 @@ if unsafe_trace != nothing let
 	shielded_random_agent((ts[state_index], vs[state_index], ps[state_index], ls[state_index])),  actions[state_index - 1]
 end end
 
-# ╔═╡ dd189511-be2c-4e6f-b6ac-8ebb4da29749
-# ╠═╡ disabled = true
-#=╠═╡
-let
-	debug(t, v, p, l) = @info "👉\t$(get_value(box(shield, (t, v, p, l))))"
-	debug(1, 10, 0, 0)
-	debug(1, 6, 0, 0)
-	debug(1, 6, 1, 0)
-	debug(1, 20, 0, 0)
-	debug(1, 20, 1, 0)
-end
-  ╠═╡ =#
-
 # ╔═╡ 16598016-eb21-43da-a45b-bd09692125ca
 call(() -> begin
 	
@@ -562,4 +549,3 @@ end
 # ╠═4af0b349-5894-4da5-8c3b-9fbc466d94f5
 # ╟─16598016-eb21-43da-a45b-bd09692125ca
 # ╟─63b217ad-bb2c-420b-b327-2c9a28be0a90
-# ╠═dd189511-be2c-4e6f-b6ac-8ebb4da29749

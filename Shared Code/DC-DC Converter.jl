@@ -226,7 +226,7 @@ struct DCTrace
 end
 
 # ╔═╡ 77907f6b-4986-4699-838b-b849363416d2
-initial_state = (0.35, 15., 60.)
+initial_state = (0.35, 15., 73.)
 
 # ╔═╡ 7e315630-28e2-4bbe-851a-fe27bf61e009
 initial_state
@@ -351,7 +351,19 @@ end
 #=╠═╡
 let
 	trace = simulate_trace(mechanics, (0.35, 15., 60), (_...) -> on, duration=120)
-	plot()
+	plot(title="Always On")
+	plot_trace!(trace, show_actions=false)
+	hline!([mechanics.x1_max mechanics.x2_min mechanics.x2_max], 
+		color=[colors.WISTERIA colors.EMERALD colors.PETER_RIVER],
+		label=nothing)
+end
+  ╠═╡ =#
+
+# ╔═╡ 11f82a97-417f-41a1-894c-69e0852249eb
+#=╠═╡
+let
+	trace = simulate_trace(mechanics, (0.35, 15., 60), (_...) -> off, duration=120)
+	plot(title="Always Off")
 	plot_trace!(trace, show_actions=false)
 	hline!([mechanics.x1_max mechanics.x2_min mechanics.x2_max], 
 		color=[colors.WISTERIA colors.EMERALD colors.PETER_RIVER],
@@ -1433,7 +1445,8 @@ version = "1.4.1+0"
 # ╠═e362439c-716f-4dcb-91b4-3eaddceab0ea
 # ╠═795e4d30-6bda-433d-8de5-b90c2a67bd50
 # ╠═e8b5cfaf-28b9-40c5-98ba-b579ab1daf57
-# ╠═9fb1112a-7d6c-4f37-8744-e44827fd9d8e
+# ╟─9fb1112a-7d6c-4f37-8744-e44827fd9d8e
+# ╟─11f82a97-417f-41a1-894c-69e0852249eb
 # ╟─64084492-f5f7-4f5c-b21c-8191d512f9c4
 # ╠═f1f39983-dd7e-4169-a3e3-1b63bc21ea2c
 # ╠═b0ef9fe2-3cf8-413b-9950-328da3572d47

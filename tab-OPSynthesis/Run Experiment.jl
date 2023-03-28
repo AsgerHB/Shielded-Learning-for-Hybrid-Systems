@@ -116,7 +116,7 @@ progress_update("Saving  to $results_dir")
 
 include("Table from CSVs.jl")
 
-exported_table_name = "CCSynthesis"
+exported_table_name = "OPSynthesis"
 
 CSV.write(joinpath(results_dir, "$exported_table_name.csv"), joint_report)
 write(joinpath(results_dir, "$exported_table_name.txt"), "$joint_report")
