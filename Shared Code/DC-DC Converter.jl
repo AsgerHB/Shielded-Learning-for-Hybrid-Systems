@@ -68,18 +68,28 @@ md"""
 ## Basics
 """
 
+# ╔═╡ ca873c15-677d-45f8-a5ee-c936de1b7094
+md"""
+The state is represented by the tuple $(x_1, x_2, R)$ where
+
+ - ⁣ $x_1$ is the output current (unit: A) (also $i(t)$ in the paper)
+ -  $x_2$ is the output voltage (unit: V) (also $v(t)$ in the paper)
+ -  $R$ is the power consuption (resistance) of the output device (unit: Ω)
+"""
+
 # ╔═╡ ebd20f9c-a927-4a50-98e4-2aec1f2c8e1b
 # Wrapping all the constants which define the system into a neat little ball.
 struct DCMechanics
-	L 	# Capacitor (inductor?)
-	RL
-	Co
-	vs 	# Input voltage
-	time_step # Time between actions
+	L 	# Inductor's inductance (µH)
+	RL 	# Inductor's resistance (Ω)
+	Co 	# Capacitor's capacitance (µF)
+	vs 	# Input voltage (V)
+	time_step # Time between actions (ticks; unit depends on time scale)
 	scale # Time scale
-	R_fluctuation # Output consumption R can fluctuate ± this amount each step
+	R_fluctuation # Output consumption R (Ω)  can fluctuate ± this amount each step
 	R_min
 	R_max
+	# Target values:
 	x1_ref
 	x2_ref
 	# Safety constraints:
@@ -105,9 +115,9 @@ struct DCMechanics
 			x1_ref=0.35,
 			x2_ref=15,
 			x1_min=0,
-			x1_max=0.7,
-			x2_min=14.8,
-			x2_max=15.2,)
+			x1_max=4,
+			x2_min=14.5,
+			x2_max=15.5,)
 		
 		DCMechanics(L, RL, Co, vs, time_step, scale, R_fluctuation, R_min, R_max, 
 			x1_ref, x2_ref,
@@ -128,14 +138,6 @@ mechanics = DCMechanics()
 
 # ╔═╡ f9779742-ec7b-43e5-ae5a-eaec30276ac0
 SwitchStatus
-
-# ╔═╡ ca873c15-677d-45f8-a5ee-c936de1b7094
-md"""
-The state is represented by the tuple $(x_1, x_2)$ where
-
- - ⁣ $x_1$ is the output current $i(t)$
- -  $x_2$ is the output voltage $v(t)$
-"""
 
 # ╔═╡ ed6df85f-96e6-430a-8c7a-e8bc8e940cd8
 md"""
@@ -1406,12 +1408,12 @@ version = "1.4.1+0"
 # ╠═e6bc04b3-d768-409f-aa64-0a5cbed84456
 # ╟─484bbefc-c519-4d8f-9f25-df8596deecd9
 # ╟─7144e8f2-38af-4f32-8377-47841261bac5
+# ╟─ca873c15-677d-45f8-a5ee-c936de1b7094
 # ╠═ebd20f9c-a927-4a50-98e4-2aec1f2c8e1b
 # ╠═7e315630-28e2-4bbe-851a-fe27bf61e009
 # ╠═23041c74-867a-4990-9193-149bb006572d
 # ╠═1f052f6e-5676-4f66-aa9b-a3514bc20525
 # ╠═f9779742-ec7b-43e5-ae5a-eaec30276ac0
-# ╟─ca873c15-677d-45f8-a5ee-c936de1b7094
 # ╟─ed6df85f-96e6-430a-8c7a-e8bc8e940cd8
 # ╠═a2a0991c-7485-4bf3-8353-b33d2f4e9688
 # ╠═a214953e-b4d2-482c-aaad-7fc22a6b8feb

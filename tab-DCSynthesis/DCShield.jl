@@ -81,7 +81,7 @@ is_safe(bounds::Bounds, mechanics::DCMechanics) =
 
 # ╔═╡ ae621a99-56e3-4a93-8af0-096c3a6f00f0
 begin
-	grid = Grid([0.0005, 0.001, 1.0], [
+	grid = Grid([0.01, 0.01, 1.0], [
 			m.x1_min, 
 			m.x2_min - granularity,
 			m.R_min
@@ -533,10 +533,10 @@ end
 # ╠═09496aef-95be-43b8-95d1-5cdaa9da50b9
 # ╟─56781a46-51a5-425d-aea8-bcfd4820da88
 # ╠═084c26b7-2786-4aea-af07-43e6adee06cf
+# ╟─fd2b4c23-e373-43e7-9a4f-63203ef2b83b
 # ╟─1e2dcb19-8e61-45b9-a033-0e28406b1511
 # ╟─d099b12b-9e8e-482f-82ed-a4681a424d2e
 # ╟─bf83ba44-8900-48c8-a172-161337181e41
-# ╟─fd2b4c23-e373-43e7-9a4f-63203ef2b83b
 # ╟─7692cddf-6b37-4be2-847f-afb6d34e44ab
 # ╠═5d8cd954-3605-431a-bf85-1a03fa82497d
 # ╠═f6bab622-4b1d-41ec-ae54-61915fca3b2c
