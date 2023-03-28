@@ -123,7 +123,7 @@ cleandata = call() do
 			cleandata)
 
 	# Turn number of interventions into % interventions
-	cleandata = transform(cleandata, :Avg_Interventions => x -> (x/1200)*100, renamecols=false)
+	cleandata = transform(cleandata, :Avg_Interventions => x -> (x/120)*100, renamecols=false)
 	cleandata = transform(cleandata, :Avg_Deaths => x -> x*100, renamecols=false)
 
 	cleandata
