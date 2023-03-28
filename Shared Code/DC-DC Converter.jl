@@ -21,6 +21,8 @@ end
   ╠═╡ =#
 
 # ╔═╡ e6bc04b3-d768-409f-aa64-0a5cbed84456
+# ╠═╡ skip_as_script = true
+#=╠═╡
 begin
     using Logging
     using LoggingExtras
@@ -29,14 +31,13 @@ begin
     Logging.min_enabled_level(::PlutoRunner.PlutoCellLogger) = 
             PlutoRunner.stdout_log_level
 end
+  ╠═╡ =#
 
 # ╔═╡ 484bbefc-c519-4d8f-9f25-df8596deecd9
 md"""
 # DC-DC Converter
 
-From the unpublished paper **A “Hybrid” Approach for Synthesizing Optimal
-Controllers of Hybrid Systems: A Case Study of
-the Oil Pump Industrial Example.** 
+From the unpublished paper **Proving and Improving Model Predictive Control of DC-DC Boost Converters.** 
 
 It is similar to, but not quite the same as  [Direct Voltage Control of DC–DC Boost Converters Using Enumeration-Based Model Predictive Control](https://www.semanticscholar.org/paper/Direct-Voltage-Control-of-DC%E2%80%93DC-Boost-Converters-Karamanakos-Geyer/df2d695bb5eb7a856be4a624510135a2c7f10233). 
 
@@ -174,6 +175,7 @@ function simulate_point(mechanics::DCMechanics,
 		for t in 0:h:time_step
 			if x1 > 0
 				x1 += h*((-RL/L)*x1+(-1.0/L)*x2+(vs/L))/scale
+				x1 = max(x1, 0)
 				x2 += h*((1.0/Co)*x1+(-1.0/(Co*R))*x2)/scale
 			else
 				x1 += 0
@@ -222,7 +224,10 @@ struct DCTrace
 end
 
 # ╔═╡ 77907f6b-4986-4699-838b-b849363416d2
-initial_state = (0., 10., 0., 0.)
+initial_state = (0.35, 15., 60.)
+
+# ╔═╡ 7e315630-28e2-4bbe-851a-fe27bf61e009
+initial_state
 
 # ╔═╡ 5e2912de-768c-4711-82a9-d809f78e93ff
 function simulate_trace(mechanics::DCMechanics, state, policy; duration=20, h=0.1)
@@ -241,21 +246,6 @@ function simulate_trace(mechanics::DCMechanics, state, policy; duration=20, h=0.
 	DCTrace(x1s, x2s, Rs, elapsed, actions)
 end
 
-# ╔═╡ 675538d0-5291-4069-9363-57464ba1012f
-#=╠═╡
-trace = simulate_trace(mechanics, 
-		(0.35, 15., 60), 
-		(_...) -> rand([action]),
-		duration = 120
-	)
-  ╠═╡ =#
-
-# ╔═╡ a5c44feb-e5f5-4ce0-a911-7ad0c7bd4acf
-#=╠═╡
-# Nice syntax for unpacking structs
-(;x1s, x2s, elapsed, actions) = trace
-  ╠═╡ =#
-
 # ╔═╡ 9e9174d8-7634-4a2f-ad07-f89e6af6fa3f
 function plot_trace!(tup; params...)
 	plot_trace!(tup...; params...)
@@ -267,7 +257,7 @@ function plot_trace!(trace::DCTrace; show_actions=true, params...)
 	plot!(elapsed, x1s,
 		line=(colors.ALIZARIN, 3),
 		label="current",
-		xlabel="time (s)",
+		xlabel="time (µs)",
 		ylabel="";
 		params...)
 	
@@ -298,7 +288,7 @@ begin
 	plot()
 	for i in 1:10
 		trace = simulate_trace(mechanics, 
-			(0.35, 15., 60), 
+			initial_state, 
 			(_...) -> rand([on off]),
 			duration = 120,
 			h=0.01
@@ -344,7 +334,27 @@ end
 
 # ╔═╡ 795e4d30-6bda-433d-8de5-b90c2a67bd50
 #=╠═╡
-count_unsafe_traces(mechanics, (_...) -> rand([on off]))
+(;unsafe_trace) = count_unsafe_traces(mechanics, (_...) -> rand([on off]))
+  ╠═╡ =#
+
+# ╔═╡ e8b5cfaf-28b9-40c5-98ba-b579ab1daf57
+#=╠═╡
+if unsafe_trace !== nothing
+	plot()
+	plot_trace!(unsafe_trace)
+end
+  ╠═╡ =#
+
+# ╔═╡ 9fb1112a-7d6c-4f37-8744-e44827fd9d8e
+#=╠═╡
+let
+	trace = simulate_trace(mechanics, (0.35, 15., 60), (_...) -> on, duration=120)
+	plot()
+	plot_trace!(trace, show_actions=false)
+	hline!([mechanics.x1_max mechanics.x2_min mechanics.x2_max], 
+		color=[colors.WISTERIA colors.EMERALD colors.PETER_RIVER],
+		label=nothing)
+end
   ╠═╡ =#
 
 # ╔═╡ 64084492-f5f7-4f5c-b21c-8191d512f9c4
@@ -374,8 +384,7 @@ end
 
 # ╔═╡ b0ef9fe2-3cf8-413b-9950-328da3572d47
 function cost(mechanics::DCMechanics, policy::Function; runs=1000, run_duration=120)
-	initial_state = (0., 10., 0, 0.)
-	accumulator = 0
+	accumulator = BigInt(0)
 	for i in 1:runs
 		trace = simulate_trace(mechanics, initial_state, policy, 
 			duration=run_duration)
@@ -383,17 +392,27 @@ function cost(mechanics::DCMechanics, policy::Function; runs=1000, run_duration=
 		accumulator += cost(mechanics, trace)
 	end
 
-	accumulator/runs
+	accumulator/runs |> Float64
 end
+
+# ╔═╡ 675538d0-5291-4069-9363-57464ba1012f
+#=╠═╡
+trace = simulate_trace(mechanics, 
+		initial_state, 
+		(_...) -> rand([on off]),
+		duration=120
+	)
+  ╠═╡ =#
+
+# ╔═╡ a5c44feb-e5f5-4ce0-a911-7ad0c7bd4acf
+#=╠═╡
+# Nice syntax for unpacking structs
+(;x1s, x2s, elapsed, actions) = trace
+  ╠═╡ =#
 
 # ╔═╡ 9830b7bd-4561-4dcb-9ca5-2b32da5ef132
 #=╠═╡
-cost(mechanics,
-	simulate_trace(mechanics, 
-		(0., 10., 0, 0.), 
-		(_...) -> rand([on off]),
-		duration = 120
-	))
+cost(mechanics, trace)
   ╠═╡ =#
 
 # ╔═╡ 98c3de3f-9d27-4a5d-acb5-02c5b6f42f97
@@ -421,7 +440,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.8.2"
 manifest_format = "2.0"
-project_hash = "39afcf2b040be49686c7f83bd2f5c734d3656c45"
+project_hash = "4ce7c60b8a97d2e489ce5864068dc425a9f0613a"
 
 [[deps.AbstractPlutoDingetjes]]
 deps = ["Pkg"]
@@ -1388,6 +1407,7 @@ version = "1.4.1+0"
 # ╟─484bbefc-c519-4d8f-9f25-df8596deecd9
 # ╟─7144e8f2-38af-4f32-8377-47841261bac5
 # ╠═ebd20f9c-a927-4a50-98e4-2aec1f2c8e1b
+# ╠═7e315630-28e2-4bbe-851a-fe27bf61e009
 # ╠═23041c74-867a-4990-9193-149bb006572d
 # ╠═1f052f6e-5676-4f66-aa9b-a3514bc20525
 # ╠═f9779742-ec7b-43e5-ae5a-eaec30276ac0
@@ -1401,7 +1421,6 @@ version = "1.4.1+0"
 # ╠═126e00be-7899-405a-bd6e-731c76215726
 # ╠═77907f6b-4986-4699-838b-b849363416d2
 # ╠═5e2912de-768c-4711-82a9-d809f78e93ff
-# ╠═675538d0-5291-4069-9363-57464ba1012f
 # ╠═a5c44feb-e5f5-4ce0-a911-7ad0c7bd4acf
 # ╠═501fbde2-57d4-48e7-ab46-af7ad8cce6e9
 # ╠═9e9174d8-7634-4a2f-ad07-f89e6af6fa3f
@@ -1411,9 +1430,12 @@ version = "1.4.1+0"
 # ╠═19967ff1-f10e-4efe-89ce-120a45d2d7b7
 # ╠═e362439c-716f-4dcb-91b4-3eaddceab0ea
 # ╠═795e4d30-6bda-433d-8de5-b90c2a67bd50
+# ╠═e8b5cfaf-28b9-40c5-98ba-b579ab1daf57
+# ╠═9fb1112a-7d6c-4f37-8744-e44827fd9d8e
 # ╟─64084492-f5f7-4f5c-b21c-8191d512f9c4
 # ╠═f1f39983-dd7e-4169-a3e3-1b63bc21ea2c
 # ╠═b0ef9fe2-3cf8-413b-9950-328da3572d47
+# ╠═675538d0-5291-4069-9363-57464ba1012f
 # ╠═9830b7bd-4561-4dcb-9ca5-2b32da5ef132
 # ╠═98c3de3f-9d27-4a5d-acb5-02c5b6f42f97
 # ╟─00000000-0000-0000-0000-000000000001
