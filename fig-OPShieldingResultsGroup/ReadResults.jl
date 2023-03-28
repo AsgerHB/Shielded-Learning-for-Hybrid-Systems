@@ -362,9 +362,6 @@ average_cost = call(() -> begin
 	p1
 end)
 
-# ╔═╡ ed1965e8-0c24-48b0-ad8a-896d5c52d7bc
-plot(average_cost, ylim=(20, 72))
-
 # ╔═╡ 1724e32a-be5c-4784-8b32-615e26160235
 make_label(experiment, d) = "$(proper_experiment_name[experiment]) d=$d"
 
@@ -383,6 +380,27 @@ end
 average_interventions = call(() -> begin
 	df = DataFrame(medians)
 	filter!(:Experiment => ==("PostShielded"), df)
+	
+	transform!(df, [:Experiment, :Deterrence] => ByRow(make_label) => :Label)
+	transform!(df, :Runs => fix_bad_sorting, renamecols=false)
+	
+	
+	@df df groupedbar(:Runs, :Avg_Interventions, 
+		size=(300,220),
+		group=:Label,
+		color=interventions_colors,
+		linecolor=interventions_colors,
+		legend=:outertop,
+		xlabel="Episodes",
+		margin=0mm,
+		ylabel=avg_interventions_description)
+end)
+
+# ╔═╡ 009bc318-d3d6-421f-8cf0-2f0e356b3c4e
+average_interventions_no_d0 = call(() -> begin
+	df = DataFrame(medians)
+	filter!(:Experiment => ==("PostShielded"), df)
+	filter!(:Deterrence => !=("0"), df)
 	
 	transform!(df, [:Experiment, :Deterrence] => ByRow(make_label) => :Label)
 	transform!(df, :Runs => fix_bad_sorting, renamecols=false)
@@ -1765,11 +1783,11 @@ version = "0.9.1+5"
 # ╟─0f8633b1-af76-4fb7-9822-7abd90a35a06
 # ╠═b9c5b5e8-7c3c-4cb1-850d-937e928c8090
 # ╠═b11d7a45-2e55-4ccb-82f8-d09cb669719b
-# ╠═ed1965e8-0c24-48b0-ad8a-896d5c52d7bc
 # ╟─4fd405a2-ef9e-4590-8af1-6f806724ef2c
 # ╠═1724e32a-be5c-4784-8b32-615e26160235
 # ╠═e47b5ba0-3a9d-4d73-9ec8-00adb42ee2fe
 # ╠═61bd91fc-6b0f-4fa5-a3dc-ea0f87c06cf1
+# ╠═009bc318-d3d6-421f-8cf0-2f0e356b3c4e
 # ╠═439297f0-8945-43c8-9141-e04dac3e94ee
 # ╠═8d9b7625-4b4c-4dbc-837e-f4afebd26c0c
 # ╟─dfca2665-01aa-48e1-92b4-f6663eb07105
