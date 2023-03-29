@@ -9,12 +9,12 @@ using ArgParse
 using Glob
 using Dates
 include("../Shared Code/ExperimentUtilities.jl")
-include("Get libopshield.jl")
+include("Get libdcshield.jl")
 
 # infix operator "\join" redefined to signify joinpath
 ⨝ = joinpath
 
-figure_name = "fig-OPShieldingResultsGroup"
+figure_name = "fig-DCShieldingResultsGroup"
 
 s = ArgParseSettings()
 
@@ -55,8 +55,8 @@ mkpath(queries_models_dir)
 query_results_dir = results_dir ⨝ "Query Results"
 mkpath(query_results_dir)
 
-libopshield_dir = results_dir ⨝ "libopshield"
-mkpath(libopshield_dir)
+libdcshield_dir = results_dir ⨝ "libdcshield"
+mkpath(libdcshield_dir)
 
 possible_shield_file = args["shield"]
 
@@ -65,9 +65,8 @@ checks = args["test"] ? 10 : 1000 # Number of checks to use for estimating expec
 if !args["skip-experiment"]
     # Get the nondeterministic safe strategy that will be used for shielding.
     # Or just the "shield" for short.
-    libopshield_file = libopshield_dir ⨝ "libopshield.so"
-    get_libopshield(possible_shield_file, "Shared Code/libopshield/", libopshield_file, working_dir=libopshield_dir, test=args["test"])
-
+    libdcshield_file = libdcshield_dir ⨝ "libdcshield.so"
+    get_libdcshield(possible_shield_file, "Shared Code/libdcshield/", libdcshield_file, working_dir=libdcshield_dir, test=args["test"])
 
     # Create UPPAAL models and queries from blueprints, by doing search and replace on the placeholders.
     # This is similar to templating, but the word blueprint was choseen to avoid a name clash with UPPAAL templates. 
@@ -79,7 +78,7 @@ if !args["skip-experiment"]
 
     replacements = Dict(
         "%resultsdir%" => query_results_dir,
-        "%shieldfile%" => libopshield_file,
+        "%dcshieldfile%" => libdcshield_file,
         "%checks%" => checks
     )
         
@@ -137,17 +136,17 @@ NBPARAMS = Dict(
 
 include("ReadResults.jl")
 
-average_cost_name = "OPShieldingResults"
+average_cost_name = "DCShieldingResults"
 savefig(average_cost, results_dir ⨝ "$average_cost_name.png")
 savefig(average_cost, results_dir ⨝ "$average_cost_name.svg")
 progress_update("Saved $average_cost_name")
 
-average_interventions_name = "OPShieldingInterventions"
+average_interventions_name = "DCShieldingInterventions"
 savefig(average_interventions, results_dir ⨝ "$average_interventions_name.png")
 savefig(average_interventions, results_dir ⨝ "$average_interventions_name.svg")
 progress_update("Saved $average_interventions_name")
 
-average_deaths_name = "OPShieldingDeaths"
+average_deaths_name = "DCShieldingDeaths"
 savefig(average_deaths, results_dir ⨝ "$average_deaths_name.png")
 savefig(average_deaths, results_dir ⨝ "$average_deaths_name.svg")
 progress_update("Saved $average_deaths_name")

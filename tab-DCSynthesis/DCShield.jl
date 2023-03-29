@@ -236,6 +236,9 @@ is_safe(Bounds(partition), m)
 # ╔═╡ 5d35a493-0195-46f7-bdf6-013fde056a1e
 sample_count = (length(SupportingPoints(samples_per_axis, partition)))
 
+# ╔═╡ c430653d-cb79-4419-9da8-3bc63ed80d87
+get_value(partition)
+
 # ╔═╡ 7749a8ca-2f38-41c7-9372-df06ce54b919
 Bounds(partition)
 
@@ -302,15 +305,6 @@ md"""
 
 # ╔═╡ 4f01a075-b44b-467c-9f87-55df435b7bdd
 random_agent(_...) = sample([on, off], [1 - off_chance, off_chance] |> Weights)
-
-# ╔═╡ 87d7a2f0-4602-489e-8dba-6cd0f71fdad7
-
-
-# ╔═╡ c6ef755f-e8ac-486c-890a-0613e3bb10e3
-
-
-# ╔═╡ 186fb459-c758-473f-8510-e665cf3da7a8
-
 
 # ╔═╡ a57c6670-6d88-4119-b5b1-7509a8806dae
 shielded(something(shield, grid), (_...) -> action)((x1, x2, R))
@@ -478,6 +472,7 @@ end
 # ╠═90efd733-ea84-46c4-80a5-556f23dc4192
 # ╟─f81f53ce-d81e-429d-ac80-a3edd2f76eac
 # ╠═8751340a-f41a-46fa-8f6d-cc9ca132e260
+# ╠═c430653d-cb79-4419-9da8-3bc63ed80d87
 # ╠═7749a8ca-2f38-41c7-9372-df06ce54b919
 # ╠═c6aec984-3963-41f3-9281-e267d1c8ac78
 # ╠═31699662-ddfc-45a8-b963-f0b03b7c71c2
@@ -505,9 +500,6 @@ end
 # ╟─4d169b72-54f8-4325-adec-f53d18e54fae
 # ╠═dae2fc1d-38d0-48e1-bddc-3b490648648b
 # ╠═4f01a075-b44b-467c-9f87-55df435b7bdd
-# ╠═87d7a2f0-4602-489e-8dba-6cd0f71fdad7
-# ╠═c6ef755f-e8ac-486c-890a-0613e3bb10e3
-# ╠═186fb459-c758-473f-8510-e665cf3da7a8
 # ╠═a57c6670-6d88-4119-b5b1-7509a8806dae
 # ╠═1b447b3e-0565-4dc5-b679-5102c946dec2
 # ╠═fdfa1b59-217e-4504-9d4f-2ad44c39cfd8

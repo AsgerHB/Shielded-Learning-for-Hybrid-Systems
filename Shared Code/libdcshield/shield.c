@@ -12,7 +12,6 @@
 #include<stdbool.h>
 #include "shield_dump.c"
 
-const int ANY_ACTION  = 1 + 2 + 4;
 const int OUT_OF_BOUNDS = -1;
 
 int get_index(int indices[])
@@ -49,9 +48,9 @@ int get_value_from_vector(double s[])
     return get_index(indices);
 }
 
-int get_value(double t, double v, int p, double l)
+int get_value(double x1, double x2, double R)
 {
-    return get_value_from_vector((double[]){t, v, p, l});
+    return get_value_from_vector((double[]){x1, x2, R});
 }
 
 int main()

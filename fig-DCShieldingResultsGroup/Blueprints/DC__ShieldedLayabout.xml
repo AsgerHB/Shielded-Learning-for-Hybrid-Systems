@@ -219,18 +219,11 @@ d_aux = 0</label>
 		<transition id="id21">
 			<source ref="id17"/>
 			<target ref="id16"/>
-			<label kind="assignment" x="-382" y="-153">next_action = 
-shield(ON)</label>
-			<nail x="-272" y="-127"/>
-		</transition>
-		<transition id="id22">
-			<source ref="id17"/>
-			<target ref="id16"/>
 			<label kind="assignment" x="-161" y="-153">next_action = 
 shield(OFF)</label>
 			<nail x="-170" y="-127"/>
 		</transition>
-		<transition id="id23" controllable="false">
+		<transition id="id22" controllable="false">
 			<source ref="id18"/>
 			<target ref="id17"/>
 			<label kind="synchronisation" x="-221" y="-51">tock?</label>
@@ -238,48 +231,36 @@ shield(OFF)</label>
 	</template>
 	<template>
 		<name>Monitor</name>
-		<declaration>clock c;
+		<declaration>
 clock dist;</declaration>
-		<location id="id24" x="-459" y="-34">
-			<label kind="invariant" x="-595" y="68">c &lt;= 1 &amp;&amp;
-dist'==pow(x2-x2ref, 2.0)+fabs(x1-x1ref)/3.0</label>
+		<location id="id23" x="-459" y="-34">
+			<label kind="invariant" x="-469" y="-17">dist'==pow(x2-x2ref, 2.0)+fabs(x1-x1ref)/3.0</label>
 		</location>
-		<init ref="id24"/>
-		<transition id="id25">
-			<source ref="id24"/>
-			<target ref="id24"/>
-			<label kind="guard" x="-484" y="17">c &gt;= 1</label>
-			<label kind="assignment" x="-484" y="34">c = 0</label>
-			<nail x="-484" y="17"/>
-			<nail x="-433" y="17"/>
-		</transition>
-		<transition id="id26" controllable="false">
-			<source ref="id24"/>
-			<target ref="id24"/>
-			<label kind="guard" x="-671" y="-93">x2 &gt; 15.5 &amp;&amp;
-c &gt;= 1</label>
-			<label kind="assignment" x="-671" y="-51">number_deaths = 1,
-c = 0</label>
+		<init ref="id23"/>
+		<transition id="id24" controllable="false">
+			<source ref="id23"/>
+			<target ref="id23"/>
+			<label kind="guard" x="-661" y="-85">x2 &gt; 15.5</label>
+			<label kind="synchronisation" x="-661" y="-68">tick?</label>
+			<label kind="assignment" x="-661" y="-51">number_deaths = 1</label>
 			<nail x="-518" y="-34"/>
 			<nail x="-518" y="-76"/>
 		</transition>
-		<transition id="id27" controllable="false">
-			<source ref="id24"/>
-			<target ref="id24"/>
-			<label kind="guard" x="-510" y="-161">x2 &lt; 14.5 &amp;&amp; 
-c &gt;= 1</label>
-			<label kind="assignment" x="-510" y="-119">number_deaths = 1,
-c = 0</label>
+		<transition id="id25" controllable="false">
+			<source ref="id23"/>
+			<target ref="id23"/>
+			<label kind="guard" x="-510" y="-127">x2 &lt; 14.5</label>
+			<label kind="synchronisation" x="-510" y="-144">tick?</label>
+			<label kind="assignment" x="-510" y="-110">number_deaths = 1</label>
 			<nail x="-416" y="-76"/>
 			<nail x="-493" y="-76"/>
 		</transition>
-		<transition id="id28" controllable="false">
-			<source ref="id24"/>
-			<target ref="id24"/>
-			<label kind="guard" x="-391" y="-93">x1 &gt; 4 &amp;&amp;
-c &gt;= 1</label>
-			<label kind="assignment" x="-390" y="-51">number_deaths = 1,
-c = 0</label>
+		<transition id="id26" controllable="false">
+			<source ref="id23"/>
+			<target ref="id23"/>
+			<label kind="guard" x="-390" y="-85">x1 &gt; 4</label>
+			<label kind="synchronisation" x="-390" y="-68">tick?</label>
+			<label kind="assignment" x="-390" y="-51">number_deaths = 1</label>
 			<nail x="-399" y="-34"/>
 			<nail x="-399" y="-76"/>
 		</transition>
@@ -287,21 +268,21 @@ c = 0</label>
 	<template>
 		<name>Timer</name>
 		<declaration>clock x;</declaration>
-		<location id="id29" x="0" y="0">
+		<location id="id27" x="0" y="0">
 			<label kind="invariant" x="-10" y="17">x&lt;=1</label>
 		</location>
-		<location id="id30" x="-76" y="-85">
+		<location id="id28" x="-76" y="-85">
 			<urgent/>
 		</location>
-		<init ref="id29"/>
-		<transition id="id31" controllable="false">
-			<source ref="id30"/>
-			<target ref="id29"/>
+		<init ref="id27"/>
+		<transition id="id29" controllable="false">
+			<source ref="id28"/>
+			<target ref="id27"/>
 			<label kind="synchronisation" x="-76" y="-42">tock!</label>
 		</transition>
-		<transition id="id32" controllable="false">
-			<source ref="id29"/>
-			<target ref="id30"/>
+		<transition id="id30" controllable="false">
+			<source ref="id27"/>
+			<target ref="id28"/>
 			<label kind="guard" x="-33" y="-119">x&gt;=1</label>
 			<label kind="synchronisation" x="-33" y="-102">tick!</label>
 			<label kind="assignment" x="-33" y="-85">x=0</label>
@@ -310,32 +291,32 @@ c = 0</label>
 	</template>
 	<template>
 		<name>Load</name>
-		<location id="id33" x="0" y="0">
+		<location id="id31" x="0" y="0">
 			<label kind="invariant" x="-10" y="17">x_R'==0</label>
 		</location>
-		<location id="id34" x="-76" y="0">
+		<location id="id32" x="-76" y="0">
 			<committed/>
 		</location>
-		<location id="id35" x="119" y="-17">
+		<location id="id33" x="119" y="-17">
 			<committed/>
 		</location>
-		<init ref="id34"/>
-		<transition id="id36" controllable="false">
-			<source ref="id35"/>
-			<target ref="id33"/>
+		<init ref="id32"/>
+		<transition id="id34" controllable="false">
+			<source ref="id33"/>
+			<target ref="id31"/>
 			<label kind="select" x="76" y="17">i:int[-10,10]</label>
 			<label kind="guard" x="76" y="51">x_R + i &gt;= 60 &amp;&amp; x_R + i &lt;= 80</label>
 			<label kind="assignment" x="76" y="34">x_R= x_R + i</label>
 			<nail x="127" y="17"/>
 		</transition>
-		<transition id="id37" controllable="false">
-			<source ref="id33"/>
-			<target ref="id35"/>
+		<transition id="id35" controllable="false">
+			<source ref="id31"/>
+			<target ref="id33"/>
 			<label kind="synchronisation" x="42" y="-34">tick?</label>
 		</transition>
-		<transition id="id38" controllable="false">
-			<source ref="id34"/>
-			<target ref="id33"/>
+		<transition id="id36" controllable="false">
+			<source ref="id32"/>
+			<target ref="id31"/>
 			<label kind="assignment" x="-76" y="-51">x_R=70.0</label>
 		</transition>
 	</template>
@@ -364,11 +345,7 @@ system Converter, Controller, Load, Timer, Monitor;
 			<comment/>
 		</query>
 		<query>
-			<formula>E[&lt;=120;100] (max: number_deaths)</formula>
-			<comment/>
-		</query>
-		<query>
-			<formula>E[&lt;=120;100] (max: number_deaths) under S</formula>
+			<formula>E[&lt;=120;100] (max: x1 &lt;= 0 &amp;&amp; x1 &gt;= 4 &amp;&amp; x2 &lt;= 14.5 &amp;&amp; x2 &gt;= 15.5)</formula>
 			<comment/>
 		</query>
 		<query>
@@ -384,11 +361,11 @@ system Converter, Controller, Load, Timer, Monitor;
 			<comment/>
 		</query>
 		<query>
-			<formula>Pr[&lt;=50;10000] (&lt;&gt; number_deaths &gt; 0 )</formula>
+			<formula>Pr[&lt;=50;10000] (&lt;&gt; (x1 &gt;= 0 &amp;&amp; x1 &lt;= 4 &amp;&amp; x2 &gt;= 14.5 &amp;&amp; x2&lt;=15.5) )</formula>
 			<comment/>
 		</query>
 		<query>
-			<formula>Pr[&lt;=50;10000] (&lt;&gt; number_deaths &gt; 0 ) under S</formula>
+			<formula>Pr[&lt;=50;10000] (&lt;&gt; (x1 &gt;= 0 &amp;&amp; x1 &lt;= 4 &amp;&amp; x2 &gt;= 14.5 &amp;&amp; x2&lt;=15.5) ) under S</formula>
 			<comment/>
 		</query>
 		<query>
