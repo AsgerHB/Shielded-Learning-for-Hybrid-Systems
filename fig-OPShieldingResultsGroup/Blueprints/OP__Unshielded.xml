@@ -20,11 +20,16 @@ const int ON = 1;
 const double v_min = 4.9;
 const double v_max = 25.1; 
 
-// Stub function to make the edges identical
-int shield(int action) {
+// "Shielding" stub
+
+const int OFF = 0;
+const int ON = 1;
+int next_action;
+int interventions;
+
+int shield(int action){
     return action;
-}
-</declaration>
+}</declaration>
 	<template>
 		<name>Controller</name>
 		<declaration>clock x;
@@ -319,15 +324,35 @@ system Controller, Pump, Machine, Fluctuation, AccumulatedVolume, SafetyMonitor;
 			<comment/>
 		</query>
 		<query>
-			<formula>simulate[&lt;=120;5] {v, v_min, v_max}</formula>
+			<formula>strategy LowVolume = minE (aov/120) [&lt;=120] {p} -&gt; {t, v, l}: &lt;&gt; elapsed &gt;= 120</formula>
 			<comment/>
 		</query>
 		<query>
-			<formula>Pr[&lt;=120;1000]([] 4.9 &lt; v &amp;&amp; v &lt; 25.1)</formula>
+			<formula>strategy SmartSwitching = minE (aov/120 + switches/2) [&lt;=120] {p} -&gt; {t, v, l}: &lt;&gt; elapsed &gt;= 120</formula>
 			<comment/>
 		</query>
 		<query>
-			<formula>E[&lt;=120;1000] (max:aov)</formula>
+			<formula>Pr[&lt;=120;100000]([] 4.9 &lt; v &amp;&amp; v &lt; 25.1)</formula>
+			<comment/>
+		</query>
+		<query>
+			<formula>Pr[&lt;=120;100000](&lt;&gt; 4.9 &lt; v &amp;&amp; v &lt; 25.1) under LowVolume</formula>
+			<comment/>
+		</query>
+		<query>
+			<formula>Pr[&lt;=120;100000](&lt;&gt; 4.9 &lt; v &amp;&amp; v &lt; 25.1) under SmartSwitching</formula>
+			<comment/>
+		</query>
+		<query>
+			<formula>E[&lt;=120;1000] (max:aov/120 + switches/2)</formula>
+			<comment/>
+		</query>
+		<query>
+			<formula>E[&lt;=120;1000] (max:aov/120 + switches/2) under LowVolume</formula>
+			<comment/>
+		</query>
+		<query>
+			<formula>E[&lt;=120;1000] (max:aov/120) under LowVolume</formula>
 			<comment/>
 		</query>
 		<query>
@@ -335,23 +360,11 @@ system Controller, Pump, Machine, Fluctuation, AccumulatedVolume, SafetyMonitor;
 			<comment/>
 		</query>
 		<query>
-			<formula>E[&lt;=120;1000] (max:switches)</formula>
+			<formula>E[&lt;=120;1000] (max:aov/120 + switches/2) under SmartSwitching</formula>
 			<comment/>
 		</query>
 		<query>
-			<formula>E[&lt;=120;1000] (max:number_deaths)</formula>
-			<comment/>
-		</query>
-		<query>
-			<formula/>
-			<comment/>
-		</query>
-		<query>
-			<formula>strategy LowVolume = minE (aov/100 + number_deaths*1000) [&lt;=120] {p} -&gt; {t, v, l}: &lt;&gt; elapsed &gt;= 120</formula>
-			<comment/>
-		</query>
-		<query>
-			<formula>saveStrategy("Results/Misc/LowVolume.strategy.json", LowVolume)</formula>
+			<formula>simulate[&lt;=120;5] {v, v_min, v_max}</formula>
 			<comment/>
 		</query>
 		<query>
@@ -359,19 +372,7 @@ system Controller, Pump, Machine, Fluctuation, AccumulatedVolume, SafetyMonitor;
 			<comment/>
 		</query>
 		<query>
-			<formula>Pr[&lt;=120;1000]([] 4.9 &lt; v &amp;&amp; v &lt; 25.1) under LowVolume</formula>
-			<comment/>
-		</query>
-		<query>
-			<formula>E[&lt;=120;1000] (max:aov) under LowVolume</formula>
-			<comment/>
-		</query>
-		<query>
-			<formula>E[&lt;=120;1000] (max:switches) under LowVolume</formula>
-			<comment/>
-		</query>
-		<query>
-			<formula>E[&lt;=120;1000] (max:number_deaths) under LowVolume</formula>
+			<formula>simulate[&lt;=120;5] {v, v_min, v_max} under SmartSwitching</formula>
 			<comment/>
 		</query>
 		<query>
@@ -379,31 +380,7 @@ system Controller, Pump, Machine, Fluctuation, AccumulatedVolume, SafetyMonitor;
 			<comment/>
 		</query>
 		<query>
-			<formula>strategy FewSwitches = minE (switches + number_deaths*1000) [&lt;=120] {p} -&gt; {t, v, l}: &lt;&gt; elapsed &gt;= 120</formula>
-			<comment/>
-		</query>
-		<query>
-			<formula>saveStrategy("Results/Misc/FewSwitches.strategy.json", FewSwitches)</formula>
-			<comment/>
-		</query>
-		<query>
-			<formula>simulate[&lt;=120;5] {v, v_min, v_max} under FewSwitches</formula>
-			<comment/>
-		</query>
-		<query>
-			<formula>Pr[&lt;=120;1000]([] 4.9 &lt; v &amp;&amp; v &lt; 25.1) under FewSwitches</formula>
-			<comment/>
-		</query>
-		<query>
-			<formula>E[&lt;=120;1000] (max:aov) under FewSwitches</formula>
-			<comment/>
-		</query>
-		<query>
-			<formula>E[&lt;=120;1000] (max:switches) under FewSwitches</formula>
-			<comment/>
-		</query>
-		<query>
-			<formula>E[&lt;=120;1000] (max:number_deaths) under FewSwitches</formula>
+			<formula/>
 			<comment/>
 		</query>
 		<query>
@@ -411,7 +388,7 @@ system Controller, Pump, Machine, Fluctuation, AccumulatedVolume, SafetyMonitor;
 			<comment/>
 		</query>
 		<query>
-			<formula>strategy SmartSwitching = minE (aov/100 + switches + number_deaths*1000) [&lt;=120] {p} -&gt; {t, v, l}: &lt;&gt; elapsed &gt;= 120</formula>
+			<formula>saveStrategy("Results/Misc/LowVolume.strategy.json", LowVolume)</formula>
 			<comment/>
 		</query>
 		<query>
@@ -419,23 +396,7 @@ system Controller, Pump, Machine, Fluctuation, AccumulatedVolume, SafetyMonitor;
 			<comment/>
 		</query>
 		<query>
-			<formula>simulate[&lt;=120;5] {v, v_min, v_max} under SmartSwitching</formula>
-			<comment/>
-		</query>
-		<query>
-			<formula>Pr[&lt;=120;1000]([] 4.9 &lt; v &amp;&amp; v &lt; 25.1) under SmartSwitching</formula>
-			<comment/>
-		</query>
-		<query>
-			<formula>E[&lt;=120;1000] (max:aov) under SmartSwitching</formula>
-			<comment/>
-		</query>
-		<query>
-			<formula>E[&lt;=120;1000] (max:switches) under SmartSwitching</formula>
-			<comment/>
-		</query>
-		<query>
-			<formula>E[&lt;=120;1000] (max:number_deaths) under SmartSwitching</formula>
+			<formula/>
 			<comment/>
 		</query>
 		<query>

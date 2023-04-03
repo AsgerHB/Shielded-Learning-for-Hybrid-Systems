@@ -12,7 +12,6 @@
 #include<stdbool.h>
 #include "shield_dump.c"
 
-const int ANY_ACTION  = 1 + 2 + 4;
 const int OUT_OF_BOUNDS = -1;
 
 int get_index(int indices[])

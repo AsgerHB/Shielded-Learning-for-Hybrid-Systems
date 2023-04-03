@@ -369,15 +369,15 @@ system Controller, Pump, Machine, Fluctuation, AccumulatedVolume, SafetyMonitor;
 			<comment/>
 		</query>
 		<query>
-			<formula>Pr[&lt;=120;1000]([] 4.9 &lt; v &amp;&amp; v &lt; 25.1)</formula>
+			<formula>Pr[&lt;=120;100000]([] 4.9 &lt; v &amp;&amp; v &lt; 25.1)</formula>
 			<comment/>
 		</query>
 		<query>
-			<formula>Pr[&lt;=120;1000]([] 4.9 &lt; v &amp;&amp; v &lt; 25.1) under LowVolume</formula>
+			<formula>Pr[&lt;=120;100000](&lt;&gt; 4.9 &lt; v &amp;&amp; v &lt; 25.1) under LowVolume</formula>
 			<comment/>
 		</query>
 		<query>
-			<formula>Pr[&lt;=120;1000]([] 4.9 &lt; v &amp;&amp; v &lt; 25.1) under SmartSwitching</formula>
+			<formula>Pr[&lt;=120;100000](&lt;&gt; 4.9 &lt; v &amp;&amp; v &lt; 25.1) under SmartSwitching</formula>
 			<comment/>
 		</query>
 		<query>
