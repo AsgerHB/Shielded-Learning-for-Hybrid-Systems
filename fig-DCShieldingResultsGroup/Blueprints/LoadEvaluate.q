@@ -4,7 +4,7 @@
 strategy Deterrence1000 = loadStrategy {Converter.location} -> {x1, x2}("%resultsdir%/Deterrence1000.strategy.json")
 
 /* formula 2 */
-E[<=120;%checks%] (max:Monitor.dist) under Deterrence1000
+E[<=120;%checks%] (max:Monitor.dist/1000 + switches*1.0) under Deterrence1000
 
 /* formula 3 */
 E[<=120;%checks%] (max:number_deaths) under Deterrence1000
@@ -16,7 +16,7 @@ E[<=120;%checks%] (max:interventions) under Deterrence1000
 strategy Deterrence100 = loadStrategy {Converter.location} -> {x1, x2}("%resultsdir%/Deterrence100.strategy.json")
 
 /* formula 6 */
-E[<=120;%checks%] (max:Monitor.dist) under Deterrence100
+E[<=120;%checks%] (max:Monitor.dist/1000 + switches*1.0) under Deterrence100
 
 /* formula 7 */
 E[<=120;%checks%] (max:number_deaths) under Deterrence100
@@ -28,7 +28,7 @@ E[<=120;%checks%] (max:interventions) under Deterrence100
 strategy Deterrence10 = loadStrategy {Converter.location} -> {x1, x2}("%resultsdir%/Deterrence10.strategy.json")
 
 /* formula 10 */
-E[<=120;%checks%] (max:Monitor.dist) under Deterrence10
+E[<=120;%checks%] (max:Monitor.dist/1000 + switches*1.0) under Deterrence10
 
 /* formula 11 */
 E[<=120;%checks%] (max:number_deaths) under Deterrence10
@@ -40,7 +40,7 @@ E[<=120;%checks%] (max:interventions) under Deterrence10
 strategy Deterrence0 = loadStrategy {Converter.location} -> {x1, x2}("%resultsdir%/Deterrence0.strategy.json")
 
 /* formula 14 */
-E[<=120;%checks%] (max:Monitor.dist) under Deterrence0
+E[<=120;%checks%] (max:Monitor.dist/1000 + switches*1.0) under Deterrence0
 
 /* formula 15 */
 E[<=120;%checks%] (max:number_deaths) under Deterrence0

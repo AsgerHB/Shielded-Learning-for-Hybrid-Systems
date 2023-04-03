@@ -21,6 +21,7 @@ clock time;
 clock x1 = 0.35; // Current
 clock x2 = 15.0; // Voltage
 
+int switches;
 int number_deaths; 
 
 const double x_L = 450e-6;  // capacitor
@@ -81,7 +82,7 @@ x2'==((-1.0/(x_Co*x_R))*x2)/scale</label>
 d_aux = 0</label>
 		</location>
 		<location id="id3" x="127" y="0">
-			<name x="119" y="17">pd1u1</name>
+			<name x="110" y="17">pd1u1</name>
 			<urgent/>
 		</location>
 		<location id="id4" x="348" y="0">
@@ -129,7 +130,8 @@ d_aux = 0</label>
 		<transition id="id12" controllable="false">
 			<source ref="id4"/>
 			<target ref="id0"/>
-			<label kind="synchronisation" x="178" y="-59">on?</label>
+			<label kind="synchronisation" x="127" y="-59">on?</label>
+			<label kind="assignment" x="102" y="-42">switches++</label>
 			<nail x="348" y="-42"/>
 			<nail x="0" y="-42"/>
 		</transition>
@@ -137,6 +139,7 @@ d_aux = 0</label>
 			<source ref="id5"/>
 			<target ref="id0"/>
 			<label kind="synchronisation" x="0" y="59">on?</label>
+			<label kind="assignment" x="0" y="76">switches++</label>
 		</transition>
 		<transition id="id14" controllable="false">
 			<source ref="id1"/>
@@ -148,6 +151,7 @@ d_aux = 0</label>
 			<source ref="id3"/>
 			<target ref="id1"/>
 			<label kind="synchronisation" x="153" y="-17">off?</label>
+			<label kind="assignment" x="136" y="0">switches++</label>
 		</transition>
 	</template>
 	<template>
@@ -311,6 +315,10 @@ system Converter, Controller, Load, Timer, Monitor;
 			<comment>--print-strategies=strats --discount 0.9 --good-runs 1000 --total-runs 1000 --runs-pr-state 1000 --max-iterations 10 --reset-no-better 10 --random-search-limit 0.5 --deterministic-search-limit 0.8 --split-filter-rate 1 --split-ks 0.2 --split-lower-t 0.05 --split-upper-t 1.8 --learning-method 5 -D0.5</comment>
 		</query>
 		<query>
+			<formula>strategy S2 = minE(Monitor.dist + switches) [&lt;=1000] {Converter.location} -&gt; {x1, x2}: &lt;&gt; time &gt;= 1000</formula>
+			<comment/>
+		</query>
+		<query>
 			<formula>simulate [&lt;=120;20] {x1,x2, 7 + Converter.d1u1, 9 + Converter.d1u0, 11 + Converter.d0u0, fabs(x2-x2ref), 14.8,  15.2 , 0.7} under S</formula>
 			<comment/>
 		</query>
@@ -323,6 +331,14 @@ system Converter, Controller, Load, Timer, Monitor;
 			<comment/>
 		</query>
 		<query>
+			<formula>E[&lt;=120;100] (max: switches) under S</formula>
+			<comment/>
+		</query>
+		<query>
+			<formula>E[&lt;=120;100] (max: switches) under S2</formula>
+			<comment/>
+		</query>
+		<query>
 			<formula>E[&lt;=120;100] (max: number_deaths)</formula>
 			<comment/>
 		</query>
@@ -331,11 +347,19 @@ system Converter, Controller, Load, Timer, Monitor;
 			<comment/>
 		</query>
 		<query>
+			<formula>E[&lt;=120;100] (max: number_deaths) under S2</formula>
+			<comment/>
+		</query>
+		<query>
 			<formula>E[&lt;=120;100] (max: Monitor.dist)</formula>
 			<comment/>
 		</query>
 		<query>
 			<formula>E[&lt;=120;100] (max: Monitor.dist) under S</formula>
+			<comment/>
+		</query>
+		<query>
+			<formula>E[&lt;=120;100] (max: Monitor.dist) under S2</formula>
 			<comment/>
 		</query>
 		<query>
@@ -351,11 +375,7 @@ system Converter, Controller, Load, Timer, Monitor;
 			<comment/>
 		</query>
 		<query>
-			<formula>E[&lt;=50;1000] (max:Monitor.dist)</formula>
-			<comment/>
-		</query>
-		<query>
-			<formula>E[&lt;=50;1000] (max:Monitor.dist)  under S</formula>
+			<formula>Pr[&lt;=50;10000] (&lt;&gt; number_deaths &gt; 0 ) under S2</formula>
 			<comment/>
 		</query>
 		<query>
@@ -363,7 +383,7 @@ system Converter, Controller, Load, Timer, Monitor;
 			<comment/>
 		</query>
 		<query>
-			<formula>strategy S = loadStrategy {Converter.location} -&gt; {x1, x2} ("Results/Misc/DC.strategy.json")</formula>
+			<formula>strategy S = loadStrategy {Converter.location} -&gt; {x1, x2} ("/home/asger/Results/fig-DCShieldingResultsGroup/Query Results/0/NoShield/12000Runs/Deterrence0.strategy.json")</formula>
 			<comment/>
 		</query>
 	</queries>
