@@ -15,6 +15,7 @@ Make sure you have the following packages installed on your system:
 	wget https://julialang-s3.julialang.org/bin/linux/x64/1.8/julia-1.8.2-linux-x86_64.tar.gz
 	tar zxvf julia-1.8.2-linux-x86_64.tar.gz
 	mv julia-1.8.2/ ~/julia-1.8.2
+	sudo ln -s ~/julia-1.8.2/bin/julia /usr/local/bin/julia
 
 Download dependencies for this repository. Note that the `]` key activates the package manager interface.
 
@@ -26,20 +27,20 @@ Download dependencies for this repository. Note that the `]` key activates the p
 
 The package has not yet beed added to the Julia packages repository, and so has to be downloaded manually from GitHub.
 
-	mkdir -p .julia/dev
+	mkdir -p ~/.julia/dev
 	cd .julia/dev
-	git clone https://github.com/AsgerHB/GridShielding.jl 
+	git clone https://github.com/AsgerHB/GridShielding.jl GridShielding
 	
-	
+
 ### Install UPPAAL STRATEGO 10 and Activate License
 If the following wget request is denied, please visit uppaal.org and follow download instructions.
 
 	mkdir ~/opt
 	cd ~/opt
-	wget https://uppaal.org/dl/uppaal-4.1.20-stratego-10-linux64.zip
+	wget https://download.uppaal.org/uppaal-4.1.20-stratego/stratego-11/uppaal-4.1.20-stratego-11-linux64.zip
 	unzip uppaal-4.1.20-stratego-10-linux64.zip
 
-Retrieve a license from uppaal.veriaal.dk/academic.html or alternatively visit uppaal.org for more info. Once you have your license, activate it by running 
+Retrieve a license from https://uppaal.veriaal.dk/academic.html or alternatively visit uppaal.org for more info. Once you have your license, activate it by running 
 
 	~/opt/uppaal-4.1.20-stratego-10-linux64/uppaal
 
@@ -50,7 +51,7 @@ Enter your license when prompted.
 Create figures by running their corresponding experiment. Shown here for fig-BarbaricMethodAccuracy
 
 	cd path/to/ReproducibilityPackage
-	julia "fig-BarbaricMethodAccuracy/Run Experiment.jl --results-dir ~/Results"
+	julia "fig-BarbaricMethodAccuracy/Run Experiment.jl" --results-dir ~/Results
 
 # Scratchpad and remarks
 
