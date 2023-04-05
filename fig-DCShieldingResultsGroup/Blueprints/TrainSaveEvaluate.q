@@ -2,13 +2,13 @@
 // HACK: Since this query file is only used for NoShield, I don't bother estimating the number of interventions. It will be zero, but I want to keep that number.
 
 /* formula 1 */
-strategy Deterrence1000 = minE (Monitor.dist/1000 + switches*1.0 + number_deaths*1000)  [<=120] {Converter.location} -> {x1, x2}: <> time >= 120
+strategy Deterrence1000 = minE (Monitor.dist + switches*1.0 + number_deaths*1000)  [<=120] {Converter.location} -> {x1, x2}: <> time >= 120
 
 /* formula 2 */
 saveStrategy("%resultsdir%/Deterrence1000.strategy.json", Deterrence1000)
 
 /* formula 3 */
-E[<=120;%checks%] (max:Monitor.dist/1000 + switches*1.0) under Deterrence1000
+E[<=120;%checks%] (max:Monitor.dist + switches*1.0) under Deterrence1000
 
 /* formula 4 */
 E[<=120;%checks%] (max:number_deaths) under Deterrence1000
@@ -17,13 +17,13 @@ E[<=120;%checks%] (max:number_deaths) under Deterrence1000
 E[<=120;2] (max:0)
 
 /* formula 6 */
-strategy Deterrence100 = minE (Monitor.dist/1000 + switches*1.0 + number_deaths*100)  [<=120] {Converter.location} -> {x1, x2}: <> time >= 120
+strategy Deterrence100 = minE (Monitor.dist + switches*1.0 + number_deaths*100)  [<=120] {Converter.location} -> {x1, x2}: <> time >= 120
 
 /* formula 7 */
 saveStrategy("%resultsdir%/Deterrence100.strategy.json", Deterrence100)
 
 /* formula 8 */
-E[<=120;%checks%] (max:Monitor.dist/1000 + switches*1.0) under Deterrence100
+E[<=120;%checks%] (max:Monitor.dist + switches*1.0) under Deterrence100
 
 /* formula 9 */
 E[<=120;%checks%] (max:number_deaths) under Deterrence100
@@ -32,13 +32,13 @@ E[<=120;%checks%] (max:number_deaths) under Deterrence100
 E[<=120;2] (max:0)
 
 /* formula 11 */
-strategy Deterrence10 = minE (Monitor.dist/1000 + switches*1.0 + number_deaths*10)  [<=120] {Converter.location} -> {x1, x2}: <> time >= 120
+strategy Deterrence10 = minE (Monitor.dist + switches*1.0 + number_deaths*10)  [<=120] {Converter.location} -> {x1, x2}: <> time >= 120
 
 /* formula 12 */
 saveStrategy("%resultsdir%/Deterrence10.strategy.json", Deterrence10)
 
 /* formula 13 */
-E[<=120;%checks%] (max:Monitor.dist/1000 + switches*1.0) under Deterrence10
+E[<=120;%checks%] (max:Monitor.dist + switches*1.0) under Deterrence10
 
 /* formula 14 */
 E[<=120;%checks%] (max:number_deaths) under Deterrence10
@@ -47,13 +47,13 @@ E[<=120;%checks%] (max:number_deaths) under Deterrence10
 E[<=120;2] (max:0)
 
 /* formula 16 */
-strategy Deterrence0 = minE (Monitor.dist/1000 + switches*1.0 + number_deaths*0)  [<=120] {Converter.location} -> {x1, x2}: <> time >= 120
+strategy Deterrence0 = minE (Monitor.dist + switches*1.0 + number_deaths*0)  [<=120] {Converter.location} -> {x1, x2}: <> time >= 120
 
 /* formula 17 */
 saveStrategy("%resultsdir%/Deterrence0.strategy.json", Deterrence0)
 
 /* formula 18 */
-E[<=120;%checks%] (max:Monitor.dist/1000 + switches*1.0) under Deterrence0
+E[<=120;%checks%] (max:Monitor.dist + switches*1.0) under Deterrence0
 
 /* formula 19 */
 E[<=120;%checks%] (max:number_deaths) under Deterrence0

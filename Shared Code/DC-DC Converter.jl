@@ -109,9 +109,9 @@ struct DCMechanics
 			vs=10.0,
 			time_step=1,
 			scale=1.0/0.00005, # Time scale so that 1 tick = 50µs. 
-			R_fluctuation=10,
-			R_min=60,
-			R_max=80,
+			R_fluctuation=30,
+			R_min=30,
+			R_max=200,
 			x1_ref=0.35,
 			x2_ref=15,
 			x1_min=0,

@@ -246,7 +246,7 @@ shield(OFF)</label>
 clock dist;</declaration>
 		<location id="id24" x="-459" y="-34">
 			<label kind="invariant" x="-595" y="68">c &lt;= 1 &amp;&amp;
-dist'==pow(x2-x2ref, 2.0)+fabs(x1-x1ref)/3.0</label>
+dist'==fabs(x2-x2ref)</label>
 		</location>
 		<init ref="id24"/>
 		<transition id="id25">
@@ -327,8 +327,8 @@ c = 0</label>
 		<transition id="id36" controllable="false">
 			<source ref="id35"/>
 			<target ref="id33"/>
-			<label kind="select" x="76" y="17">i:int[-10,10]</label>
-			<label kind="guard" x="76" y="51">x_R + i &gt;= 60 &amp;&amp; x_R + i &lt;= 80</label>
+			<label kind="select" x="76" y="17">i:int[-30,30]</label>
+			<label kind="guard" x="76" y="51">x_R + i &gt;= 30 &amp;&amp; x_R + i &lt;= 200</label>
 			<label kind="assignment" x="76" y="34">x_R= x_R + i</label>
 			<nail x="127" y="17"/>
 		</transition>

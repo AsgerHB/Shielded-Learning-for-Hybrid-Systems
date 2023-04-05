@@ -205,7 +205,7 @@ shield(OFF)</label>
 clock dist;</declaration>
 		<location id="id24" x="-459" y="-34">
 			<label kind="invariant" x="-595" y="68">c &lt;= 1 &amp;&amp;
-dist'==pow(x2-x2ref, 2.0)+fabs(x1-x1ref)/3.0</label>
+dist'==fabs(x2-x2ref)</label>
 		</location>
 		<init ref="id24"/>
 		<transition id="id25">
@@ -286,8 +286,8 @@ c = 0</label>
 		<transition id="id36" controllable="false">
 			<source ref="id35"/>
 			<target ref="id33"/>
-			<label kind="select" x="76" y="17">i:int[-10,10]</label>
-			<label kind="guard" x="76" y="51">x_R + i &gt;= 60 &amp;&amp; x_R + i &lt;= 80</label>
+			<label kind="select" x="76" y="17">i:int[-30,30]</label>
+			<label kind="guard" x="76" y="51">x_R + i &gt;= 30 &amp;&amp; x_R + i &lt;= 200</label>
 			<label kind="assignment" x="76" y="34">x_R= x_R + i</label>
 			<nail x="127" y="17"/>
 		</transition>
@@ -306,6 +306,11 @@ c = 0</label>
 system Converter, Controller, Load, Timer, Monitor;
     </system>
 	<queries>
+		<option key="--total-runs" value="1500"/>
+		<option key="--max-iterations" value="1"/>
+		<option key="--good-runs" value="1500"/>
+		<option key="--eval-runs" value="1500"/>
+		<option key="--runs-pr-state" value="1500"/>
 		<query>
 			<formula/>
 			<comment/>
@@ -316,6 +321,10 @@ system Converter, Controller, Load, Timer, Monitor;
 		</query>
 		<query>
 			<formula>strategy S2 = minE(Monitor.dist + switches) [&lt;=1000] {Converter.location} -&gt; {x1, x2}: &lt;&gt; time &gt;= 1000</formula>
+			<comment/>
+		</query>
+		<query>
+			<formula>strategy S3 = minE(Monitor.dist + switches + number_deaths*10) [&lt;=1000] {Converter.location} -&gt; {x1, x2}: &lt;&gt; time &gt;= 1000</formula>
 			<comment/>
 		</query>
 		<query>
@@ -331,11 +340,23 @@ system Converter, Controller, Load, Timer, Monitor;
 			<comment/>
 		</query>
 		<query>
+			<formula>simulate [&lt;=120;10] {x1, x2, 14.5,  15.5 , 4} under S2</formula>
+			<comment/>
+		</query>
+		<query>
+			<formula>simulate [&lt;=120;10] {x1, x2, 14.5,  15.5 , 4} under S3</formula>
+			<comment/>
+		</query>
+		<query>
 			<formula>E[&lt;=120;100] (max: switches) under S</formula>
 			<comment/>
 		</query>
 		<query>
 			<formula>E[&lt;=120;100] (max: switches) under S2</formula>
+			<comment/>
+		</query>
+		<query>
+			<formula>E[&lt;=120;100] (max: switches) under S3</formula>
 			<comment/>
 		</query>
 		<query>
@@ -351,6 +372,10 @@ system Converter, Controller, Load, Timer, Monitor;
 			<comment/>
 		</query>
 		<query>
+			<formula>E[&lt;=120;100] (max: number_deaths) under S3</formula>
+			<comment/>
+		</query>
+		<query>
 			<formula>E[&lt;=120;100] (max: Monitor.dist)</formula>
 			<comment/>
 		</query>
@@ -360,6 +385,10 @@ system Converter, Controller, Load, Timer, Monitor;
 		</query>
 		<query>
 			<formula>E[&lt;=120;100] (max: Monitor.dist) under S2</formula>
+			<comment/>
+		</query>
+		<query>
+			<formula>E[&lt;=120;100] (max: Monitor.dist) under S3</formula>
 			<comment/>
 		</query>
 		<query>

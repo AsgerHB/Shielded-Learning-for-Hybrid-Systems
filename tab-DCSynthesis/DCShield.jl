@@ -220,7 +220,7 @@ md"""
 `x1 =` $(@bind x1 NumberField(grid.bounds.lower[1] + granularity:granularity:grid.bounds.upper[1], default=default=m.x1_ref))
 `x2 =` $(@bind x2 NumberField(grid.bounds.lower[2] + granularity:granularity:grid.bounds.upper[2], default=default=m.x2_ref))
 
-`R =` $(@bind R NumberField(grid.bounds.lower[3]:1:grid.bounds.upper[3]))
+`R =` $(@bind R NumberField(grid.bounds.lower[3]:1:grid.bounds.upper[3] - 1))
 
 `action =` 
 $(@bind action Select(instances(SwitchStatus) |> collect))
