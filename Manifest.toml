@@ -689,7 +689,7 @@ version = "1.7.4"
 deps = ["Distributions", "Plots", "Serialization", "StatsBase"]
 path = "/home/asger/.julia/dev/GridShielding"
 uuid = "d6812381-bd27-4ab8-a35f-a1c7ba1f8c22"
-version = "0.1.0"
+version = "1.0.0"
 
 [[deps.Grisu]]
 git-tree-sha1 = "53bb909d1151e57e2484c3d1b53e19552b887fb2"
