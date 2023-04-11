@@ -38,11 +38,11 @@ If the following wget request is denied, please visit uppaal.org and follow down
 	mkdir ~/opt
 	cd ~/opt
 	wget https://download.uppaal.org/uppaal-4.1.20-stratego/stratego-11/uppaal-4.1.20-stratego-11-linux64.zip
-	unzip uppaal-4.1.20-stratego-11-linux64.zip
+	unzip uppaal-4.1.20-stratego-10-linux64.zip
 
 Retrieve a license from https://uppaal.veriaal.dk/academic.html or alternatively visit uppaal.org for more info. Once you have your license, activate it by running 
 
-	~/opt/uppaal-4.1.20-stratego-11-linux64/uppaal
+	~/opt/uppaal-4.1.20-stratego-10-linux64/uppaal
 
 Enter your license when prompted.
 
