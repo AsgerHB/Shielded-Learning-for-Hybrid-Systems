@@ -34,7 +34,7 @@ s = ArgParseSettings()
             default=nothing
 
         "--uppaal-dir"
-            help="""Root directory of the UPPAAL STRATEGO 10 install."""
+            help="""Root directory of the UPPAAL STRATEGO install."""
             default=homedir() ⨝ "opt/uppaal-4.1.20-stratego-11-rc1-linux64/"
 
         "--julia-dir"

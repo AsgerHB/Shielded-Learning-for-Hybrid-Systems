@@ -33,8 +33,8 @@ s = ArgParseSettings()
             default=nothing
 
         "--uppaal-dir"
-            help="""Root directory of the UPPAAL STRATEGO 10 install."""
-            default=homedir() ⨝ "opt/uppaal-4.1.20-stratego-10-linux64/"
+            help="""Root directory of the UPPAAL STRATEGO install."""
+            default=homedir() ⨝ "opt/uppaal-4.1.20-stratego-11-linux64/"
 
         "--skip-experiment"
             help="""Yea I know. But figures will still be created from <results-dir>/Query Results/Results.csv
