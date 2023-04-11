@@ -74,9 +74,13 @@ else
     runs_per_shield = 100
 end
 
+
 # samples per axis and granularities are individually defined for each axis. The 3rd axis, p, only has discrete values 0 and 1, and therefore should not be sampled at other points.
 samples_per_axiss = [ (s, s, 1, s) for s in samples_per_axiss ]
 Gs = [ (G, G, 1, G) for G in Gs]
+
+m = OPMechanics()
+
 ##############
 # Mainmatter #
 ##############
@@ -84,13 +88,13 @@ Gs = [ (G, G, 1, G) for G in Gs]
 progress_update("Estimated total time to complete: 3 hours. (2 minutes if run with --test.)")
 
 if make_barbaric_shields
-    make_and_save_barbaric_shields(samples_per_axiss, Gs, shields_dir)
+    make_and_save_barbaric_shields(m, samples_per_axiss, Gs, shields_dir)
 else
     progress_update("Skipping synthesis of shields using sampling-based reachability analysis.")
 end
 
 if test_shields
-    test_shields_and_save_results(OPMechanics(), shields_dir, evaluations_dir, runs_per_shield)
+    test_shields_and_save_results(m, shields_dir, evaluations_dir, runs_per_shield)
 else
     progress_update("Skipping tests of shields")
 end

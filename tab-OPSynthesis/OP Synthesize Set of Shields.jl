@@ -170,13 +170,13 @@ simulation_model
   ╠═╡ =#
 
 # ╔═╡ 8523418d-67e4-4d02-9697-46e274e3e61e
-function make_and_save_barbaric_shield(samples_per_axis, granularity, save_path)
+function make_and_save_barbaric_shield(m::OPMechanics, samples_per_axis, granularity, save_path)
 	simulation_model′ = SimulationModel(simulation_function, randomness_space, samples_per_axis)
 	
 	# Prerequesites for synthesizing shield
 	R̂ = get_barbaric_reachability_function(simulation_model′)
 	
-	grid = get_op_grid(granularity)
+	grid = get_op_grid(m, granularity)
 	
 	# Mainmatter
 	_, seconds_taken, bytes_used, gctime, gcstats = @timed begin
@@ -220,7 +220,7 @@ test_dir = mktempdir(prefix="jl_synthesis_")
 # ╔═╡ 451aa409-aff6-4104-8108-44600971fad0
 # ╠═╡ skip_as_script = true
 #=╠═╡
-barbaric_shield = make_and_save_barbaric_shield(samples_per_axis, granularity, test_dir)
+barbaric_shield = make_and_save_barbaric_shield(m, samples_per_axis, granularity, test_dir)
   ╠═╡ =#
 
 # ╔═╡ 6cd2dced-fab7-4ef0-a72c-8cb58d773935
@@ -276,7 +276,7 @@ function estimate_times(samples_per_axiss, Gs)
 end
 
 # ╔═╡ 84351342-3c6a-491a-bde3-ef9a90b7ef14
-function make_and_save_barbaric_shields(samples_per_axiss, Gs, save_path)
+function make_and_save_barbaric_shields(m::OPMechanics, samples_per_axiss, Gs, save_path)
 	if !isdir(save_path)
 		throw(ArgumentError("Not a directory: $save_path"))
 	end
@@ -290,7 +290,7 @@ function make_and_save_barbaric_shields(samples_per_axiss, Gs, save_path)
 	results = []
 	for samples_per_axis in samples_per_axiss
 		for G in Gs
-			result = make_and_save_barbaric_shield(samples_per_axis, G, save_path)
+			result = make_and_save_barbaric_shield(m, samples_per_axis, G, save_path)
 			push!(results, result)
 			
 			progress_update("Shield $(length(results)) done. Valid:$(result.valid). Saved as: $(result.saved_as)")
