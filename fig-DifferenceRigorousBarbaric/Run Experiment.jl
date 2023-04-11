@@ -70,7 +70,7 @@ diffcolors = args["color-mode"] == "distinctive" ? [
 
 function error_on_missing(file::AbstractString)
     if !isfile(file)
-        error("Could not find file $file")
+        error("Could not find file $file. This experiment is dependent on data from tab-BBSynthesis.")
     end
 end
 
