@@ -186,7 +186,11 @@ export_figure(results_dir, "CCShieldingDeaths", average_deaths)
 #export_figure(results_dir, "CCPostShieldInterventionsComparison", post_shield_interventions_bar)
 
 if safety_violations !== nothing
-    progress_update("WARNING: Safety violation observed in shielded configuration. This is unexpected.")
+    if !args["test"]
+        progress_update("WARNING: Safety violation observed in shielded configuration. This is unexpected.")
+    else
+        progress_update("Safety violation observed in shielded configuration. This may not be unexpected, since the experiment was run as --test.")
+    end
 else
     progress_update("No deaths observed in pre-shielded or post-shielded models.")
 end

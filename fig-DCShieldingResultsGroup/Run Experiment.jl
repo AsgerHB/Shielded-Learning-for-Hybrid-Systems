@@ -153,7 +153,11 @@ progress_update("Saved $average_deaths_name")
 
 write(results_dir ⨝ "SafetyNotice.md", safety_violations_message)
 if safety_violations !== nothing
-    progress_update("WARNING: Safety violation observed in shielded configuration. This is unexpected.")
+    if !args["test"]
+        progress_update("WARNING: Safety violation observed in shielded configuration. This is unexpected.")
+    else
+        progress_update("Safety violation observed in shielded configuration. This may not be unexpected, since the experiment was run as --test.")
+    end
 else
     progress_update("No deaths observed in pre-shielded or post-shielded models.")
 end
