@@ -1,3 +1,6 @@
+#!/usr/bin/env bash
+
+
 # $@ is bash for "all arguments"
 julia "fig-BarbaricMethodAccuracy/Run Experiment.jl" $@
 julia "fig-BBGranularityCost/Run Experiment.jl" $@
