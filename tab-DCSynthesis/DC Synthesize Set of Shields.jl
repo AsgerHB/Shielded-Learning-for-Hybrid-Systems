@@ -167,7 +167,7 @@ function make_and_save_barbaric_shield(samples_per_axis, granularity, save_path)
 	sample_count = length(possible_outcomes(simulation_model′, 
 			first(shield), off))
 	
-	file_name = "OP $sample_count Samples $(granularity[1]) G.shield"
+	file_name = "DC $sample_count Samples $(granularity[1]) G.shield"
 	file_path = get_unique_file(save_path, file_name)
 	robust_grid_serialization(file_path, shield)
 	
