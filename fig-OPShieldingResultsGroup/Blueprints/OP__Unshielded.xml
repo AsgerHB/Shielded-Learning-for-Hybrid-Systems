@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.6//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_6.dtd'>
+<!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.5//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_5.dtd'>
 <nta>
 	<declaration>// State
 clock l, t;    // minimum switching Latency, cycle Time
@@ -220,7 +220,7 @@ f = 0</label>
 		<declaration>clock x;</declaration>
 		<location id="id30" x="178" y="136">
 			<label kind="invariant" x="144" y="85">x  &lt;= 1 &amp;&amp;
-x' == 5</label>
+x' == 10</label>
 			<label kind="exponentialrate" x="144" y="68">1</label>
 		</location>
 		<init ref="id30"/>
@@ -266,7 +266,8 @@ x' == 5</label>
 			<target ref="id34"/>
 			<label kind="guard" x="-178" y="-42">x &gt;= 1 &amp;&amp;
 v &lt; v_min</label>
-			<label kind="assignment" x="-238" y="0">number_deaths = 1,
+			<label kind="assignment" x="-238" y="0">number_deaths += 1,
+v = 10,
 x = 0</label>
 			<nail x="-93" y="-34"/>
 			<nail x="-93" y="-8"/>
@@ -286,7 +287,8 @@ v &lt;= v_max</label>
 			<target ref="id34"/>
 			<label kind="guard" x="34" y="-42">x &gt;= 1 &amp;&amp; 
 v &gt; v_max</label>
-			<label kind="assignment" x="34" y="0">number_deaths = 1,
+			<label kind="assignment" x="34" y="0">number_deaths += 1,
+v = 10,
 x = 0</label>
 			<nail x="25" y="-34"/>
 			<nail x="26" y="-8"/>
@@ -296,6 +298,11 @@ x = 0</label>
 system Controller, Pump, Machine, Fluctuation, AccumulatedVolume, SafetyMonitor;
 </system>
 	<queries>
+		<option key="--total-runs" value="1000"/>
+		<option key="--max-iterations" value="1"/>
+		<option key="--good-runs" value="1000"/>
+		<option key="--eval-runs" value="1000"/>
+		<option key="--runs-pr-state" value="1000"/>
 		<query>
 			<formula>simulate[&lt;=60] {c + f}</formula>
 			<comment/>
@@ -314,14 +321,14 @@ system Controller, Pump, Machine, Fluctuation, AccumulatedVolume, SafetyMonitor;
 		</query>
 		<query>
 			<formula/>
-			<comment>Shielded Agent</comment>
+			<comment>Unshielded Agent</comment>
 		</query>
 		<query>
 			<formula/>
 			<comment/>
 		</query>
 		<query>
-			<formula>strategy LowVolume = minE (aov/120) [&lt;=120] {p} -&gt; {t, v, l}: &lt;&gt; elapsed &gt;= 120</formula>
+			<formula>strategy LowVolume = minE (aov + number_deaths*100) [&lt;=120] {p} -&gt; {t, v, l}: &lt;&gt; elapsed &gt;= 120</formula>
 			<comment/>
 		</query>
 		<query>
@@ -329,35 +336,39 @@ system Controller, Pump, Machine, Fluctuation, AccumulatedVolume, SafetyMonitor;
 			<comment/>
 		</query>
 		<query>
-			<formula>Pr[&lt;=120;100000]([] 4.9 &lt; v &amp;&amp; v &lt; 25.1)</formula>
+			<formula>Pr[&lt;=120;1000]([] 4.9 &lt; v &amp;&amp; v &lt; 25.1)</formula>
 			<comment/>
 		</query>
 		<query>
-			<formula>Pr[&lt;=120;100000](&lt;&gt; 4.9 &lt; v &amp;&amp; v &lt; 25.1) under LowVolume</formula>
+			<formula>Pr[&lt;=120;1000]([] 4.9 &lt; v &amp;&amp; v &lt; 25.1) under LowVolume</formula>
 			<comment/>
 		</query>
 		<query>
-			<formula>Pr[&lt;=120;100000](&lt;&gt; 4.9 &lt; v &amp;&amp; v &lt; 25.1) under SmartSwitching</formula>
+			<formula>Pr[&lt;=120;1000](&lt;&gt; 4.9 &lt; v &amp;&amp; v &lt; 25.1) under SmartSwitching</formula>
 			<comment/>
 		</query>
 		<query>
-			<formula>E[&lt;=120;1000] (max:aov/120 + switches/2)</formula>
+			<formula>E[&lt;=120;1000] (max:aov)</formula>
 			<comment/>
 		</query>
 		<query>
-			<formula>E[&lt;=120;1000] (max:aov/120 + switches/2) under LowVolume</formula>
+			<formula>E[&lt;=120;1000] (max:aov) under LowVolume</formula>
 			<comment/>
 		</query>
 		<query>
-			<formula>E[&lt;=120;1000] (max:aov/120) under LowVolume</formula>
+			<formula>E[&lt;=120;1000] (max:aov) under LowVolume</formula>
 			<comment/>
 		</query>
 		<query>
-			<formula>E[&lt;=120;1000] (max:aov/120)</formula>
+			<formula>E[&lt;=120;1000] (max:switches)</formula>
 			<comment/>
 		</query>
 		<query>
-			<formula>E[&lt;=120;1000] (max:aov/120 + switches/2) under SmartSwitching</formula>
+			<formula>E[&lt;=120;1000] (max:switches) under LowVolume</formula>
+			<comment/>
+		</query>
+		<query>
+			<formula>E[&lt;=120;1000] (max:switches) under SmartSwitching</formula>
 			<comment/>
 		</query>
 		<query>

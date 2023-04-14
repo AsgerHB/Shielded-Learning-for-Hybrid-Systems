@@ -260,7 +260,7 @@ f = 0</label>
 		<declaration>clock x;</declaration>
 		<location id="id29" x="178" y="136">
 			<label kind="invariant" x="144" y="85">x  &lt;= 1 &amp;&amp;
-x' == 5</label>
+x' == 10</label>
 			<label kind="exponentialrate" x="144" y="68">1</label>
 		</location>
 		<init ref="id29"/>
@@ -306,7 +306,8 @@ x' == 5</label>
 			<target ref="id33"/>
 			<label kind="guard" x="-178" y="-42">x &gt;= 1 &amp;&amp;
 v &lt; v_min</label>
-			<label kind="assignment" x="-238" y="0">number_deaths = 1,
+			<label kind="assignment" x="-238" y="0">number_deaths += 1,
+v = 10,
 x = 0</label>
 			<nail x="-93" y="-34"/>
 			<nail x="-93" y="-8"/>
@@ -326,7 +327,8 @@ v &lt;= v_max</label>
 			<target ref="id33"/>
 			<label kind="guard" x="34" y="-42">x &gt;= 1 &amp;&amp; 
 v &gt; v_max</label>
-			<label kind="assignment" x="34" y="0">number_deaths = 1,
+			<label kind="assignment" x="34" y="0">number_deaths += 1,
+v = 10,
 x = 0</label>
 			<nail x="25" y="-34"/>
 			<nail x="26" y="-8"/>
@@ -354,14 +356,14 @@ system Controller, Pump, Machine, Fluctuation, AccumulatedVolume, SafetyMonitor;
 		</query>
 		<query>
 			<formula/>
-			<comment>Shielded Agent</comment>
+			<comment>Layabout</comment>
 		</query>
 		<query>
 			<formula/>
 			<comment/>
 		</query>
 		<query>
-			<formula>strategy LowVolume = minE (aov/120) [&lt;=120] {p} -&gt; {t, v, l}: &lt;&gt; elapsed &gt;= 120</formula>
+			<formula>strategy LowVolume = minE (aov) [&lt;=120] {p} -&gt; {t, v, l}: &lt;&gt; elapsed &gt;= 120</formula>
 			<comment/>
 		</query>
 		<query>
@@ -393,7 +395,7 @@ system Controller, Pump, Machine, Fluctuation, AccumulatedVolume, SafetyMonitor;
 			<comment/>
 		</query>
 		<query>
-			<formula>E[&lt;=120;1000] (max:aov/120)</formula>
+			<formula>E[&lt;=120;1000] (max:number_deaths &gt; 0)</formula>
 			<comment/>
 		</query>
 		<query>

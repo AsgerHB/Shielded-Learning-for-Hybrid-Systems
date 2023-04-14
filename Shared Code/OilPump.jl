@@ -147,14 +147,25 @@ function simulate_point(mechanics::OPMechanics,
 		l′ = mechanics.latency
 	end
 	
+	# fluctuation changes twice as often as the decision-period, 
+	# so we compute the decision period in a fist and second half
+	while t′ < t + mechanics.time_step/2
+		time_step = min(t + mechanics.time_step/2 - t′, next_rate_change(t′) - t′)
+		v′ = v′ - consumption_rate(t′)*time_step 
+		if consumption_rate(t′) > 0
+			v′ = v′ + random_outcomes[1] # Fluctuation 1
+		end
+		t′ += time_step
+	end
 	while t′ < t + mechanics.time_step
 		time_step = min(t + mechanics.time_step - t′, next_rate_change(t′) - t′)
 		v′ = v′ - consumption_rate(t′)*time_step 
 		if consumption_rate(t′) > 0
-			v′ = v′ + random_outcomes[1]
+			v′ = v′ + random_outcomes[2] # Fluctuation 2
 		end
 		t′ += time_step
 	end
+	
 	t′ = t′%20
 	
 	l′ = round(l′ - mechanics.time_step, digits=10) # Floats, amirite?
@@ -167,7 +178,12 @@ end
 
 # ╔═╡ 5ed3810f-dedd-4844-a491-3a0ad3547b15
 function simulate_point(mechanics::OPMechanics, state, action::PumpStatus)
-	random_outcomes = rand(-mechanics.fluctuation:0.001:mechanics.fluctuation)
+	
+	random_outcomes = [
+		rand(-mechanics.fluctuation:0.001:mechanics.fluctuation),
+		rand(-mechanics.fluctuation:0.001:mechanics.fluctuation)
+	]
+	
 	simulate_point(mechanics::OPMechanics, state, action::PumpStatus, random_outcomes)
 end
 

@@ -15,7 +15,7 @@ function get_op_grid(m::OPMechanics, granularity)
 	grid
 end
 
-get_randomness_space(m::OPMechanics) = Bounds((-m.fluctuation,), (m.fluctuation,))
+get_randomness_space(m::OPMechanics) = Bounds((-m.fluctuation, -m.fluctuation,), (m.fluctuation, m.fluctuation,))
 
 # Values v and l are unbounded, but we'd like to clamp them to roughly the bounds of the shield.
 function clamp_state(grid::Grid, state)
