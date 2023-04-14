@@ -37,7 +37,7 @@ function get_shield(possible_shield_file, working_dir; test)
         samples_per_axis = [1, 1, 1, 1] # This won't be a safe shield
     else
         grid = get_op_grid(m, 0.1)
-        samples_per_axis = [2, 2, 1, 2]
+        samples_per_axis = [4, 4, 1, 4]
     end
 
     simulation_model = SimulationModel(get_simulation_function(m), get_randomness_space(m), samples_per_axis)
