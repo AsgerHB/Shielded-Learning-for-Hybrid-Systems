@@ -262,7 +262,9 @@ dist'==fabs(x2-x2ref)</label>
 			<target ref="id24"/>
 			<label kind="guard" x="-671" y="-93">x2 &gt; 15.5 &amp;&amp;
 c &gt;= 1</label>
-			<label kind="assignment" x="-671" y="-51">number_deaths = 1,
+			<label kind="assignment" x="-671" y="-51">number_deaths += 1,
+x1 = 0.35,
+x2 = 15.0,
 c = 0</label>
 			<nail x="-518" y="-34"/>
 			<nail x="-518" y="-76"/>
@@ -270,9 +272,11 @@ c = 0</label>
 		<transition id="id27" controllable="false">
 			<source ref="id24"/>
 			<target ref="id24"/>
-			<label kind="guard" x="-510" y="-161">x2 &lt; 14.5 &amp;&amp; 
+			<label kind="guard" x="-510" y="-204">x2 &lt; 14.5 &amp;&amp; 
 c &gt;= 1</label>
-			<label kind="assignment" x="-510" y="-119">number_deaths = 1,
+			<label kind="assignment" x="-510" y="-161">number_deaths += 1,
+x1 = 0.35,
+x2 = 15.0,
 c = 0</label>
 			<nail x="-416" y="-76"/>
 			<nail x="-493" y="-76"/>
@@ -282,7 +286,9 @@ c = 0</label>
 			<target ref="id24"/>
 			<label kind="guard" x="-391" y="-93">x1 &gt; 4 &amp;&amp;
 c &gt;= 1</label>
-			<label kind="assignment" x="-390" y="-51">number_deaths = 1,
+			<label kind="assignment" x="-390" y="-51">number_deaths += 1,
+x1 = 0.35,
+x2 = 15.0,
 c = 0</label>
 			<nail x="-399" y="-34"/>
 			<nail x="-399" y="-76"/>
