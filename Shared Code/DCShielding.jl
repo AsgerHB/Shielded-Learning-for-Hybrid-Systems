@@ -24,7 +24,7 @@ end
 get_randomness_space(m::DCMechanics) = Bounds((-m.R_fluctuation,), (m.R_fluctuation,))
 
 # Values v and l are unbounded, but we'd like to clamp them to roughly the bounds of the shield.
-function clamp_state(grid::Grid, state)
+function clamp_state(grid::Grid, state::Tuple{Float64, Float64, Float64})
 	x1, x2, R = state
 	x1 = clamp(x1, grid.bounds.lower[1], grid.bounds.upper[1] - 0.1*grid.granularity[1])
 	x2 = clamp(x2, grid.bounds.lower[2], grid.bounds.upper[2] - 0.1*grid.granularity[2])
@@ -32,7 +32,7 @@ function clamp_state(grid::Grid, state)
 	x1, x2, R
 end
 
-function clamp_state(m::DCMechanics, state)
+function clamp_state(m::DCMechanics, state::Tuple{Float64, Float64, Float64})
 	ϵ = 0.0001
 	x1, x2, R = state
 	x1 = clamp(x1, 0, m.x1_max + ϵ)

@@ -61,14 +61,14 @@ md"""
 # ╔═╡ ebd20f9c-a927-4a50-98e4-2aec1f2c8e1b
 # Wrapping all the constants which define the system into a neat little ball.
 struct OPMechanics
-	v_min
-	v_max
-	period
-	time_step
-	inflow
-	fluctuation
-	imprecision
-	latency
+	v_min::Float64
+	v_max::Float64
+	period::Float64
+	time_step::Float64
+	inflow::Float64
+	fluctuation::Float64
+	imprecision::Float64
+	latency::Float64
 
 	function OPMechanics(params...)
 		new(params...)

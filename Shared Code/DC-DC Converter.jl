@@ -80,23 +80,23 @@ The state is represented by the tuple $(x_1, x_2, R)$ where
 # ╔═╡ ebd20f9c-a927-4a50-98e4-2aec1f2c8e1b
 # Wrapping all the constants which define the system into a neat little ball.
 struct DCMechanics
-	L 	# Inductor's inductance (µH)
-	RL 	# Inductor's resistance (Ω)
-	Co 	# Capacitor's capacitance (µF)
-	vs 	# Input voltage (V)
-	time_step # Time between actions (ticks; unit depends on time scale)
-	scale # Time scale
-	R_fluctuation # Output consumption R (Ω)  can fluctuate ± this amount each step
-	R_min
-	R_max
+	L::Float64	 	# Inductor's inductance (µH)
+	RL::Float64	 	# Inductor's resistance (Ω)
+	Co::Float64	 	# Capacitor's capacitance (µF)
+	vs::Float64	 	# Input voltage (V)
+	time_step::Float64	 # Time between actions (ticks; unit depends on time scale)
+	scale::Float64	 # Time scale
+	R_fluctuation::Int64	 # Output consumption R (Ω)  can fluctuate ± this amount each step
+	R_min::Int64	
+	R_max::Int64	
 	# Target values:
-	x1_ref
-	x2_ref
+	x1_ref::Float64	
+	x2_ref::Float64	
 	# Safety constraints:
-	x1_min
-	x1_max
-	x2_min
-	x2_max
+	x1_min::Float64	
+	x1_max::Float64	
+	x2_min::Float64	
+	x2_max::Float64	
 
 	function DCMechanics(params...)
 		new(params...)
@@ -146,7 +146,7 @@ md"""
 
 # ╔═╡ a2a0991c-7485-4bf3-8353-b33d2f4e9688
 function simulate_point(mechanics::DCMechanics, 
-		state, 
+		state::Tuple{Float64, Float64, Float64}, 
 		action::SwitchStatus, 
 		random_outcomes;
 		h=0.1, # h is short for "euler method step size"
