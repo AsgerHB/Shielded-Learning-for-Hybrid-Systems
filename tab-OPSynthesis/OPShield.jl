@@ -256,16 +256,16 @@ md"""
 	This cell affects multiple other cells across the notebook. Drag it around to make interaction easier.
 
 `t =` 
-$(@bind t NumberField(0:granularity[1]:20-granularity[1]))
+$(@bind t NumberField(0:shield.granularity[1]:20-shield.granularity[1]))
 
 `v =` 
-$(@bind v NumberField(m.v_min:granularity[2]:m.v_max))
+$(@bind v NumberField(m.v_min:shield.granularity[2]:m.v_max))
 
 `p =`
 $(@bind p Select([Int(a) for a in instances(PumpStatus)]))
 
 `l =`
-$(@bind l NumberField(grid.bounds.lower[4]:granularity[4]:grid.bounds.upper[4]-granularity[4]))
+$(@bind l NumberField(shield.bounds.lower[4]:4:shield.bounds.upper[4]-4))
 
 `action =` 
 $(@bind action Select(instances(PumpStatus) |> collect))

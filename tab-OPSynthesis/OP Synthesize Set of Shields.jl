@@ -303,6 +303,12 @@ function make_and_save_barbaric_shields(m::OPMechanics, samples_per_axiss, Gs, s
 	return results
 end
 
+# ╔═╡ 451aa409-aff6-4104-8108-44600971fad0
+# ╠═╡ skip_as_script = true
+#=╠═╡
+barbaric_shield = make_and_save_barbaric_shields(m, [samples_per_axis], [granularity], test_dir)
+  ╠═╡ =#
+
 # ╔═╡ Cell order:
 # ╟─96aad91c-38c6-11ed-2211-bd576258e89c
 # ╠═fdbdf588-101d-4c12-940a-55072186ade6

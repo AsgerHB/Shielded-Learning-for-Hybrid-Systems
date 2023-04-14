@@ -37,16 +37,16 @@ end
 md"""
 # Shielding the DC-DC Converter
 
-From the unpublished paper **Proving and Improving Model Predictive Control of DC-DC Boost Converters.** 
+Based on [Direct Voltage Control of DC–DC Boost Converters Using Enumeration-Based Model Predictive Control](https://www.semanticscholar.org/paper/Direct-Voltage-Control-of-DC%E2%80%93DC-Boost-Converters-Karamanakos-Geyer/df2d695bb5eb7a856be4a624510135a2c7f10233). 
 
-It is similar to, but not quite the same as  [Direct Voltage Control of DC–DC Boost Converters Using Enumeration-Based Model Predictive Control](https://www.semanticscholar.org/paper/Direct-Voltage-Control-of-DC%E2%80%93DC-Boost-Converters-Karamanakos-Geyer/df2d695bb5eb7a856be4a624510135a2c7f10233). 
 
-So it turns out there is no neat trick for transforming DC from one voltage to another, unlike AC where you just need spools with different numbers of windings. I think this figure from the latter paper still describes the basic setup. 
+See [Wikipedia on Boost Converters](https://en.wikipedia.org/wiki/Boost_converter) for an overview.
+So it turns out there is no neat trick for transforming DC from one voltage to another, unlike AC where you just need spools with different numbers of windings. This figure from the paper describes the basic setup. 
 
 ![a circuit with a single inductor, a single switch, and some other stuff. I'm not an electrician.](https://i.imgur.com/MrvFyR3.png)
 
 The mechanics are the following. 
-The system chan switch between states on and off, denoted by the control variable $\delta(t)$.
+The system can switch between states on and off, denoted by the control variable $\delta(t)$.
 
 
  $R_L, L$ and $C_o$ are constants derived from the physical system. So is $v_s$, the input voltage. I'm pulling those from the UPPAAL model associated with the paper. $R$ is a variable load on the system, bounded between 60 and 80. In the model it can only change by 10 each tick.
@@ -154,6 +154,9 @@ if make_shield_button > 0
 		get_transitions(reachability_function, SwitchStatus, grid)
 end
 
+# ╔═╡ 6688e765-9861-4232-b2b9-486dbf47d50f
+sum(length(i) for i in reachability_function_precomputed[on])
+
 # ╔═╡ 084c26b7-2786-4aea-af07-43e6adee06cf
 @bind max_steps NumberField(0:1000, default=10)
 
@@ -230,11 +233,11 @@ $(@bind action Select(instances(SwitchStatus) |> collect))
 # ╔═╡ 8751340a-f41a-46fa-8f6d-cc9ca132e260
 partition = box(something(shield, grid), (x1, x2, R))
 
-# ╔═╡ ad6bc72c-f9f2-41a7-958b-a4be73a018d6
-is_safe(Bounds(partition), m)
-
 # ╔═╡ 5d35a493-0195-46f7-bdf6-013fde056a1e
 sample_count = (length(SupportingPoints(samples_per_axis, partition)))
+
+# ╔═╡ ad6bc72c-f9f2-41a7-958b-a4be73a018d6
+is_safe(Bounds(partition), m)
 
 # ╔═╡ c430653d-cb79-4419-9da8-3bc63ed80d87
 get_value(partition)
@@ -278,6 +281,19 @@ let
 	plot!()
 end
 
+# ╔═╡ 6dffef55-255f-4217-a5b5-07a52f22071f
+begin
+	# For the paper
+	draw(something(shield, grid), [:, :, box(shield, (x1, x2, R)).indices[3]],
+		size=(300, 180),
+		legend=:topright, 
+		colors=dcshieldcolors,
+		#show_grid=true,
+		color_labels=dcshieldlabels;
+		xlabel="Current", ylabel="Voltage")
+	plot!([], line=nothing, label="R=$R")
+end
+
 # ╔═╡ 5d8cd954-3605-431a-bf85-1a03fa82497d
 
 
@@ -300,19 +316,27 @@ md"""
 """
 
 # ╔═╡ dae2fc1d-38d0-48e1-bddc-3b490648648b
+# ╠═╡ disabled = true
+#=╠═╡
 # Probability that the random agents selects the action "off" at any given time
 @bind off_chance NumberField(0:0.01:1, default=0.3)
+  ╠═╡ =#
 
 # ╔═╡ 4f01a075-b44b-467c-9f87-55df435b7bdd
+#=╠═╡
 random_agent(_...) = sample([on, off], [1 - off_chance, off_chance] |> Weights)
+  ╠═╡ =#
 
 # ╔═╡ a57c6670-6d88-4119-b5b1-7509a8806dae
 shielded(something(shield, grid), (_...) -> action)((x1, x2, R))
 
 # ╔═╡ 1b447b3e-0565-4dc5-b679-5102c946dec2
+#=╠═╡
 shielded_random_agent = shielded(shield, random_agent)
+  ╠═╡ =#
 
 # ╔═╡ fdfa1b59-217e-4504-9d4f-2ad44c39cfd8
+#=╠═╡
 let
 	draw(shield, [:, :, 2, 1],
 		colorbar=:right, 
@@ -329,11 +353,10 @@ let
 	end
 	plot!(xlabel="x1", ylabel="x2")
 end
-
-# ╔═╡ 811efa40-bf3b-4597-b7dd-72862e63b8c9
-initial_state
+  ╠═╡ =#
 
 # ╔═╡ aeba4953-dee5-4810-a3de-0fc191711e16
+#=╠═╡
 begin
 	plot()
 	for i in 1:1
@@ -355,11 +378,15 @@ begin
 	hline!([m.x2_min, m.x2_max], color=colors.WET_ASPHALT, label="safety constraints")
 	plot!(xlabel="t (µs)", legend=:outerright)
 end
+  ╠═╡ =#
 
 # ╔═╡ d77f23be-3a54-4c48-ab6d-b1c31adc3e25
+#=╠═╡
 unsafe, total, unsafe_trace = count_unsafe_traces(m, shielded_random_agent, run_duration=120, runs=1000)
+  ╠═╡ =#
 
 # ╔═╡ 150d8707-e8ef-4476-9378-9dd1c63036bf
+#=╠═╡
 if unsafe > 0
 Markdown.parse("""
 !!! danger "Shield is Unsafe"
@@ -371,19 +398,27 @@ Markdown.parse("""
     There were no safety violations during the $total runs.
 """)
 end
+  ╠═╡ =#
 
 # ╔═╡ ac138da0-fd64-4e35-ab26-e5803fa2d9b5
+#=╠═╡
 cost(m, shielded_random_agent)
+  ╠═╡ =#
 
 # ╔═╡ e8d8db08-50d9-4cca-8cbe-aac6ea0132e3
+#=╠═╡
 cost(m, random_agent)
+  ╠═╡ =#
 
 # ╔═╡ e5a18013-48a1-4329-b238-65a606a82c9b
+#=╠═╡
 if unsafe_trace !== nothing
 	@bind state_index NumberField(1:length(unsafe_trace.actions), default=2)
 end
+  ╠═╡ =#
 
 # ╔═╡ f0a96c74-c73b-4763-992e-73d4aa542976
+#=╠═╡
 if unsafe_trace != nothing let
 
 	(;x1s, x2s, Rs, actions) = unsafe_trace
@@ -415,13 +450,16 @@ if unsafe_trace != nothing let
 		marker=(colors.EMERALD, 5, :+),
 		msw=4)
 end end
+  ╠═╡ =#
 
 # ╔═╡ 4af0b349-5894-4da5-8c3b-9fbc466d94f5
+#=╠═╡
 if unsafe_trace != nothing let 
 	(;x1s, x2s, Rs, actions) = unsafe_trace
 	
 	shielded_random_agent((x1s[state_index], x2s[state_index], Rs[state_index])),  actions[state_index - 1]
 end end
+  ╠═╡ =#
 
 # ╔═╡ 16598016-eb21-43da-a45b-bd09692125ca
 call(() -> begin
@@ -458,11 +496,10 @@ end
 # ╠═5ae3173f-6abb-4f38-94f8-90300c93d0e9
 # ╟─35fbdec7-b673-40a9-8e49-2e19c596b71b
 # ╠═67d83ab6-8d99-4067-aafc-dee1026eb1dc
-# ╠═1687a47c-c3f6-4518-ac46-e97b240ad323
+# ╟─1687a47c-c3f6-4518-ac46-e97b240ad323
 # ╟─be055e02-7ef6-4a63-8c95-d6c2bfdc799a
 # ╠═3048a6f4-9a4a-488c-becc-6ab39d7894d1
 # ╠═33861602-0e64-4977-9c64-7ae42eb890d4
-# ╠═ad6bc72c-f9f2-41a7-958b-a4be73a018d6
 # ╟─cfe8387f-a127-4e46-88a6-40d9442fe4b1
 # ╠═d2300c36-906c-4351-952a-3a5176338649
 # ╟─ce2ecf63-c2dc-4c6b-9a60-1a934e915ba2
@@ -472,6 +509,7 @@ end
 # ╠═90efd733-ea84-46c4-80a5-556f23dc4192
 # ╟─f81f53ce-d81e-429d-ac80-a3edd2f76eac
 # ╠═8751340a-f41a-46fa-8f6d-cc9ca132e260
+# ╠═ad6bc72c-f9f2-41a7-958b-a4be73a018d6
 # ╠═c430653d-cb79-4419-9da8-3bc63ed80d87
 # ╠═7749a8ca-2f38-41c7-9372-df06ce54b919
 # ╠═c6aec984-3963-41f3-9281-e267d1c8ac78
@@ -485,10 +523,12 @@ end
 # ╟─40116c98-2afb-48d8-a7d6-de03c5bc119c
 # ╠═f65de4dd-438b-43c2-9571-adc3fa03fb09
 # ╠═d57587e2-a9f3-4e10-9679-325f716882e9
+# ╠═6688e765-9861-4232-b2b9-486dbf47d50f
 # ╠═09496aef-95be-43b8-95d1-5cdaa9da50b9
 # ╟─56781a46-51a5-425d-aea8-bcfd4820da88
 # ╠═084c26b7-2786-4aea-af07-43e6adee06cf
 # ╟─fd2b4c23-e373-43e7-9a4f-63203ef2b83b
+# ╠═6dffef55-255f-4217-a5b5-07a52f22071f
 # ╟─1e2dcb19-8e61-45b9-a033-0e28406b1511
 # ╟─d099b12b-9e8e-482f-82ed-a4681a424d2e
 # ╟─bf83ba44-8900-48c8-a172-161337181e41
@@ -503,7 +543,6 @@ end
 # ╠═a57c6670-6d88-4119-b5b1-7509a8806dae
 # ╠═1b447b3e-0565-4dc5-b679-5102c946dec2
 # ╠═fdfa1b59-217e-4504-9d4f-2ad44c39cfd8
-# ╠═811efa40-bf3b-4597-b7dd-72862e63b8c9
 # ╠═aeba4953-dee5-4810-a3de-0fc191711e16
 # ╠═d77f23be-3a54-4c48-ab6d-b1c31adc3e25
 # ╟─150d8707-e8ef-4476-9378-9dd1c63036bf
