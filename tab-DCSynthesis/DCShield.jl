@@ -19,18 +19,26 @@ begin
 	using Pkg
 	Pkg.activate("..")
 	Pkg.develop("GridShielding")
-	using GridShielding
 	
-	include("../Shared Code/DC-DC Converter.jl")
-	include("../Shared Code/DCShielding.jl")
-	include("../Shared Code/FlatUI.jl")
 	using Plots
 	using PlutoLinks
 	using PlutoUI
 	using Unzip
 	using Printf
 	using StatsBase
+	using Logging
+	using LoggingExtras
 	TableOfContents()
+end
+
+# ╔═╡ ebcd3970-71ac-4e1c-99f3-08b379dc828b
+@revise using GridShielding
+
+# ╔═╡ f879cc2e-e97b-437b-b618-d866befc7828
+begin
+	include("../Shared Code/DC-DC Converter.jl")
+	include("../Shared Code/DCShielding.jl")
+	include("../Shared Code/FlatUI.jl")
 end
 
 # ╔═╡ 6f5584c1-ea5e-49ee-afc0-25abde4e295a
@@ -59,6 +67,9 @@ md"""
 ## Preface
 """
 
+# ╔═╡ 32fab5d1-ae88-4436-b8c5-e7b586fa7144
+pretty_debug() = LevelOverrideLogger(Logging.Debug, current_logger())
+
 # ╔═╡ 5ae3173f-6abb-4f38-94f8-90300c93d0e9
 call(f) = f()
 
@@ -82,7 +93,7 @@ grid = get_dc_grid(m, [granularity, granularity, 1.0])
 md"""
 Total partitions: **$(length(grid.array))**
 
-Estimated time to compute reachability: $(1/405657 * length(grid.array)) minute
+Estimated time to compute reachability: $(round(1/405657 * length(grid.array), digits=2)) minutes
 """
 
 # ╔═╡ 33861602-0e64-4977-9c64-7ae42eb890d4
@@ -142,6 +153,11 @@ md"""
 ## Synthesising Safe Strategy
 """
 
+# ╔═╡ a2770323-9817-4723-97c3-77b9ee2ceb11
+md"""
+Worst case memory usage: **$(worst_case_memory_usage(simulation_model, grid))**
+"""
+
 # ╔═╡ 40116c98-2afb-48d8-a7d6-de03c5bc119c
 grid, simulation_model; @bind make_shield_button CounterButton("Make Shield")
 
@@ -150,12 +166,16 @@ reachability_function = get_barbaric_reachability_function(simulation_model)
 
 # ╔═╡ d57587e2-a9f3-4e10-9679-325f716882e9
 if make_shield_button > 0
-	reachability_function_precomputed = 
-		get_transitions(reachability_function, SwitchStatus, grid)
+		with_logger(SimpleLogger(stdout, Logging.Debug)) do
+			reachability_function_precomputed = 
+				get_transitions(reachability_function, SwitchStatus, grid)
+		end
 end
 
 # ╔═╡ 6688e765-9861-4232-b2b9-486dbf47d50f
-sum(length(i) for i in reachability_function_precomputed[on])
+if make_shield_button > 0
+	sum(length(i) for i in reachability_function_precomputed[on]) / 1.074e+9
+end
 
 # ╔═╡ 084c26b7-2786-4aea-af07-43e6adee06cf
 @bind max_steps NumberField(0:1000, default=10)
@@ -164,9 +184,11 @@ sum(length(i) for i in reachability_function_precomputed[on])
 if make_shield_button > 0 && imported_shield === nothing
 
 	## The actual call to make_shield ##
-	
+
 	shield, max_steps_reached = 
-		make_shield(reachability_function_precomputed, SwitchStatus, grid; max_steps)
+		pretty_debug() do 
+				make_shield(reachability_function_precomputed, SwitchStatus, grid; max_steps)
+		end
 	
 elseif imported_shield === nothing
 	shield, max_steps_reached = grid, true
@@ -493,6 +515,9 @@ end
 # ╟─6f5584c1-ea5e-49ee-afc0-25abde4e295a
 # ╟─e4f088b7-b48a-4c6f-aa36-fc9fd4746d9b
 # ╠═bb902940-a858-11ed-2f11-1d6f5af61e4a
+# ╠═ebcd3970-71ac-4e1c-99f3-08b379dc828b
+# ╠═f879cc2e-e97b-437b-b618-d866befc7828
+# ╠═32fab5d1-ae88-4436-b8c5-e7b586fa7144
 # ╠═5ae3173f-6abb-4f38-94f8-90300c93d0e9
 # ╟─35fbdec7-b673-40a9-8e49-2e19c596b71b
 # ╠═67d83ab6-8d99-4067-aafc-dee1026eb1dc
@@ -520,6 +545,7 @@ end
 # ╟─5ff2a592-e30e-43ad-938e-5396f94f713e
 # ╠═f589d4eb-5f83-449b-8271-56fc1b008b83
 # ╟─252ac6f4-ae88-4647-91cc-7f29e0a1a015
+# ╟─a2770323-9817-4723-97c3-77b9ee2ceb11
 # ╟─40116c98-2afb-48d8-a7d6-de03c5bc119c
 # ╠═f65de4dd-438b-43c2-9571-adc3fa03fb09
 # ╠═d57587e2-a9f3-4e10-9679-325f716882e9

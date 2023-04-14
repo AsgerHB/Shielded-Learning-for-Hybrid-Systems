@@ -8,6 +8,8 @@ Pkg.instantiate()
 using ArgParse
 using Glob
 using Dates
+using Logging
+using LoggingExtras
 include("../Shared Code/ExperimentUtilities.jl")
 include("Get libdcshield.jl")
 
@@ -24,27 +26,35 @@ s = ArgParseSettings()
                 Useful for testing if everything is set up."""
         action=:store_true
 
-        "--results-dir"
-            help="""Results will be saved in an appropriately named subdirectory.
-                    Directory will be created if it does not exist."""
-            default=homedir() ⨝ "Results"
+    "--verbose"
+        help="""Set logging level to include Debug."""
+        action=:store_true
 
-        "--shield"
-            help="""Shield file to use for the experiment. 
-                    If no file is provided, a new shield will be synthesised and saved in the results dir."""
-            default=nothing
+    "--results-dir"
+        help="""Results will be saved in an appropriately named subdirectory.
+                Directory will be created if it does not exist."""
+        default=homedir() ⨝ "Results"
 
-        "--uppaal-dir"
-            help="""Root directory of the UPPAAL STRATEGO 10 install."""
-            default=homedir() ⨝ "opt/uppaal-4.1.20-stratego-10-linux64/"
+    "--shield"
+        help="""Shield file to use for the experiment. 
+                If no file is provided, a new shield will be synthesised and saved in the results dir."""
+        default=nothing
 
-        "--skip-experiment"
-            help="""Yea I know. But figures will still be created from <results-dir>/Query Results/Results.csv
-                    If nothing else I need this for testing."""
-            action=:store_true
+    "--uppaal-dir"
+        help="""Root directory of the UPPAAL STRATEGO 10 install."""
+        default=homedir() ⨝ "opt/uppaal-4.1.20-stratego-10-linux64/"
+
+    "--skip-experiment"
+        help="""Yea I know. But figures will still be created from <results-dir>/Query Results/Results.csv
+                If nothing else I need this for testing."""
+        action=:store_true
 end
 
 args = parse_args(s)
+
+if args["verbose"]
+    global_logger(LevelOverrideLogger(Logging.Debug, current_logger()))
+end
 
 results_dir = args["results-dir"]
 results_dir = results_dir ⨝ figure_name

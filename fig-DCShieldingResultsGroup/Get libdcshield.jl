@@ -36,7 +36,7 @@ function get_shield(possible_shield_file, working_dir; test)
         grid = get_dc_grid(m, 0.1)
         samples_per_axis = [2, 2, 1] # This won't be a safe shield
     else
-        grid = get_dc_grid(m, 0.005)
+        grid = get_dc_grid(m, 0.01)
         samples_per_axis = [4, 4, 1]
     end
 
