@@ -30,7 +30,7 @@ function clamp_state(m::OPMechanics, state)
 	t, v, p, l = state
 	v = clamp(v, floor(m.v_min - ϵ), ceil(m.v_max + ϵ))
 	l = clamp(l, -ϵ, m.latency)
-	t, v, p, l
+	return t, v, p, l
 end
 
 function get_simulation_function(m::OPMechanics)

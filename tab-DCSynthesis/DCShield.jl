@@ -157,7 +157,7 @@ md"""
 
 # ╔═╡ a2770323-9817-4723-97c3-77b9ee2ceb11
 md"""
-Worst case memory usage: **$(worst_case_memory_usage(simulation_model, grid))**
+Amount of memory it *ought* to use: **$(worst_case_memory_usage(simulation_model, grid))**
 """
 
 # ╔═╡ 40116c98-2afb-48d8-a7d6-de03c5bc119c

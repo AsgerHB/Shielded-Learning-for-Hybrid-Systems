@@ -320,6 +320,9 @@ let
 	plot!()
 end
 
+# ╔═╡ b7d70793-92b5-4812-a6dd-7302ee9e6ae4
+shield_is_valid(shield)
+
 # ╔═╡ f6bab622-4b1d-41ec-ae54-61915fca3b2c
 reachability_function′(partition, a) = begin
 	result = reachability_function(partition, a)
@@ -527,7 +530,7 @@ end
 # ╟─d099b12b-9e8e-482f-82ed-a4681a424d2e
 # ╠═bf83ba44-8900-48c8-a172-161337181e41
 # ╠═fd2b4c23-e373-43e7-9a4f-63203ef2b83b
-# ╟─7692cddf-6b37-4be2-847f-afb6d34e44ab
+# ╠═b7d70793-92b5-4812-a6dd-7302ee9e6ae4
 # ╠═f6bab622-4b1d-41ec-ae54-61915fca3b2c
 # ╠═7358338f-47d9-4cb1-a868-f89b0162e72d
 # ╠═258ec4cf-4193-4b14-bf4c-53f83eca96ae
