@@ -60,12 +60,12 @@ diffcolors = args["color-mode"] == "distinctive" ? [
     colors.ASBESTOS,    # should not be used. included to prevent overflow
     colors.ORANGE,      # should not be used. included to prevent overflow
 ] : args["color-mode"] == "transparent" ? [
-	colorant"#ffc8bf", # {hit, nohit} ~ {}
-	colorant"#dfbdbf", # {hit} ~ {}
+	colorant"#ffe0db", # {hit, nohit} ~ {}
+	colorant"#d7f295", # {hit} ~ {}
 	colorant"#cff2fe", # {hit, nohit} ~ {hit}
 	colorant"#cff2fe", # should not be used. included to prevent overflow
-	colorant"#dfbdbf", # should not be used. included to prevent overflow
-	colorant"#ffc8bf", # should not be used. included to prevent overflow
+	colorant"#d7f295", # should not be used. included to prevent overflow
+	colorant"#ffe0db", # should not be used. included to prevent overflow
 ] : error("--color-mode should be one of {distinctive, transparent}")
 
 function error_on_missing(file::AbstractString)
