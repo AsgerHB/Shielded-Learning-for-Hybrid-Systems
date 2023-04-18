@@ -248,6 +248,12 @@ begin
 	ylabel = state_variables[ylabel];
 end
 
+# ╔═╡ 19e5297d-c095-4e72-a2b1-e63d682d1587
+
+
+# ╔═╡ 3131d5d5-34ef-4440-ae19-198b6ae8d54a
+grid, simulation_model; @bind make_animation_button CounterButton("Make Animation")
+
 # ╔═╡ 7692cddf-6b37-4be2-847f-afb6d34e44ab
 md"""
 ### Select State to preview
@@ -265,7 +271,7 @@ $(@bind v NumberField(m.v_min:shield.granularity[2]:m.v_max))
 $(@bind p Select([Int(a) for a in instances(PumpStatus)]))
 
 `l =`
-$(@bind l NumberField(shield.bounds.lower[4]:4:shield.bounds.upper[4]-4))
+$(@bind l NumberField(-shield.granularity[4]:shield.granularity[4]:shield.bounds.upper[4]-shield.granularity[4]))
 
 `action =` 
 $(@bind action Select(instances(PumpStatus) |> collect))
@@ -295,6 +301,24 @@ slice = let
 	slice
 end
 
+# ╔═╡ 5d0400fb-2ad5-4d07-9115-49024913c3fa
+if make_animation_button > 0
+	shield2 = shield
+	a = @animate for i in 1:10
+		shield2 = shield_step(reachability_function_precomputed, PumpStatus, shield2)
+		
+		draw(something(shield2, grid), slice,
+			legend=:outerright, 
+			colors=opshieldcolors,
+			color_labels=opshieldlabels;
+			xlabel, ylabel)
+	end
+end
+
+# ╔═╡ 47fdca20-194d-4535-a4a3-25a7509324b5
+make_animation_button > 0 && 
+	gif(a, fps=15)
+
 # ╔═╡ b83a55ee-f2a3-4b0b-8e0a-12dc6caf5075
 possible_outcomes(simulation_model, partition, action)
 
@@ -302,7 +326,7 @@ possible_outcomes(simulation_model, partition, action)
 [Partition(grid, i) |> Bounds 
 	for i in reachability_function(partition, action)]
 
-# ╔═╡ fd2b4c23-e373-43e7-9a4f-63203ef2b83b
+# ╔═╡ caf38611-4ba4-4b10-99aa-d72252a8b60d
 let
 	draw(something(shield, grid), slice,
 		legend=:outerright, 
@@ -342,14 +366,17 @@ md"""
 """
 
 # ╔═╡ dae2fc1d-38d0-48e1-bddc-3b490648648b
-# Probability that the random agents selects the action "off" at any given time
-@bind off_chance NumberField(0:0.01:1, default=0.3)
+md"""
+Set the probability that the random agents selects the action "off" at any given time
+
+`off_chance =` $(@bind off_chance NumberField(0:0.01:1, default=0.3))
+"""
 
 # ╔═╡ 4f01a075-b44b-467c-9f87-55df435b7bdd
 random_agent(_...) = sample([on, off], [1 - off_chance, off_chance] |> Weights)
 
-# ╔═╡ 87d7a2f0-4602-489e-8dba-6cd0f71fdad7
-
+# ╔═╡ 794b75b0-5d14-4509-a293-0b657d6d0600
+grid, simulation_model; @bind check_safety_button CounterButton("Check Safety")
 
 # ╔═╡ a57c6670-6d88-4119-b5b1-7509a8806dae
 shielded(something(shield, grid), (_...) -> action)((t, v, p, l))
@@ -358,7 +385,7 @@ shielded(something(shield, grid), (_...) -> action)((t, v, p, l))
 shielded_random_agent = shielded(shield, random_agent)
 
 # ╔═╡ fdfa1b59-217e-4504-9d4f-2ad44c39cfd8
-let
+if check_safety_button > 0 let
 	draw(shield, [:, :, 2, 1],
 		colorbar=:right, 
 		colors=opshieldcolors,
@@ -373,13 +400,13 @@ let
 			label=nothing)
 	end
 	plot!(xlabel="t", ylabel="v")
-end
+end end
 
 # ╔═╡ dad2155a-562d-4340-afa3-cd6889ba216b
 [1 2]*[1 1; 1 1]
 
 # ╔═╡ aeba4953-dee5-4810-a3de-0fc191711e16
-begin
+if check_safety_button > 0
 	plot()
 	for i in 1:10
 		trace = 
@@ -393,13 +420,16 @@ begin
 	plot!(xlabel="t", ylabel="v", legend=:topleft)
 end
 
-# ╔═╡ f241c723-948e-4ffb-a425-b36f1f9f71f5
-
-
 # ╔═╡ d77f23be-3a54-4c48-ab6d-b1c31adc3e25
-unsafe, total, unsafe_trace = count_unsafe_traces(m, shielded_random_agent, run_duration=120, runs=1000)
+if check_safety_button > 0
+	unsafe, total, unsafe_trace = count_unsafe_traces(m, 
+		shielded_random_agent, 
+		run_duration=120, 
+		runs=1000)
+end
 
 # ╔═╡ 150d8707-e8ef-4476-9378-9dd1c63036bf
+#=╠═╡
 if unsafe > 0
 Markdown.parse("""
 !!! danger "Shield is Unsafe"
@@ -411,17 +441,18 @@ Markdown.parse("""
     There were no safety violations during the $total runs.
 """)
 end
+  ╠═╡ =#
 
 # ╔═╡ ac138da0-fd64-4e35-ab26-e5803fa2d9b5
 cost(m, shielded_random_agent)
 
 # ╔═╡ e5a18013-48a1-4329-b238-65a606a82c9b
-if unsafe_trace !== nothing
+if check_safety_button > 0 && unsafe_trace !== nothing
 	@bind state_index NumberField(1:length(unsafe_trace.actions), default=2)
 end
 
 # ╔═╡ f0a96c74-c73b-4763-992e-73d4aa542976
-if unsafe_trace != nothing let
+if check_safety_button > 0 && unsafe_trace != nothing let
 
 	(;ts, vs, ps, ls, elapsed, actions) = unsafe_trace
 	unsafe_trace′ = [ts, vs, ps, ls, elapsed, actions]
@@ -455,7 +486,7 @@ if unsafe_trace != nothing let
 end end
 
 # ╔═╡ 4af0b349-5894-4da5-8c3b-9fbc466d94f5
-if unsafe_trace != nothing let 
+if check_safety_button > 0 && unsafe_trace != nothing let 
 	(;ts, vs, ps, ls, elapsed, actions) = unsafe_trace
 	
 	shielded_random_agent((ts[state_index], vs[state_index], ps[state_index], ls[state_index])),  actions[state_index - 1]
@@ -529,21 +560,25 @@ end
 # ╟─1e2dcb19-8e61-45b9-a033-0e28406b1511
 # ╟─d099b12b-9e8e-482f-82ed-a4681a424d2e
 # ╠═bf83ba44-8900-48c8-a172-161337181e41
-# ╠═fd2b4c23-e373-43e7-9a4f-63203ef2b83b
+# ╠═19e5297d-c095-4e72-a2b1-e63d682d1587
+# ╟─3131d5d5-34ef-4440-ae19-198b6ae8d54a
+# ╠═5d0400fb-2ad5-4d07-9115-49024913c3fa
+# ╠═47fdca20-194d-4535-a4a3-25a7509324b5
+# ╟─caf38611-4ba4-4b10-99aa-d72252a8b60d
+# ╟─7692cddf-6b37-4be2-847f-afb6d34e44ab
 # ╠═b7d70793-92b5-4812-a6dd-7302ee9e6ae4
 # ╠═f6bab622-4b1d-41ec-ae54-61915fca3b2c
 # ╠═7358338f-47d9-4cb1-a868-f89b0162e72d
 # ╠═258ec4cf-4193-4b14-bf4c-53f83eca96ae
 # ╟─4d169b72-54f8-4325-adec-f53d18e54fae
-# ╠═dae2fc1d-38d0-48e1-bddc-3b490648648b
+# ╟─dae2fc1d-38d0-48e1-bddc-3b490648648b
 # ╠═4f01a075-b44b-467c-9f87-55df435b7bdd
-# ╠═87d7a2f0-4602-489e-8dba-6cd0f71fdad7
+# ╟─794b75b0-5d14-4509-a293-0b657d6d0600
 # ╠═a57c6670-6d88-4119-b5b1-7509a8806dae
 # ╠═1b447b3e-0565-4dc5-b679-5102c946dec2
 # ╟─fdfa1b59-217e-4504-9d4f-2ad44c39cfd8
 # ╠═dad2155a-562d-4340-afa3-cd6889ba216b
-# ╠═aeba4953-dee5-4810-a3de-0fc191711e16
-# ╠═f241c723-948e-4ffb-a425-b36f1f9f71f5
+# ╟─aeba4953-dee5-4810-a3de-0fc191711e16
 # ╠═d77f23be-3a54-4c48-ab6d-b1c31adc3e25
 # ╟─150d8707-e8ef-4476-9378-9dd1c63036bf
 # ╠═ac138da0-fd64-4e35-ab26-e5803fa2d9b5
