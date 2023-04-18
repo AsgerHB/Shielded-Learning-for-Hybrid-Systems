@@ -224,10 +224,10 @@ grouping = call() do
 end;
 
 # ╔═╡ 7904c209-eeea-4243-beb4-0e5a7fd47a56
-medians = 
+means = 
 call(() -> begin	
-	medians = combine(grouping, 
-		:Avg_Cost => median, :Avg_Deaths => median, :Avg_Interventions => median,
+	means = combine(grouping, 
+		:Avg_Cost => mean, :Avg_Deaths => mean, :Avg_Interventions => mean,
 		renamecols=false)
 end)
 
@@ -296,7 +296,7 @@ average_cost = call(() -> begin
 
 	## Pre-shielded ##
 	if pre_shielded
-		df = DataFrame(medians)
+		df = DataFrame(means)
 		filter!(:Experiment => e -> e == "PreShielded", df)
 		sort!(df, :Runs)
 		transform!(df, [:Experiment] => ByRow(e -> proper_experiment_name[e]), renamecols=false)
@@ -313,7 +313,7 @@ average_cost = call(() -> begin
 
 	## Post-shielded ##
 	if post_shielded
-		df = DataFrame(medians)
+		df = DataFrame(means)
 		filter!(:Experiment => e -> e == "PostShielded", df)
 		transform!(df, [:Experiment, :Deterrence] => ByRow(make_label), renamecols=false)
 		rename!(df, :Experiment_Deterrence => :Label)
@@ -332,7 +332,7 @@ average_cost = call(() -> begin
 
 	## No shield ##
 	if no_shield
-		df = DataFrame(medians)
+		df = DataFrame(means)
 		filter!(:Experiment => e -> e == "NoShield", df)
 		transform!(df, [:Experiment, :Deterrence] => ByRow(make_label), renamecols=false)
 		rename!(df, :Experiment_Deterrence => :Label)
@@ -350,7 +350,7 @@ average_cost = call(() -> begin
 	
 	## Layabout ##
 	if layabout
-		layabout_row = filter(:Experiment => ==("Layabout"), medians)
+		layabout_row = filter(:Experiment => ==("Layabout"), means)
 		
 		p1 = @df layabout_row hline!(:Avg_Cost,
 			label="Shielded Lazy Agent",
@@ -378,7 +378,7 @@ end
 
 # ╔═╡ 61bd91fc-6b0f-4fa5-a3dc-ea0f87c06cf1
 average_interventions = call(() -> begin
-	df = DataFrame(medians)
+	df = DataFrame(means)
 	filter!(:Experiment => ==("PostShielded"), df)
 	
 	transform!(df, [:Experiment, :Deterrence] => ByRow(make_label) => :Label)
@@ -398,7 +398,7 @@ end)
 
 # ╔═╡ 009bc318-d3d6-421f-8cf0-2f0e356b3c4e
 average_interventions_no_d0 = call(() -> begin
-	df = DataFrame(medians)
+	df = DataFrame(means)
 	filter!(:Experiment => ==("PostShielded"), df)
 	filter!(:Deterrence => !=("0"), df)
 	
@@ -420,7 +420,7 @@ end)
 # ╔═╡ 439297f0-8945-43c8-9141-e04dac3e94ee
 average_deaths = call(() -> begin
 	
-	df = DataFrame(medians)
+	df = DataFrame(means)
 	filter!(:Experiment => ==("NoShield"), df)
 
 	transform!(df, [:Experiment, :Deterrence] => ByRow(make_label) => :Label)
@@ -470,7 +470,7 @@ Markdown.parse(safety_violations_message)
 
 # ╔═╡ ac54a7f0-2062-4814-9d5b-34801c994afa
 call(() -> begin
-	df = DataFrame(medians)
+	df = DataFrame(means)
 	filter!(:Experiment => ==("PreShielded"), df)
 	#df = transform(df, :Runs => ByRow(r -> "$r runs"), renamecols=false)
 	#sort!(df, :Runs, lt=natural)
