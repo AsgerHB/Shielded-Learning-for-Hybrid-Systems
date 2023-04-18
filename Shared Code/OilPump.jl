@@ -151,18 +151,20 @@ function simulate_point(mechanics::OPMechanics,
 	# so we compute the decision period in a fist and second half
 	while t′ < t + mechanics.time_step/2
 		time_step = min(t + mechanics.time_step/2 - t′, next_rate_change(t′) - t′)
-		v′ = v′ - consumption_rate(t′)*time_step 
+		consumption = consumption_rate(t′)
 		if consumption_rate(t′) > 0
-			v′ = v′ + random_outcomes[1] # Fluctuation 1
+			consumption += random_outcomes[1] # Fluctuation 1
 		end
+		v′ = v′ - consumption*time_step 
 		t′ += time_step
 	end
 	while t′ < t + mechanics.time_step
 		time_step = min(t + mechanics.time_step - t′, next_rate_change(t′) - t′)
-		v′ = v′ - consumption_rate(t′)*time_step 
+		consumption = consumption_rate(t′)
 		if consumption_rate(t′) > 0
-			v′ = v′ + random_outcomes[2] # Fluctuation 2
+			consumption += random_outcomes[2] # Fluctuation 2
 		end
+		v′ = v′ - consumption*time_step 
 		t′ += time_step
 	end
 	
@@ -226,6 +228,16 @@ next_rate_change(t)
 @bind v0 NumberField(mechanics.v_min:0.1:mechanics.v_max)
   ╠═╡ =#
 
+# ╔═╡ ae4052b1-31e9-424a-a144-6df0d17338f8
+#=╠═╡
+@bind p Select([Int(p) for p in instances(PumpStatus)])
+  ╠═╡ =#
+
+# ╔═╡ 7f469b21-2d6c-4e6f-8aa9-939aa743a6a7
+#=╠═╡
+@bind l NumberField(0:0.1:mechanics.latency)
+  ╠═╡ =#
+
 # ╔═╡ a490bc63-a9d9-4261-aca8-0a1f877d09ce
 #=╠═╡
 @bind action Select(instances(PumpStatus) |> collect)
@@ -233,7 +245,17 @@ next_rate_change(t)
 
 # ╔═╡ a214953e-b4d2-482c-aaad-7fc22a6b8feb
 #=╠═╡
-simulate_point(mechanics, (t, v0, Int(off), 0), action)
+simulate_point(mechanics, (t, v0, p, l), action, [-0.1, -0.1])
+  ╠═╡ =#
+
+# ╔═╡ b2decea5-1a22-4711-8534-cc88cbabfb5c
+#=╠═╡
+consumption_rate(t)*mechanics.time_step
+  ╠═╡ =#
+
+# ╔═╡ db311b13-5ae0-4f24-b461-a64d62ea41cd
+#=╠═╡
+mechanics.inflow*mechanics.time_step
   ╠═╡ =#
 
 # ╔═╡ 6c41264e-db32-4a5f-aa82-438a82824681
@@ -1413,8 +1435,12 @@ version = "1.4.1+0"
 # ╠═5ed3810f-dedd-4844-a491-3a0ad3547b15
 # ╠═dead1cb7-09e8-45c5-81dd-8c3bb164741d
 # ╠═d5c6d42a-3471-4005-80ec-9be2163962c9
+# ╠═ae4052b1-31e9-424a-a144-6df0d17338f8
+# ╠═7f469b21-2d6c-4e6f-8aa9-939aa743a6a7
 # ╠═a490bc63-a9d9-4261-aca8-0a1f877d09ce
 # ╠═a214953e-b4d2-482c-aaad-7fc22a6b8feb
+# ╠═b2decea5-1a22-4711-8534-cc88cbabfb5c
+# ╠═db311b13-5ae0-4f24-b461-a64d62ea41cd
 # ╟─6c41264e-db32-4a5f-aa82-438a82824681
 # ╠═126e00be-7899-405a-bd6e-731c76215726
 # ╠═77907f6b-4986-4699-838b-b849363416d2
