@@ -393,7 +393,7 @@ md"""
 # ╠═╡ skip_as_script = true
 #=╠═╡
 # Values of `samples_per_axis` to test for
-spa_values = [5:16;]
+spa_values = [2:16;]
   ╠═╡ =#
 
 # ╔═╡ f72b8dba-1b9a-4b0b-802a-03c5a299e204
@@ -420,7 +420,7 @@ figure_size=(300, 150)
 function plot_accuracies_spa(df, plotargs...)
 	labels = ["γ=$G" for G in transpose(unique(df[!, :G]))]
 	xticks = df[!, :samples_per_axis] |> unique
-	xticks = xticks[2:2:end]
+	xticks = xticks[1:2:end]
 	df = transform(df, :G => ByRow(string) => :G)
 
 	@df df plot(:samples_per_axis, :accuracy,

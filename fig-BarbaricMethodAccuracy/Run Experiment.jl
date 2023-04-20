@@ -65,7 +65,7 @@ else
     samples_per_square = 100
 
     # To use with the spa comparison
-    granularities1 = [0.1, 0.01]
+    granularities1 = [1, 0.01]
     samples_per_axiss1 = [2:16;] # Values of `samples_per_axis` to test for
     
     # To use with the granularities comparison
