@@ -337,11 +337,68 @@ let
 	if show_tv
 		draw_barbaric_transition!(simulation_model, partition, action, slice)
 	end
-	
-	#= plot!(t -> consumption_rate(abs(t%m.period)), 
+	#==
+	plot!([], 
 		line=(3, colors.PETER_RIVER),
-		label="consumption ") =#
+		label="consumption ")
+	 plot!(twinx(), t -> consumption_rate(abs(t%m.period)), 
+		line=(3, colors.PETER_RIVER),
+		ylim=(0,3),
+		label=nothing) 
+	==#
 	plot!()
+end
+
+# ╔═╡ 0a0285ca-a922-467f-ae91-b7a96ee43588
+let
+	# For the paper
+	slice = deepcopy(slice)
+	slice[3] = 1 # Pump status off
+	draw(something(shield, grid), slice,
+		legend=nothing, 
+		colors=opshieldcolors,
+		color_labels=opshieldlabels;
+		xlabel="t (s)", ylabel="v (L)")
+	
+	if show_tv
+		draw_barbaric_transition!(simulation_model, partition, action, slice)
+	end
+	plot!([], 
+		line=(3, colors.ASBESTOS),
+		label="consumption ")
+	
+	#==# plot!(twinx(), t -> consumption_rate(abs(t%m.period)), 
+		line=(3, colors.ASBESTOS),
+		ylim=(0,3),
+		ylabel="c (L/s)",
+		label=nothing) #==#
+	plot!(size=(400, 240))
+end
+
+# ╔═╡ cacf2987-28ef-42a2-b6ff-26e512b84856
+let
+	# For the paper
+	slice = deepcopy(slice)
+	slice[3] = 2 # Pump status on
+	draw(something(shield, grid), slice,
+		legend=:topleft, 
+		colors=opshieldcolors,
+		color_labels=opshieldlabels;
+		xlabel="t (s)", ylabel="v (L)")
+	
+	if show_tv
+		draw_barbaric_transition!(simulation_model, partition, action, slice)
+	end
+	plot!([], 
+		line=(3, colors.ASBESTOS),
+		label="consumption ")
+	
+	#==# plot!(twinx(), t -> consumption_rate(abs(t%m.period)), 
+		line=(3, colors.ASBESTOS),
+		ylim=(0,3),
+		ylabel="c (L/s)",
+		label=nothing) #==#
+	plot!(size=(400, 240))
 end
 
 # ╔═╡ b7d70793-92b5-4812-a6dd-7302ee9e6ae4
@@ -429,7 +486,6 @@ if check_safety_button > 0
 end
 
 # ╔═╡ 150d8707-e8ef-4476-9378-9dd1c63036bf
-#=╠═╡
 if unsafe > 0
 Markdown.parse("""
 !!! danger "Shield is Unsafe"
@@ -441,7 +497,6 @@ Markdown.parse("""
     There were no safety violations during the $total runs.
 """)
 end
-  ╠═╡ =#
 
 # ╔═╡ ac138da0-fd64-4e35-ab26-e5803fa2d9b5
 cost(m, shielded_random_agent)
@@ -565,6 +620,8 @@ end
 # ╠═5d0400fb-2ad5-4d07-9115-49024913c3fa
 # ╠═47fdca20-194d-4535-a4a3-25a7509324b5
 # ╟─caf38611-4ba4-4b10-99aa-d72252a8b60d
+# ╟─0a0285ca-a922-467f-ae91-b7a96ee43588
+# ╟─cacf2987-28ef-42a2-b6ff-26e512b84856
 # ╟─7692cddf-6b37-4be2-847f-afb6d34e44ab
 # ╠═b7d70793-92b5-4812-a6dd-7302ee9e6ae4
 # ╠═f6bab622-4b1d-41ec-ae54-61915fca3b2c
