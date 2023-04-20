@@ -62,7 +62,7 @@ include("DC Statistical Checking of Shield.jl")
 if !test
     # HARDCODED: Parameters to generate shield. All variations will be used.
     samples_per_axiss = [1, 2, 3, 4]
-    Gs = [0.1, 0.05, 0.01]
+    Gs = [0.1, 0.05, 0.02, 0.01]
 
     # HARDCODED: Safety checking parameters.
     runs_per_shield = 1E6
