@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.19
+# v0.19.22
 
 using Markdown
 using InteractiveUtils
@@ -418,7 +418,7 @@ figure_size=(300, 150)
 
 # ╔═╡ 5ef10f10-102e-43a0-99cc-8d333450995d
 function plot_accuracies_spa(df, plotargs...)
-	labels = ["δ=$G" for G in transpose(unique(df[!, :G]))]
+	labels = ["γ=$G" for G in transpose(unique(df[!, :G]))]
 	xticks = df[!, :samples_per_axis] |> unique
 	xticks = xticks[2:2:end]
 	df = transform(df, :G => ByRow(string) => :G)
@@ -490,10 +490,10 @@ function plot_accuracies_granularity(df, plotargs...)
 		xrotation=0,
 		size=figure_size,
 		label=labels,
-		xlabel="δ", 
+		xlabel="γ", 
 		ylabel="Accuracy",
 		legend=:bottomright,
-		margin=0mm
+		#margin=1mm
 		;common_plotargs..., plotargs...)
 	
 	hline!([1], label=nothing, color=colors.ASBESTOS)
