@@ -51,21 +51,14 @@ include("../Shared Code/ExperimentUtilities.jl")
 include("../Shared Code/BBSquares.jl")
 
 diffcolors = args["color-mode"] == "distinctive" ? [
-	colors.SUNFLOWER,   # {hit, nohit} ~ {}
-	colors.PETER_RIVER, # {hit} ~ {}
-	colors.AMETHYST,    # {hit, nohit} ~ {hit}
-	colors.WET_ASPHALT, # {hit, nohit} ~ {hit}
-    colors.EMERALD,     # should not be used. included to prevent overflow
-    colors.WET_ASPHALT, # should not be used. included to prevent overflow
-    colors.ASBESTOS,    # should not be used. included to prevent overflow
-    colors.ORANGE,      # should not be used. included to prevent overflow
-] : args["color-mode"] == "transparent" ? [
-	colorant"#ffe0db", # {hit, nohit} ~ {}
-	colorant"#d7f295", # {hit} ~ {}
-	colorant"#cff2fe", # {hit, nohit} ~ {hit}
-	colorant"#cff2fe", # should not be used. included to prevent overflow
-	colorant"#d7f295", # should not be used. included to prevent overflow
-	colorant"#ffe0db", # should not be used. included to prevent overflow
+	colors.SUNFLOWER,  # {hit, nohit} ~ {}
+	colors.PETER_RIVER,  # {hit} ~ {}
+	colors.AMETHYST, # {hit, nohit} ~ {hit}
+	colors.WET_ASPHALT # {hit, nohit} ~ {hit}
+] :  args["color-mode"] == "transparent" ? [
+	colorant"#717171", # {hit, nohit} ~ {}
+	colorant"#FCF434", # {hit} ~ {}
+	colorant"#ff48ff", # {hit, nohit} ~ {hit}
 ] : error("--color-mode should be one of {distinctive, transparent}")
 
 function error_on_missing(file::AbstractString)

@@ -32,10 +32,10 @@ transitioncolors = trans
 transitionlabels = ["Initial", "Reachable", "Not reachable"]
 
 bbshieldlabels = 	["{hit, nohit}", "{hit}", "{}"]
-bbshieldcolors = 	trans
+bbshieldcolors = 	[enby[2], enby[3], enby[4]]
 
 rwshieldlabels = 	["{fast, slow}", "{fast}", "{}"]
-rwshieldcolors = 	trans
+rwshieldcolors = 	[enby[2], enby[3], enby[4]]
 
 opshieldlabels = ["{}", "{off}", "{on}", "{on, off}"]
 opshieldcolors = [enby[4], enby[3], enby[1], enby[2]]

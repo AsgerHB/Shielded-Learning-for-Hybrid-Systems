@@ -368,7 +368,7 @@ let
 		label="consumption ")
 	
 	#==# plot!(twinx(), t -> consumption_rate(abs(t%m.period)), 
-		line=(3, colors.ASBESTOS),
+		line=(3, colorant"#717171"),
 		ylim=(0,3),
 		ylabel="c (L/s)",
 		label=nothing) #==#
@@ -394,7 +394,7 @@ let
 		label="consumption ")
 	
 	#==# plot!(twinx(), t -> consumption_rate(abs(t%m.period)), 
-		line=(3, colors.ASBESTOS),
+		line=(3, colorant"#717171"),
 		ylim=(0,3),
 		ylabel="c (L/s)",
 		label=nothing) #==#
