@@ -418,26 +418,35 @@ figure_size=(300, 150)
 
 # ╔═╡ 5ef10f10-102e-43a0-99cc-8d333450995d
 function plot_accuracies_spa(df, plotargs...)
-	labels = ["γ=$G" for G in transpose(unique(df[!, :G]))]
 	xticks = df[!, :samples_per_axis] |> unique
 	xticks = xticks[1:2:end]
 	df = transform(df, :G => ByRow(string) => :G)
+	Gs = (unique(df[!, :G]))
+	labels = Dict(G => "γ=$G" for G in Gs)
+	colors′ = [colors.PETER_RIVER, colors.AMETHYST, colors.BELIZE_HOLE]
 
-	@df df plot(:samples_per_axis, :accuracy,
+	plot(
 		xflip=false,
 		xticks=xticks,
-		group=:G,
-		marker=:circle, 
-		markerstrokewidth=1,
-		color=[colors.PETER_RIVER colors.AMETHYST colors.BELIZE_HOLE],
 		xrotation=0,
 		size=figure_size,
 		label=labels,
-		xlabel="N", 
+		xlabel="n", 
 		ylabel="Accuracy",
 		legend=:bottomright,
 		margin=0mm,
-		;common_plotargs..., plotargs...)
+		;common_plotargs..., plotargs...
+	)
+	for (i, G) in enumerate(Gs)
+		df′ = filter(:G => (G′ -> G′ == G), df)
+		
+		@df df′ plot!(:samples_per_axis, :accuracy,
+			color=colors′[i];
+			label=labels[G],
+			marker=:circle, 
+			markerstrokewidth=1,
+			common_plotargs..., plotargs...)
+	end
 	
 	hline!([1], label=nothing, color=colors.ASBESTOS)
 end
@@ -479,14 +488,13 @@ granularity_result = compute_accuracies(
 
 # ╔═╡ dbbdff6b-71e7-4583-8ad7-f6e49adbfb88
 function plot_accuracies_granularity(df, plotargs...)
-	labels = ["N=$N" for N in transpose(unique(df[!, :samples_per_axis]))]	
 	df = transform(df, :G => ByRow(string) => :G)
+	ns = unique(df[!, :samples_per_axis])
+	labels = Dict(n => "n=$n" for n in ns)
+	colors′ = [colors.EMERALD, colors.TURQUOISE, colors.NEPHRITIS]
 
-	@df df plot(:G, :accuracy,
+	plot(
 		xflip=false,
-		group=:samples_per_axis,
-		marker=:circle, markerstrokewidth=0,
-		color=[colors.EMERALD colors.TURQUOISE colors.NEPHRITIS],
 		xrotation=0,
 		size=figure_size,
 		label=labels,
@@ -495,6 +503,23 @@ function plot_accuracies_granularity(df, plotargs...)
 		legend=:bottomright,
 		#margin=1mm
 		;common_plotargs..., plotargs...)
+
+	for (i, n) in enumerate(ns)
+		df′ = filter(:samples_per_axis => (n′ -> n′ == n), df)
+		
+		@df df′ plot!(:G, :accuracy,
+			xflip=false,
+			marker=:circle, markerstrokewidth=0,
+			xrotation=0,
+			size=figure_size,
+			label=labels[n],
+			color=colors′[i],
+			xlabel="γ", 
+			ylabel="Accuracy",
+			legend=:bottomright,
+			#margin=1mm
+			;common_plotargs..., plotargs...)
+	end
 	
 	hline!([1], label=nothing, color=colors.ASBESTOS)
 end
