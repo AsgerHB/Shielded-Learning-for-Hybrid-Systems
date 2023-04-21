@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.19
+# v0.19.22
 
 using Markdown
 using InteractiveUtils
@@ -26,11 +26,17 @@ begin
 	using StatsPlots
 	using NaturalSort
 	using Printf
+	using HypothesisTests
 	include("../Shared Code/ExperimentUtilities.jl")
 	include("../Shared Code/BBSquares.jl")
 	include("../Shared Code/Ball.jl")
 	TableOfContents()
 end
+
+# ╔═╡ 79a40ace-6535-4310-90b0-5b7374ee26b7
+md"""
+# BBSynthesis -- Table from CSVs
+"""
 
 # ╔═╡ a6dc63b1-b05b-4011-8da6-91812f0dc470
 begin
@@ -158,50 +164,12 @@ safety_report
 # ╠═╡ skip_as_script = true
 #=╠═╡
 md"""
-### Inspect unsafe Trace
+## Inspect unsafe Trace
 
 Select a `rawdata` File
 
 `rawresults_file` = $(@bind rawresults_file PlutoUI.FilePicker([MIME("application/octet-stream")]))
 """
-  ╠═╡ =#
-
-# ╔═╡ 60d7aeb7-42e6-4b72-ba91-1a33101f07fe
-#=╠═╡
-if rawresults_file == nothing
-	rawresults = nothing
-	md"""
-!!! warning "No file selected"
-	Select a file to see the trace.
-	"""
-else
-	rawresults = deserialize(rawresults_file["data"] |> IOBuffer)
-end
-  ╠═╡ =#
-
-# ╔═╡ d16596cd-cdbb-4e5b-9441-ccfc730f358c
-#=╠═╡
-("Safety violations were observed for the following policies:",
-[row.policy_label for row in rawresults if row.safety_violations_observed > 0])
-  ╠═╡ =#
-
-# ╔═╡ ac5c445c-e35a-4e59-a19a-a375d0afbc7b
-#=╠═╡
-md"""
-Select the set of runs $i$ from rawresults where $i \in$ [1; $(length(rawresults))]
-
-`i = ` $(@bind i NumberField(1:length(rawresults)))
-"""
-  ╠═╡ =#
-
-# ╔═╡ 724b9379-a0e6-47a3-a211-29d9db4728e7
-#=╠═╡
-rawresults[i]
-  ╠═╡ =#
-
-# ╔═╡ 9c2cee19-3924-431c-bcae-37b00cdd05b6
-#=╠═╡
-rawresults[i].file, rawresults[i].policy_label
   ╠═╡ =#
 
 # ╔═╡ 953d3f41-38e1-45db-be2d-71889f9bf0c2
@@ -223,9 +191,53 @@ begin
 	end
 end
 
+# ╔═╡ 60d7aeb7-42e6-4b72-ba91-1a33101f07fe
+#=╠═╡
+if rawresults_file == nothing
+	rawresults = nothing
+else
+	rawresults = deserialize(rawresults_file["data"] |> IOBuffer)
+end
+  ╠═╡ =#
+
+# ╔═╡ d16596cd-cdbb-4e5b-9441-ccfc730f358c
+#=╠═╡
+if rawresults !== nothing
+("Safety violations were observed for the following policies:",
+[row.policy_label for row in rawresults if row.safety_violations_observed > 0])
+end
+  ╠═╡ =#
+
+# ╔═╡ ac5c445c-e35a-4e59-a19a-a375d0afbc7b
+#=╠═╡
+if rawresults !== nothing
+md"""
+Select the set of runs $i$ from rawresults where $i \in$ [1; $(length(rawresults))]
+
+`i = ` $(@bind i NumberField(1:length(rawresults)))
+"""
+end
+  ╠═╡ =#
+
+# ╔═╡ 724b9379-a0e6-47a3-a211-29d9db4728e7
+#=╠═╡
+if rawresults !== nothing
+rawresults[i]
+end
+  ╠═╡ =#
+
+# ╔═╡ 9c2cee19-3924-431c-bcae-37b00cdd05b6
+#=╠═╡
+if rawresults !== nothing
+rawresults[i].file, rawresults[i].policy_label
+end
+  ╠═╡ =#
+
 # ╔═╡ 9f7d2852-4b9f-432c-bda7-b4aa40605a0e
 #=╠═╡
+if rawresults !== nothing
 draw_trace(rawresults[i].unsafe_trace...)
+end
   ╠═╡ =#
 
 # ╔═╡ 7c8255e7-ac31-4d41-9aec-faddc08a56e0
@@ -234,8 +246,8 @@ md"""
 """
 
 # ╔═╡ c9913de3-c7bc-49f3-b7d6-b8f4af8cd956
-# Headers
-file, safety_violations_observed, runs, percent_safe= :file, :safety_violations_observed, :runs, :percent_safe;
+# Headers from file
+file, safety_violations_observed, runs, fraction_unsafe= :file, :safety_violations_observed, :runs, :fraction_unsafe;
 
 # ╔═╡ 1fc62c5a-cfc4-453a-9003-b25ff6480d05
 Markdown.parse("""
@@ -245,8 +257,28 @@ Markdown.parse("""
 	(If there is more than 1 element in the list, the shields were checked with different amounts of runs.)
 """)
 
-# ╔═╡ 49589492-c716-4916-ba1b-a19338dc1528
-algorithm, parameters, granularity = :algorithm, :parameters, :granularity
+# ╔═╡ 8f815363-c247-421b-a1b7-c0d1347066d7
+# Headers that I'm gonna create with select
+algorithm, parameters, granularity, lower, upper, alpha, confidence_interval = 
+	:algorithm, :parameters, :granularity, :lower, :upper, :alpha, :confidence_interval
+
+# ╔═╡ 8fb7a429-e702-4662-a9e9-e7093506e43a
+BinomialTest(100, 100, 1)
+
+# ╔═╡ c3170a3f-d542-4616-b4e3-99ae9bbe1c3d
+# confint(model, α, method=:method)
+confint(BinomialTest(100, 100, 1), 0.05, method=:clopper_pearson)
+
+# ╔═╡ 9ba67e34-e5bb-41f2-b897-52c7162c86fe
+function get_confidence_interval(unsafe_runs, total_runs)
+	α = 0.01
+	method = :clopper_pearson
+	lower, upper = confint(BinomialTest(total_runs - unsafe_runs, total_runs, 1), α; method)
+	return lower*100, upper*100, α*100
+end
+
+# ╔═╡ a8a4ffce-dede-4a33-9887-0a0660396657
+get_confidence_interval(100, 100)
 
 # ╔═╡ 5e3494fb-43e0-4638-b37f-5c74dc4a59d8
 function average(lst)
@@ -284,7 +316,7 @@ begin
 		# match example: 100 samples 0.02 G.shield
 		m = match(r"(\d+) Samples ([0-9.]+) G", filename)
 		if m != nothing
-			return "N=$(Int(sqrt(parse(Int, m[1]))))"
+			return "\$n=$(Int(sqrt(parse(Int, m[1]))))\$"
 		else
 			# match example: BOX 0.01 with G of 0.02.shield
 			m = match(r"(\w+) ([0-9.]+) with G of ([0-9.]+)", filename)
@@ -328,34 +360,31 @@ clean_safety_report = call(() -> begin
 	result = combine(result, 
 		safety_violations_observed => sum, 
 		runs => sum, 
-		:fraction_unsafe => average,
+		fraction_unsafe => average,
 		renamecols=false)
-	
+		
 	result = transform(result, 
-		:fraction_unsafe => ByRow(x -> (1 - x)*100),
-		renamecols=true)
-	
-	result = rename(result, :fraction_unsafe_function => percent_safe)
+		[safety_violations_observed, runs] => 
+			ByRow(get_confidence_interval) => [lower, upper, alpha])
 	
 	result = transform(result,
 		file => get_algorithm => algorithm, 
-		file => get_algorithm_parameters => parameters,
+		file => get_algorithm_parameters => parameters, 
 		file => get_granularity => granularity)
 
-	result = transform(result,
-	[runs, percent_safe] => ByRow((r, ps) -> r == 1 ? "-" : "$ps"))
-	
+
+	#==#
 	result = select(result,
+		granularity, 
 		algorithm,  
 		parameters,
-		granularity, 
-		percent_safe)
+		fraction_unsafe,
+		lower,
+		upper,
+		alpha)
+	#==#
 	
-	result = sort(
-		sort(result, algorithm, lt=natural),
-		granularity,
-		lt=natural,
-		rev=true)
+	result = sort(result, [granularity, algorithm], lt=natural)
 end)
 
 # ╔═╡ cb9bfe45-5a0e-4602-9545-ac18638725bd
@@ -364,11 +393,11 @@ md"""
 """
 
 # ╔═╡ 8d952460-c8f2-4b66-8c25-5e4d543fdc63
-# headers
-saved_as, samples_per_axis, gridargs, valid, seconds_taken, time_taken, bytes_used = :saved_as, :samples_per_axis, :gridargs, :valid, :seconds_taken, :time_taken, :bytes_used
+# Headers from the file
+saved_as, samples_per_axis, gridargs, valid, seconds_taken, bytes_used = :saved_as, :samples_per_axis, :gridargs, :valid, :seconds_taken, :bytes_used
 
 # ╔═╡ 677a73f0-9f42-434a-916f-febb8ab9f1bb
-# headers that I'm gonna use with select
+# headers that I'm gonna create with select
 description, minutes_taken, hours_taken, gigabytes_used = :description, :minutes_taken, :hours_taken, :gigabytes_used
 
 # ╔═╡ e92acf3c-e07e-4b28-ae00-904b7b2ae025
@@ -397,47 +426,60 @@ md"""
 joint_report = innerjoin(clean_safety_report, cleaned_synthesis_report,
 					on=[algorithm, parameters, granularity])
 
+# ╔═╡ 90675427-1008-4e2b-8df9-c135e9a93d60
+function format_confidence_interval(l, u, α)
+	if u != 100.
+		l = @sprintf("%.4f", l)
+		u = @sprintf("%.4f", u)
+		return "[$l; $u]"
+	else
+		l = @sprintf("%.4f", l)
+		u = @sprintf("%.4f", u)
+		if α == 5.
+			α = "5"
+		elseif α == 1.
+			α = "1"
+		end
+		return "\$\\geq $l\$\\% ($α\\% CI)"
+	end
+end
+
 # ╔═╡ 6c624e17-1f59-47e3-9192-9dbfb9c69a13
 joint_report_latexified = call() do
 	seconds_format(d::Float64) = @sprintf("%.0f", d)
-	percent_format(d::Float64) = d == 100.0 ? "100\\%" : @sprintf("%.4f", d)*"\\%"
-	wrap_math(str::String) = replace(str, 
-		r"time-step=([0-9.]+)" => s"time-step$\\:=\g<1>$", 
-		r"N=(\d+)" => s"$N=\g<1>$",)
-	julia_reach_macro(str::String) = replace(str, 
-		r"JuliaReach" => s"\\juliareach{}")
+	
+	wrap_math(str::String) = replace(
+			replace(str, r"δ=(\d+\.?\d*)" => s"$\\delta=\g<1>$"), 
+		r"N=(\d+)" => s"$N=\g<1>$")
 	
 	result = transform(joint_report,
 		seconds_taken => ByRow(seconds_format), 
-		percent_safe => ByRow(percent_format), 
 		algorithm => ByRow(wrap_math),
-		parameters => ByRow(wrap_math),
 		renamecols=false)
 
 	result = transform(result, 
-		algorithm => ByRow(julia_reach_macro),
-		renamecols=false)
+		[lower, upper, alpha] => ByRow(format_confidence_interval) 
+			=> confidence_interval
+	)
 
-	result = transform(result, 
-		[valid, percent_safe] => ByRow((va, ps) -> va ? ps : "-"),
-		renamecols=false)
-
-	result = rename(result,
-		percent_safe => :raw_percent_safe, 
-		:valid_percent_safe => percent_safe)
+	result = transform(result,
+		[valid, confidence_interval] => ByRow((valid, ci) -> valid ? ci : "Considers \$s_0\$ unsafe")
+			=> confidence_interval
+	)
 	
 	result = select(result, 
+		algorithm => "\$\\xrightarrow{a}_{app}\$ method", 
 		granularity => "\$\\granularity~~\$", 
-		algorithm => "Algorithm", 
 		parameters => "Parameters", 
 		seconds_taken => "Seconds",
-		valid => "Safe in \$\\state_0\$",
-		percent_safe => "Safe Runs")
+		#valid => "Safe in \$\\state_0\$",
+		confidence_interval => "Probability safe"
+		)
 end
 
 # ╔═╡ 29f585d2-21c9-4c53-8fc3-2b1ae8ddf713
 resulting_latex_table = latex_table(joint_report_latexified, 
-	group_by=["\$\\granularity~~\$", "Algorithm"])
+	group_by=["\$\\granularity~~\$", "\$\\xrightarrow{a}_{app}\$ method"])
 
 # ╔═╡ 2ac7442f-13b2-401d-803e-a3005fd9a1b3
 HTML("""
@@ -458,6 +500,7 @@ CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
 Glob = "c27321d9-0574-5035-807b-f59d2c89b15c"
+HypothesisTests = "09f84164-cd44-5f33-b23f-e6b0d136a0d5"
 NaturalSort = "c020b1a1-e9b0-503a-9c33-f039bfc54a85"
 Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
 PlutoSerialization = "89dfed0f-77d6-439b-aaac-839db4b25fb8"
@@ -469,6 +512,7 @@ StatsPlots = "f3b207a7-027a-5e70-b257-86293d7955fd"
 CSV = "~0.10.4"
 DataFrames = "~1.3.6"
 Glob = "~1.3.0"
+HypothesisTests = "~0.10.11"
 NaturalSort = "~1.0.0"
 Plots = "~1.33.0"
 PlutoSerialization = "~0.1.2"
@@ -482,7 +526,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.8.2"
 manifest_format = "2.0"
-project_hash = "d4d76951d123b5c63ba534413fe0512aa38746b2"
+project_hash = "a5d99338c3c87bb84e73a69b7d51436e21c9216c"
 
 [[deps.AbstractFFTs]]
 deps = ["ChainRulesCore", "LinearAlgebra"]
@@ -602,6 +646,16 @@ git-tree-sha1 = "417b0ed7b8b838aa6ca0a87aadf1bb9eb111ce40"
 uuid = "5ae59095-9a9b-59fe-a467-6f913c188581"
 version = "0.12.8"
 
+[[deps.Combinatorics]]
+git-tree-sha1 = "08c8b6831dc00bfea825826be0bc8336fc369860"
+uuid = "861a8166-3701-5b0c-9a16-15d98fcdc6aa"
+version = "1.0.2"
+
+[[deps.CommonSolve]]
+git-tree-sha1 = "9441451ee712d1aec22edad62db1a9af3dc8d852"
+uuid = "38540f10-b2f7-11e9-35d8-d573e4eb0ff2"
+version = "0.2.3"
+
 [[deps.Compat]]
 deps = ["Dates", "LinearAlgebra", "UUIDs"]
 git-tree-sha1 = "5856d3031cdb1f3b2b6340dfdc66b6d9a149a374"
@@ -612,6 +666,12 @@ version = "4.2.0"
 deps = ["Artifacts", "Libdl"]
 uuid = "e66e0078-7015-5450-92f7-15fbd957f2ae"
 version = "0.5.2+0"
+
+[[deps.ConstructionBase]]
+deps = ["LinearAlgebra"]
+git-tree-sha1 = "89a9db8d28102b094992472d333674bd1a83ce2a"
+uuid = "187b0558-2788-49d3-abe0-74a17ed4e7c9"
+version = "1.5.1"
 
 [[deps.Contour]]
 git-tree-sha1 = "d05d9e7b7aedff4e5b51a029dced05cfb6125781"
@@ -852,6 +912,12 @@ deps = ["Tricks"]
 git-tree-sha1 = "c47c5fa4c5308f27ccaac35504858d8914e102f9"
 uuid = "ac1192a8-f4b3-4bfe-ba22-af5b92cd3ab2"
 version = "0.9.4"
+
+[[deps.HypothesisTests]]
+deps = ["Combinatorics", "Distributions", "LinearAlgebra", "Random", "Rmath", "Roots", "Statistics", "StatsBase"]
+git-tree-sha1 = "ae3b6964d58df11984d22644ce5546eaf20fe95d"
+uuid = "09f84164-cd44-5f33-b23f-e6b0d136a0d5"
+version = "0.10.11"
 
 [[deps.IOCapture]]
 deps = ["Logging", "Random"]
@@ -1327,6 +1393,12 @@ git-tree-sha1 = "68db32dff12bb6127bac73c209881191bf0efbb7"
 uuid = "f50d1b31-88e8-58de-be2c-1cc44531875f"
 version = "0.3.0+0"
 
+[[deps.Roots]]
+deps = ["ChainRulesCore", "CommonSolve", "Printf", "Setfield"]
+git-tree-sha1 = "82362f2a4f756951f21ebb3ac2aed094c46a5109"
+uuid = "f2b01f46-fcfa-551c-844a-d8ac1e96c665"
+version = "2.0.12"
+
 [[deps.SHA]]
 uuid = "ea8e919c-243c-51af-8825-aaa63cd721ce"
 version = "0.7.0"
@@ -1345,6 +1417,12 @@ version = "1.3.14"
 
 [[deps.Serialization]]
 uuid = "9e88b42a-f829-5b0c-bbe9-9e923198166b"
+
+[[deps.Setfield]]
+deps = ["ConstructionBase", "Future", "MacroTools", "StaticArraysCore"]
+git-tree-sha1 = "e2cc6d8c88613c05e1defb55170bf5ff211fbeac"
+uuid = "efcf1570-3423-57d1-acb7-fd33fddbac46"
+version = "1.1.1"
 
 [[deps.SharedArrays]]
 deps = ["Distributed", "Mmap", "Random", "Serialization"]
@@ -1744,6 +1822,7 @@ version = "1.4.1+0"
 """
 
 # ╔═╡ Cell order:
+# ╟─79a40ace-6535-4310-90b0-5b7374ee26b7
 # ╠═46be8e3a-39ac-11ed-3bef-01481611ab90
 # ╟─a6dc63b1-b05b-4011-8da6-91812f0dc470
 # ╟─a558a662-d1ae-4a9e-bb9b-4aacc2d3f3d6
@@ -1758,17 +1837,21 @@ version = "1.4.1+0"
 # ╟─1b07a080-0038-4611-a674-6b0fbd9352a0
 # ╠═07d7ad83-f43c-41df-aa4a-1aaa1dcb93a4
 # ╟─98ab1267-2087-4fc8-963d-c2b76bd3f293
-# ╟─60d7aeb7-42e6-4b72-ba91-1a33101f07fe
-# ╠═d16596cd-cdbb-4e5b-9441-ccfc730f358c
-# ╠═ac5c445c-e35a-4e59-a19a-a375d0afbc7b
-# ╠═724b9379-a0e6-47a3-a211-29d9db4728e7
-# ╠═9c2cee19-3924-431c-bcae-37b00cdd05b6
 # ╟─953d3f41-38e1-45db-be2d-71889f9bf0c2
+# ╟─60d7aeb7-42e6-4b72-ba91-1a33101f07fe
+# ╟─d16596cd-cdbb-4e5b-9441-ccfc730f358c
+# ╟─ac5c445c-e35a-4e59-a19a-a375d0afbc7b
+# ╟─724b9379-a0e6-47a3-a211-29d9db4728e7
+# ╟─9c2cee19-3924-431c-bcae-37b00cdd05b6
 # ╟─9f7d2852-4b9f-432c-bda7-b4aa40605a0e
 # ╠═7c8255e7-ac31-4d41-9aec-faddc08a56e0
 # ╟─1fc62c5a-cfc4-453a-9003-b25ff6480d05
 # ╠═c9913de3-c7bc-49f3-b7d6-b8f4af8cd956
-# ╠═49589492-c716-4916-ba1b-a19338dc1528
+# ╠═8f815363-c247-421b-a1b7-c0d1347066d7
+# ╠═8fb7a429-e702-4662-a9e9-e7093506e43a
+# ╠═c3170a3f-d542-4616-b4e3-99ae9bbe1c3d
+# ╠═9ba67e34-e5bb-41f2-b897-52c7162c86fe
+# ╠═a8a4ffce-dede-4a33-9887-0a0660396657
 # ╠═f1239325-d766-4427-a5eb-d4dac7b2b1f4
 # ╠═5e3494fb-43e0-4638-b37f-5c74dc4a59d8
 # ╠═e5299152-8373-4303-9068-b0a8b54c3b1a
@@ -1780,9 +1863,10 @@ version = "1.4.1+0"
 # ╠═e92acf3c-e07e-4b28-ae00-904b7b2ae025
 # ╟─21311e72-95f3-43bb-b4d0-099544d75469
 # ╠═00fa0da1-c3c4-4a3b-b516-a16e37f70785
-# ╠═6c624e17-1f59-47e3-9192-9dbfb9c69a13
-# ╠═29f585d2-21c9-4c53-8fc3-2b1ae8ddf713
+# ╠═90675427-1008-4e2b-8df9-c135e9a93d60
 # ╟─2ac7442f-13b2-401d-803e-a3005fd9a1b3
+# ╠═29f585d2-21c9-4c53-8fc3-2b1ae8ddf713
+# ╠═6c624e17-1f59-47e3-9192-9dbfb9c69a13
 # ╠═31a9e261-ded9-4398-8d45-f5678dcc9fbd
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
