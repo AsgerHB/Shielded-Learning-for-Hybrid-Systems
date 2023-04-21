@@ -287,7 +287,7 @@ begin
 	# instead of the number of samples per axis, N. 
 	# It is a huge mess to reverse the number, as you can see.
 	function n_from_grid_points(grid_points::Int)
-		return Int(cbrt(grid_points)) # julia has cube-root. nice.
+		return Int(grid_points^(1/5)) # ⁵√
 	end
 
 	function n_from_grid_points(grid_points::AbstractString)
