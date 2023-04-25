@@ -358,7 +358,7 @@ let
 		legend=nothing, 
 		colors=opshieldcolors,
 		color_labels=opshieldlabels;
-		xlabel="t (s)", ylabel="v (L)")
+		xlabel="time (s)", ylabel="volume (l)")
 	
 	if show_tv
 		draw_barbaric_transition!(simulation_model, partition, action, slice)
@@ -370,7 +370,7 @@ let
 	#==# plot!(twinx(), t -> consumption_rate(abs(t%m.period)), 
 		line=(3, colorant"#717171"),
 		ylim=(0,3),
-		ylabel="c (L/s)",
+		ylabel="consumption (l/s)",
 		label=nothing) #==#
 	plot!(size=(400, 240))
 end
@@ -384,7 +384,7 @@ let
 		legend=:topleft, 
 		colors=opshieldcolors,
 		color_labels=opshieldlabels;
-		xlabel="t (s)", ylabel="v (L)")
+		xlabel="time (s)", ylabel="volume (l)")
 	
 	if show_tv
 		draw_barbaric_transition!(simulation_model, partition, action, slice)
@@ -396,7 +396,7 @@ let
 	#==# plot!(twinx(), t -> consumption_rate(abs(t%m.period)), 
 		line=(3, colorant"#717171"),
 		ylim=(0,3),
-		ylabel="c (L/s)",
+		ylabel="consumption (l/s)",
 		label=nothing) #==#
 	plot!(size=(400, 240))
 end
