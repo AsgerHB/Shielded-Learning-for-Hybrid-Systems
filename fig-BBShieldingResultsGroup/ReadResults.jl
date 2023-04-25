@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.19
+# v0.19.22
 
 using Markdown
 using InteractiveUtils
@@ -315,13 +315,14 @@ average_cost = call(() -> begin
 	if post_shielded
 		df = DataFrame(means)
 		filter!(:Experiment => e -> e == "PostShielded", df)
+		filter!(:Deterrence => d -> d != "0", df)
 		transform!(df, [:Experiment, :Deterrence] => ByRow(make_label), renamecols=false)
 		rename!(df, :Experiment_Deterrence => :Label)
 		sort!(df, :Runs)
 		transform!(df, :Runs => r -> string.(r), renamecols=false)
 		p1 = @df df plot!(:Runs, :Avg_Cost, 
 			group=:Label,
-			markershape=[:circle :utriangle :diamond :pentagon],
+			markershape=[:utriangle :diamond :pentagon],
 			markerstrokewidth=1,
 			markerstrokecolor=:white,
 			color=shielding_type_colors.post_shielded,
