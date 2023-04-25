@@ -113,7 +113,7 @@ if __name__ == "__main__":
         # HARDCODED: The number of iterations it re-runs the experiment.
         repeats = 10
         # HARDCODED: The number of training runs used to produce each strategy.
-        learning_runs = [1500, 3000, 6000, 12000]
+        learning_runs = [150, 300, 600, 1200]
 
     progress_update("Experiment started.")
     clear_results()
