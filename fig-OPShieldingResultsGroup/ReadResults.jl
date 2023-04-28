@@ -103,14 +103,21 @@ filter([:Experiment, :Deterrence] =>
 		(e, d) -> ((e == "NoShield" && d == "-") || (e == "PostShielded" && d == "-")),
 		rawdata)
 
+# ╔═╡ 701e4858-f8e4-4e74-a010-85b3ecbec252
+@bind learning_rate Select(rawdata[!, :Learning_Rate] |> unique)
+
 # ╔═╡ b842083d-b6c0-49bb-9243-e03b2a65bfe2
 cleandata = call() do
 
 	cleandata = rename(rawdata, :Avg_Swings => :Avg_Cost)
 	
-	cleandata = select(cleandata, [:Experiment, :Deterrence, :Runs, :Avg_Cost, :Avg_Deaths, :Avg_Interventions])
+	cleandata = select(cleandata, [:Experiment, :Deterrence, :Runs, :Avg_Cost, :Avg_Deaths, :Avg_Interventions, :Learning_Rate])
 	cleandata = sort(cleandata, [:Experiment, :Deterrence, :Runs])
 	cleandata = sort(cleandata, [:Experiment], by=experiment_order)
+	
+	cleandata = filter(:Learning_Rate => 
+		(lr -> lr == learning_rate), 
+		cleandata)
 
 	# We don't care about unshielded with no deterrence
 	cleandata = filter([:Experiment, :Deterrence] => 
@@ -128,6 +135,9 @@ cleandata = call() do
 
 	cleandata
 end
+
+# ╔═╡ 040e59d0-3beb-4552-9b00-5f320f954805
+min(cleandata[!, :Avg_Cost]...)
 
 # ╔═╡ 033989be-6592-4757-86d5-742e28b3ee8e
 "Dropped rows: $(nrow(rawdata) - nrow(cleandata))"
@@ -240,6 +250,9 @@ call(() -> begin
 		renamecols=true)
 	df = sort(df, [:Experiment, :Deterrence, :Runs])
 end)
+
+# ╔═╡ 87e9c503-c0f2-451e-b654-11e39e4e8cd0
+std
 
 # ╔═╡ d13faa16-897a-4d01-9b14-ff6d03f4a592
 md"""
@@ -1773,16 +1786,19 @@ version = "0.9.1+5"
 # ╠═5dc4f261-5e46-4914-948b-0c45b9443a44
 # ╠═9bf4c870-6b89-4cb3-a2d7-66d89149d804
 # ╠═b842083d-b6c0-49bb-9243-e03b2a65bfe2
+# ╠═040e59d0-3beb-4552-9b00-5f320f954805
 # ╟─033989be-6592-4757-86d5-742e28b3ee8e
 # ╟─8da05256-b0d7-479e-bd42-2e03d521711c
 # ╟─ad80adab-6b8a-4fd5-b457-8e9e407b4cff
 # ╟─885b1c23-e56c-4940-b699-0602292583ee
 # ╠═7904c209-eeea-4243-beb4-0e5a7fd47a56
 # ╠═45500c97-b2a7-4669-ab37-579c75ca3002
-# ╟─e0444e2e-0e77-4e5a-ac1e-64db46f2558f
+# ╠═e0444e2e-0e77-4e5a-ac1e-64db46f2558f
+# ╠═87e9c503-c0f2-451e-b654-11e39e4e8cd0
 # ╟─d13faa16-897a-4d01-9b14-ff6d03f4a592
 # ╟─0f8633b1-af76-4fb7-9822-7abd90a35a06
 # ╠═b9c5b5e8-7c3c-4cb1-850d-937e928c8090
+# ╠═701e4858-f8e4-4e74-a010-85b3ecbec252
 # ╠═b11d7a45-2e55-4ccb-82f8-d09cb669719b
 # ╟─4fd405a2-ef9e-4590-8af1-6f806724ef2c
 # ╠═1724e32a-be5c-4784-8b32-615e26160235
