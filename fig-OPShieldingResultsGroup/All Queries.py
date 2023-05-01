@@ -113,7 +113,7 @@ if __name__ == "__main__":
         # HARDCODED: The number of iterations it re-runs the experiment.
         repeats = 10
         # HARDCODED: The number of training runs used to produce each strategy.
-        learning_runs = [1500, 3000, 6000, 12000]
+        learning_runs = [24000, 36000, 48000]
 
     progress_update("Experiment started.")
     clear_results()
@@ -128,7 +128,7 @@ if __name__ == "__main__":
                         learning_rate = 2,
                         iteration = i)
 
-        for learning_rate in [2, 4, 8, 16]:
+        for learning_rate in [2]:
             for runs in  learning_runs:
 
                 run_experiment( experiment = "PreShielded",
