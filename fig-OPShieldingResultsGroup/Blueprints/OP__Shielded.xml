@@ -345,6 +345,11 @@ x = 0</label>
 system Controller, Pump, Machine, Fluctuation, AccumulatedVolume, SafetyMonitor;
 </system>
 	<queries>
+		<option key="--total-runs" value="1000"/>
+		<option key="--max-iterations" value="1"/>
+		<option key="--good-runs" value="1000"/>
+		<option key="--eval-runs" value="1000"/>
+		<option key="--runs-pr-state" value="1000"/>
 		<query>
 			<formula>simulate[&lt;=60] {c + f}</formula>
 			<comment/>
