@@ -108,7 +108,7 @@ if __name__ == "__main__":
         # HARDCODED: The number of iterations it re-runs the experiment.
         repeats = 1
         # HARDCODED: The number of training runs used to produce each strategy.
-        learning_runs = [100, 200]
+        learning_runs = [100, 200, 3000]
     else:
         # HARDCODED: The number of iterations it re-runs the experiment.
         repeats = 10
@@ -123,7 +123,7 @@ if __name__ == "__main__":
         # No learning occurs in the Layabout model, so it is only run once.
         run_experiment( experiment = "Layabout",
                         model = "OP__ShieldedLayabout.xml",          # shield_enabled = true; layabout = true
-                        queries = "NoStrategyEvaluate.q",    # Run the three queries without a strategy.
+                        queries = "ShieldedLayabout.q",    # Run the three queries without a strategy.
                         runs = None,
                         learning_rate = 2,
                         iteration = i)
@@ -132,8 +132,8 @@ if __name__ == "__main__":
             for runs in  learning_runs:
 
                 run_experiment( experiment = "PreShielded",
-                                model = "OP__Shielded.xml",      # shield_enabled = true
-                                queries = "TrainSaveEvaluateSingle.q", # Train a strategy, save it, then evaluate it.
+                                model = "OP__PreShielded.xml",      # shield_enabled = true
+                                queries = "PreShielded.q", # Train a strategy, save it, then evaluate it.
                                 runs = runs,
                                 learning_rate = learning_rate,
                                 iteration = i)
@@ -142,14 +142,14 @@ if __name__ == "__main__":
                 
                 run_experiment( experiment = "NoShield",
                                 model = "OP__Unshielded.xml",    # shield_enabled = false
-                                queries = "TrainSaveEvaluate.q", # Train a strategy, save it, then evaluate it.
+                                queries = "Unshielded.q", # Train a strategy, save it, then evaluate it.
                                 runs = runs,
                                 learning_rate = learning_rate,
                                 iteration = i)
 
                 run_experiment( experiment = "PostShielded",
-                                model = "OP__Shielded.xml",      # shield_enabled = true
-                                queries = "LoadEvaluate.q",      # Load the previous strategy, then evaluate it.
+                                model = "OP__PostShielded.xml",      # shield_enabled = true
+                                queries = "PostShielded.q",      # Load the previous strategy, then evaluate it.
                                 runs = runs,
                                 learning_rate = learning_rate,
                                 iteration = i)
