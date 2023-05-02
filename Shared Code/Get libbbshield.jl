@@ -67,9 +67,7 @@ function compile_libbbshield(working_dir, shield_dir, lib_source_code_dir)
 
     # Bake it into the C-library. 
     # Make a copy first so we don't overwrite the original files
-    for file in glob(lib_source_code_dir ⨝ "*")
-        cp(file, working_dir ⨝ basename(file), force=true)
-    end
+    cp(lib_source_code_dir ⨝ "shield.c", working_dir ⨝ "shield.c", force=true)
     
     # Write to shield dump
     write(working_dir ⨝ "shield_dump.c", get_c_library_header(shield, "Retrieved with get_libbbshield"))'

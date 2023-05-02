@@ -4,47 +4,68 @@ end
 import Pkg
 Pkg.activate(".")
 Pkg.instantiate()
-using Dates
-include("../Shared Code/ExperimentUtilities.jl")
+using ArgParse
+⨝ = joinpath # infix operator "\join" redefined to signify joinpath
 
 #########
 # Args  #
 #########
+s = ArgParseSettings()
 
-args = my_parse_args(ARGS)
-if haskey(args, "help")
-    print("""
-    --help              Display this help and exit.
-    --test              Test-mode. Produce potentially useless results, but fast.
-                        Useful for testing if everything is set up.
-    --results-dir       Results will be saved in an appropriately named subdirectory.
-                        Directory will be created if it does not exist.
-                        Default: '~/Results'
-    --skip-barbaric     Skip synthesis using barbaric reachability funciton.
-    --skip-rigorous     Skip synthesis using the JuliaReach ReachabilityAnalysis package.
-    --skip-evaluation   Do not evaluate the strategies' safety after synthesis is done.
-    """)
-    exit()
+@add_arg_table s begin
+    "--test"
+        help="""Test-mode. Produce potentially useless results, but fast.
+                Useful for testing if everything is set up."""
+        action=:store_true
+
+        "--results-dir"
+            help="""Results will be saved in an appropriately named subdirectory.
+                    Directory will be created if it does not exist."""
+            default=homedir() ⨝ "Results"
+
+        "--uppaal-dir"
+            help="""Root directory of the UPPAAL STRATEGO 10 install."""
+            default=homedir() ⨝ "opt/uppaal-4.1.20-stratego-10-linux64/"
+
+        "--skip-barbaric"
+            help="""Skip synthesis using barbaric reachability funciton."""
+            action=:store_true
+
+        "--skip-rigorous"
+            help="""Skip synthesis using rigorous reachability funciton."""
+            action=:store_true
+
+        "--skip-evaluation"
+            help="""Do not evaluate the strategies' safety after synthesis is done."""
+            action=:store_true
 end
-test = haskey(args, "test")
-results_dir = get(args, "results-dir", "$(homedir())/Results")
+
+args = parse_args(s)
+
+test = args["test"]
+results_dir = args["results-dir"]
 table_name = "tab-BBSynthesis"
 results_dir = joinpath(results_dir, table_name)
 shields_dir = joinpath(results_dir, "Exported Strategies")
+uppaal_dir = args["uppaal-dir"]
 mkpath(shields_dir)
-evaluations_dir = joinpath(results_dir, "Safety Evaluations")
+evaluations_dir = joinpath(results_dir, "Evaluations")
 mkpath(evaluations_dir)
 
-make_barbaric_shields = !haskey(args, "skip-barbaric")
-make_rigorous_shields = !haskey(args, "skip-rigorous")
-test_shields = !haskey(args, "skip-evaluation")
+make_barbaric_shields = !args["skip-barbaric"]
+make_rigorous_shields = !args["skip-rigorous"]
+test_shields = !args["skip-evaluation"]
 
 #########
 # Setup #
 #########
 
+# Additional usings after arguments are parse, to make cli help and error reporting slightly faster. Every bit counts because it is abysmally slow.
+using Dates
+using Serialization
+include("../Shared Code/ExperimentUtilities.jl")
 include("Synthesize Set of Shields.jl")
-include("Statistical Checking of Shield.jl")
+include("CheckSafetyOfPreshielded.jl")
 
 progress_update("Estimated total time to complete: 75 hours. (5 minutes if run with --test. 4 hours if run with --skip-rigorous, 71 hours if run with --skip-barbaric)")
 
@@ -108,7 +129,7 @@ else
 end
 
 if test_shields
-    test_shields_and_save_results(shields_dir, evaluations_dir, random_agents_hit_chances, runs_per_shield)
+    check_safety_of_preshielded(;shields_dir, results_dir=evaluations_dir, lib_source_code_dir="Shared Code/libbbshield",  blueprints_dir="tab-BBSynthesis/Blueprints", uppaal_dir, test)
 else
     progress_update("Skipping tests of shields")
 end
@@ -153,19 +174,12 @@ joint_df |> CSV.write(joinpath(shields_dir, "Joint Shields Synthesis Report.csv"
 # Constructing Table #
 ######################
 
+progress_update("Saving  to $results_dir")
+
 NBPARAMS = Dict(
     "csv_synthesis_report" => joinpath(shields_dir, "Joint Shields Synthesis Report.csv"),
-    "csv_safety_report" => joinpath(evaluations_dir, "Test of Shields.csv")
+    "csv_safety_report" => joinpath(evaluations_dir, "Evaluations.csv")
 )
-
-
-###########
-# Results #
-###########
-
-
-
-progress_update("Saving  to $results_dir")
 
 include("Table from CSVs.jl")
 
