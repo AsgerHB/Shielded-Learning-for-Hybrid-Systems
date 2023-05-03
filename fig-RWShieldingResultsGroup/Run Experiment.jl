@@ -79,7 +79,7 @@ if !args["skip-experiment"]
 
     replacements = Dict(
         "%resultsdir%" => query_results_dir,
-        "%shieldfile%" => librwshield_file,
+        "%rwshieldfile%" => librwshield_file,
         "%checks%" => checks
     )
 

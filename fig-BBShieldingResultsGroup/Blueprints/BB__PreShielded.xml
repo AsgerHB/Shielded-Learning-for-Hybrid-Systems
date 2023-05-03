@@ -17,6 +17,7 @@ int number_deaths = 0;
 
 /* Config */
 const bool shield_enabled = true;
+const bool layabout = false;
 
 /* Shielding */
 
@@ -31,6 +32,17 @@ int next_action = NOHIT;    // (potentially) shielded action
 
 int interventions = 0; // Total number of times the shield intervened
 int bad_interventions = 0; // Number of times where this was due to touching the red part
+
+bool shield_allows(int action) {
+    int color = get_value(v, p);
+    if (color == RED) {
+        return true;
+    } else if (color == BLUE) {
+        return action == HIT;
+    } else {
+        return true;
+    }
+}
 
 // If the shield is enabled, returns the shielded action.
 // Otherwise, action is simply returned unaltered.
@@ -55,7 +67,9 @@ int shield(int action) {
             return action;
         }
     }
-}</declaration>
+}
+
+</declaration>
 	<template>
 		<name x="5" y="5">Ball</name>
 		<declaration>// Place local declarations here.
@@ -128,36 +142,26 @@ int fired;</declaration>
 			<label kind="invariant" x="-8" y="25">x &lt;= 1 &amp;&amp;
 x' == 10</label>
 		</location>
-		<location id="id10" x="0" y="-93">
-			<name x="93" y="-102">Location5</name>
-			<committed/>
-		</location>
-		<location id="id11" x="0" y="-272">
+		<location id="id10" x="0" y="-272">
 			<name x="-10" y="-306">Location4</name>
 			<committed/>
 		</location>
 		<init ref="id9"/>
-		<transition id="id12" controllable="false">
-			<source ref="id11"/>
+		<transition id="id11">
+			<source ref="id10"/>
 			<target ref="id9"/>
-			<label kind="guard" x="-289" y="-8">next_action != HIT</label>
+			<label kind="guard" x="-289" y="-8">shield_allows(NOHIT)</label>
 			<nail x="-119" y="8"/>
 		</transition>
-		<transition id="id13" controllable="false">
-			<source ref="id11"/>
+		<transition id="id12">
+			<source ref="id10"/>
 			<target ref="id9"/>
-			<label kind="guard" x="127" y="-8">next_action == HIT</label>
+			<label kind="guard" x="127" y="-8">shield_allows(HIT)</label>
 			<label kind="synchronisation" x="127" y="-42">hit!</label>
 			<label kind="assignment" x="127" y="-25">++fired</label>
 			<nail x="119" y="8"/>
 		</transition>
-		<transition id="id14" controllable="false">
-			<source ref="id10"/>
-			<target ref="id11"/>
-			<label kind="assignment" x="68" y="-272">next_action = shield(HIT)</label>
-			<nail x="51" y="-272"/>
-		</transition>
-		<transition id="id15" controllable="false">
+		<transition id="id13" controllable="false">
 			<source ref="id9"/>
 			<target ref="id10"/>
 			<label kind="guard" x="8" y="-51">x &gt;= 1</label>
@@ -166,6 +170,11 @@ x' == 10</label>
 	</template>
 	<system>system Ball, LearnerPlayer;</system>
 	<queries>
+		<option key="--total-runs" value="3000"/>
+		<option key="--max-iterations" value="1"/>
+		<option key="--good-runs" value="3000"/>
+		<option key="--eval-runs" value="3000"/>
+		<option key="--runs-pr-state" value="3000"/>
 		<query>
 			<formula/>
 			<comment>Layabout Queries:</comment>
@@ -191,19 +200,19 @@ x' == 10</label>
 			<comment>Training Queries:</comment>
 		</query>
 		<query>
-			<formula>strategy HitWell1000 = minE (LearnerPlayer.fired + number_deaths*1000 ) [&lt;=120] {} -&gt; {p, v}: &lt;&gt; time &gt;= 120</formula>
+			<formula>strategy HitWell = minE (LearnerPlayer.fired) [&lt;=120] {} -&gt; {p, v}: &lt;&gt; time &gt;= 120</formula>
 			<comment/>
 		</query>
 		<query>
-			<formula>E[&lt;=120] (max:LearnerPlayer.fired) under HitWell1000</formula>
+			<formula>E[&lt;=120;100] (max:LearnerPlayer.fired) under HitWell</formula>
 			<comment/>
 		</query>
 		<query>
-			<formula>Pr[&lt;=120] (&lt;&gt; number_deaths &gt; 0) under HitWell1000</formula>
+			<formula>Pr[&lt;=120] (&lt;&gt; number_deaths &gt; 0) under HitWell</formula>
 			<comment/>
 		</query>
 		<query>
-			<formula>E[&lt;=120] (max:interventions) under HitWell1000</formula>
+			<formula>E[&lt;=120] (max:interventions) under HitWell</formula>
 			<comment/>
 		</query>
 	</queries>

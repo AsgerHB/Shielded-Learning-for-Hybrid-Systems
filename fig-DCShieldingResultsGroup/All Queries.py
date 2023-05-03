@@ -123,15 +123,15 @@ if __name__ == "__main__":
         # No learning occurs in the Layabout model, so it is only run once.
         run_experiment( experiment = "Layabout",
                         model = "DC__ShieldedLayabout.xml",          # shield_enabled = true; layabout = true
-                        queries = "NoStrategyEvaluate.q",    # Run the three queries without a strategy.
+                        queries = "ShieldedLayabout.q",    # Run the three queries without a strategy.
                         runs = None,
                         iteration = i)
 
         for runs in  learning_runs:
 
             run_experiment( experiment = "PreShielded",
-                            model = "DC__Shielded.xml",      # shield_enabled = true
-                            queries = "TrainSaveEvaluateSingle.q", # Train a strategy, save it, then evaluate it.
+                            model = "DC__PreShielded.xml",      # shield_enabled = true
+                            queries = "PreShielded.q", # Train a strategy, save it, then evaluate it.
                             runs = runs,
                             iteration = i)
 
@@ -139,13 +139,13 @@ if __name__ == "__main__":
             
             run_experiment( experiment = "NoShield",
                             model = "DC__Unshielded.xml",    # shield_enabled = false
-                            queries = "TrainSaveEvaluate.q", # Train a strategy, save it, then evaluate it.
+                            queries = "Unshielded.q", # Train a strategy, save it, then evaluate it.
                             runs = runs,
                             iteration = i)
 
             run_experiment( experiment = "PostShielded",
-                            model = "DC__Shielded.xml",      # shield_enabled = true
-                            queries = "LoadEvaluate.q",      # Load the previous strategy, then evaluate it.
+                            model = "DC__PostShielded.xml",      # shield_enabled = true
+                            queries = "PostShielded.q",      # Load the previous strategy, then evaluate it.
                             runs = runs,
                             iteration = i)
 
