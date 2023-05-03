@@ -67,7 +67,7 @@ def run_experiment(experiment, model, queries, runs, iteration):
     os.system(f"mkdir -p '{savedir}'")
     
     # Command to run UPPAAL verifier
-    command = f"{uppaaldir}/bin/verifyta -s --epsilon 0.001 --max-iterations 1 --good-runs {runs} --total-runs {runs} --runs-pr-state {runs} '{abspath_model}' '{abspath_queries}'"
+    command = f"{uppaaldir}/bin/verifyta -s --discretization 0.001 --epsilon 0.001 --max-iterations 1 --good-runs {runs} --total-runs {runs} --runs-pr-state {runs} '{abspath_model}' '{abspath_queries}'"
 
     progress_update(f"Running: {command}")
 

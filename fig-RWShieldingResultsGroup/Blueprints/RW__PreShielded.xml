@@ -104,7 +104,7 @@ const int WHITE = 119; // etc.
 int next_action = SLOW;
 
 int interventions = 0; // Total number of times the shield intervened
-int bad_interventions = 0; // Number of times where this was due to touching the red part
+int red_area_entered = 0; // Number of times where this was due to touching the red part
 
 int shield_allows(int action) {
     int color = get_value(x, t);
@@ -128,9 +128,8 @@ int shield(int action) {
         if (action == FAST) {
             return action;
         } else if (color == RED) {
-            ++interventions; 
-            ++bad_interventions;
-            return FAST;
+            ++red_area_entered;
+            return action;
         } else if (color == BLUE) {
             ++interventions;
             return FAST;

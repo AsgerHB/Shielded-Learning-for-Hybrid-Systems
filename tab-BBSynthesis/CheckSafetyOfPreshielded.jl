@@ -122,6 +122,7 @@ end
 """
 function check_safety_of_preshielded(;shields_dir, results_dir, lib_source_code_dir, blueprints_dir, uppaal_dir, test, just_print_the_commands=false)
     # TODO: Skip shields if they are not valid
+    # TODO: Why in the world does the invalid shields appear to be safe?
     compiled_shields = compile_all_libbshield(shields_dir, lib_source_code_dir)
 
     query_result_dirs = check_shields(compiled_shields, results_dir, blueprints_dir, uppaal_dir; test, just_print_the_commands)

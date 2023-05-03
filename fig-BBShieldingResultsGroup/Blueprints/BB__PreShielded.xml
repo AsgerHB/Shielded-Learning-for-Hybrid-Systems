@@ -31,7 +31,7 @@ const int WHITE = 119; // etc.
 int next_action = NOHIT;    // (potentially) shielded action 
 
 int interventions = 0; // Total number of times the shield intervened
-int bad_interventions = 0; // Number of times where this was due to touching the red part
+int red_area_entered = 0; // Number of times where this was due to touching the red part
 
 bool shield_allows(int action) {
     int color = get_value(v, p);
@@ -57,9 +57,8 @@ int shield(int action) {
         if (action == HIT) {
             return action;
         } else if (color == RED) {
-            ++interventions; 
-            ++bad_interventions;
-            return HIT;
+            ++red_area_entered;
+            return action;
         } else if (color == BLUE) {
             ++interventions;
             return HIT;
