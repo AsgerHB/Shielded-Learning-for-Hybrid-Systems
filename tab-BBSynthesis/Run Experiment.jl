@@ -63,7 +63,9 @@ test_shields = !args["skip-evaluation"]
 # Additional usings after arguments are parse, to make cli help and error reporting slightly faster. Every bit counts because it is abysmally slow.
 using Dates
 using Serialization
+using Glob
 include("../Shared Code/ExperimentUtilities.jl")
+include("../Shared Code/Get libbbshield.jl")
 include("Synthesize Set of Shields.jl")
 include("CheckSafetyOfPreshielded.jl")
 

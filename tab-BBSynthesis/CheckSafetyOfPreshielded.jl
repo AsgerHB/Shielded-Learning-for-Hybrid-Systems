@@ -11,6 +11,9 @@
 function compile_all_libbshield(working_dir, lib_source_code_dir)
     created_files = String[]
     for shield_file in glob("*.shield", working_dir)
+        if !shield_is_valid(robust_grid_deserialization(shield_file))
+            continue
+        end
         libbbshield_file = compile_libbbshield(working_dir, shield_file, lib_source_code_dir)
         updated_location = working_dir ⨝ "$(basename(shield_file)).so"
         mv(libbbshield_file, updated_location, force=true)
@@ -48,25 +51,31 @@ function check_shields(compiled_shields, working_dir, blueprints_dir, uppaal_dir
         push!(shield_dirs, shield_dir)
     end
 
-    training_runs = test ? 100 : 12000
-    epsilon =       test ? 0.05 : 0.000005
+    training_runs = test ? "100" : "12000"
+    alpha =   test ? "0.1" : "0.01"
+    beta =    test ? "0.1" : "0.01"
+    epsilon = test ? "0.05" : "0.00001"
+    discretization = "0.001"
     
     for shield_dir in shield_dirs
         verifyta = uppaal_dir ⨝ "bin/verifyta.sh"
-        model = shield_dir ⨝ "BB__Shielded.xml"
+        model = shield_dir ⨝ "BB__PreShielded.xml"
         queries = shield_dir ⨝ "TrainSaveCheckSafety.q"
 
         @assert isfile(model)
         @assert isfile(queries)
-
-        # Usage: verifyta MODEL QUERY [OPTION]...
-        #   -E [ --epsilon ] arg                 probability uncertainty (epsilon).
-        #   -s [ --silence-progress ]            Do not display the progress indicator.
-        #   --good-runs arg                      Use <number> good runs for each learning
-        #   --total-runs arg                     Number of total runs to attempt for  learning
-        #   --runs-pr-state arg                  Number of good runs stored per discrete  state
-        #   --max-iterations arg                 Maximal total number of iterations in the learning algorithm
-        cmd = `$verifyta $model $queries -s --epsilon $epsilon --max-iterations 1 --good-runs $training_runs --total-runs $training_runs --runs-pr-state $training_runs`
+        
+        cmd = Cmd(String[verifyta, model, queries,# Usage: verifyta MODEL QUERY [OPTION]...
+            "--silence-progress",                 #   -s [ --silence-progress ]            Do not display the progress indicator.
+            "--max-iterations", "1",             #   --max-iterations arg                 Maximal total number of iterations in the learning algorithm
+            "--good-runs", training_runs,        #   --good-runs arg                      Use <number> good runs for each learning
+            "--total-runs", training_runs,       #   --total-runs arg                     Number of total runs to attempt for  learning
+            "--runs-pr-state", training_runs,    #   --runs-pr-state arg                  Number of good runs stored per discrete  state
+            "--epsilon", epsilon,                #   -E [ --epsilon ] arg                 probability uncertainty (epsilon).
+            "--alpha", alpha,                    #   -a [ --alpha ] arg                   probability of false negatives (alpha).
+            "--beta", beta,                      #   -B [ --beta ] arg                    probability of false positives (beta).
+            "--discretization", discretization,  #   -D [ --discretization ] arg          discretization step size (time) for 
+            ])
 
         if just_print_the_commands # This may be useful for running the queries on the cluster
             println(cmd)
