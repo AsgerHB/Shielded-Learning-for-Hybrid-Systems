@@ -3,7 +3,6 @@ if !isfile("Project.toml")
 end
 import Pkg
 Pkg.activate(".")
-using Dates
 Pkg.instantiate()
 include("../Shared Code/ExperimentUtilities.jl")
 
@@ -28,7 +27,11 @@ s = ArgParseSettings()
                 Directory will be created if it does not exist."""            
         default=homedir() ⨝ "Results"
 
-    "--skip-shield-synthesis"
+    "--uppaal-dir"
+        help="""Root directory of the UPPAAL STRATEGO 10 install."""
+        default=homedir() ⨝ "opt/uppaal-4.1.20-stratego-10-linux64/"
+
+    "--skip-synthesis"
         help="""Skip synthesising shields. Presumes shields to be in the results dir already."""
         action=:store_true
 
@@ -46,18 +49,22 @@ shields_dir = joinpath(results_dir, "Exported Strategies")
 mkpath(shields_dir)
 evaluations_dir = joinpath(results_dir, "Safety Evaluations")
 mkpath(evaluations_dir)
+uppaal_dir = args["uppaal-dir"]
+@assert isdir(uppaal_dir) uppaal_dir
 
-make_barbaric_shields = !args["skip-shield-synthesis"]
+make_barbaric_shields = !args["skip-synthesis"]
 test_shields = !args["skip-evaluation"]
-
-progress_update("Estimated total time to commplete: 2 hours. (5 minutes if run with --test)")
 
 #########
 # Setup #
 #########
 
+using Dates
 include("DC Synthesize Set of Shields.jl")
 include("DC Statistical Checking of Shield.jl")
+include("CheckSafetyOfPreshielded.jl")
+
+progress_update("Estimated total time to commplete: 2 hours. (5 minutes if run with --test)")
 
 if !test
     # HARDCODED: Parameters to generate shield. All variations will be used.
@@ -82,8 +89,6 @@ Gs = [ (G, G, 1) for G in Gs]
 # Mainmatter #
 ##############
 
-progress_update("Estimated total time to complete:  ¯\\_(ツ)_/¯")
-
 if make_barbaric_shields
     make_and_save_barbaric_shields(samples_per_axiss, Gs, shields_dir)
 else
@@ -91,7 +96,7 @@ else
 end
 
 if test_shields
-    test_shields_and_save_results(DCMechanics(), shields_dir, evaluations_dir, runs_per_shield)
+    check_safety_of_preshielded(;shields_dir, results_dir=evaluations_dir, lib_source_code_dir="Shared Code/libdcshield", blueprints_dir="tab-DCSynthesis/Blueprints", uppaal_dir, test, just_print_the_commands=false)
 else
     progress_update("Skipping tests of shields")
 end
