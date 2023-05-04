@@ -57,14 +57,14 @@ function get_shield(possible_shield_file, working_dir; test)
 end
 
 """
-    compile_libccshield(working_dir, shield_dir, source_dir)
+    compile_libccpreshield(working_dir, shield_dir, source_dir)
 
-Load shield from `shield_dir`, and bake it into a `libccpreshield.so` and a `libccpostshield.so` file.
+Load shield from `shield_dir`, and bake it into a `libccpreshield.so` file.
 The C source code is copied from `source_dir` into `working_dir` 
 where the given shield is written to `shield_dump.c` and compilation takes place.
-Returns the path to `liccpreshield.so` and `libccpostshield.so` which will be somewhere within `working_dir`.
+Returns the path to `liccpreshield.so` which will be somewhere within `working_dir`.
 """
-function compile_libccshield(working_dir, shield_dir, source_dir, julia_config_dir)
+function compile_libccpreshield(working_dir, shield_dir, source_dir)
     shield = robust_grid_deserialization(shield_dir)
 
     # Bake it into the C-library. 
@@ -85,6 +85,31 @@ function compile_libccshield(working_dir, shield_dir, source_dir, julia_config_d
     run(`gcc -c -fPIC preshield.c -o preshield.o`)
     run(`gcc -shared -o libccpreshield.so preshield.o`)
 
+    cd(previous_working_dir)
+
+    return working_dir ⨝ "libccpreshield.so"
+end
+
+"""
+    compile_libccpostshield(working_dir, shield_dir, source_dir, julia_config_dir)
+
+Load shield from `shield_dir`, and bake it into a a `libccpostshield.so` file.
+The C source code is copied from `source_dir` into `working_dir` 
+where the given shield is written to `shield_dump.c` and compilation takes place.
+Returns the path to `libccpostshield.so` which will be somewhere within `working_dir`.
+"""
+function compile_libccpostshield(working_dir, shield_dir, source_dir, julia_config_dir)
+    shield = robust_grid_deserialization(shield_dir)
+
+    # Bake it into the C-library. 
+    # Make a copy first so we don't overwrite the original files
+    for file in glob(source_dir ⨝ "*.c")
+        cp(file, working_dir ⨝ basename(file), force=true)
+    end
+
+    previous_working_dir = pwd()
+    cd(working_dir)
+
     # postshield
     # Command to get compiler flags for gcc
     cmd_julia_config = Cmd([julia_config_dir, "--cflags", "--ldflags", "--ldlibs"])
@@ -101,7 +126,7 @@ function compile_libccshield(working_dir, shield_dir, source_dir, julia_config_d
 
     cd(previous_working_dir)
 
-    return (working_dir ⨝ "libccpreshield.so", working_dir ⨝ "libccpostshield.so")
+    return working_dir ⨝ "libccpostshield.so"
 end
 
 function get_libccshield(possible_shield_file, source_dir; preshield_destination, postshield_destination, working_dir, julia_config_dir, test=false)
@@ -109,7 +134,8 @@ function get_libccshield(possible_shield_file, source_dir; preshield_destination
     # Getting shield
     shield_dir = get_shield(possible_shield_file, working_dir; test)
 
-    preshield_location, postshield_location = compile_libccshield(working_dir, shield_dir, source_dir, julia_config_dir)
+    preshield_location  = compile_libccpreshield(working_dir, shield_dir, source_dir)
+    postshield_location = compile_libccpostshield(working_dir, shield_dir, source_dir, julia_config_dir)
 
     if preshield_destination != preshield_location
         cp(preshield_location, preshield_destination, force=true)

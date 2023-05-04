@@ -18,7 +18,7 @@ end
 begin
 	using Plots
 	using PlutoUI
-	using PlutoSerialization
+	using Serialization
 	using CSV 
 	using Glob
 	using Dates

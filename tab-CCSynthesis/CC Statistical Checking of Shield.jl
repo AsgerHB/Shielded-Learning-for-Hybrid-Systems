@@ -14,7 +14,7 @@ begin
 	using Random
 	using PlutoUI
 	using StatsBase
-	using PlutoSerialization
+	using Serialization
 	include("../Shared Code/Squares.jl")
 	include("../Shared Code/Cruise.jl")
 	include("../Shared Code/ExperimentUtilities.jl")

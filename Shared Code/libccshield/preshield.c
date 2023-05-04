@@ -54,6 +54,16 @@ int get_value(double v_ego, double v_front, double distance)
     return get_value_from_vector((double[]){v_ego, v_front, distance});
 }
 
+/*  TODO: clean up dirty glasses
+    _____
+   /.---.\ 
+   |`````|
+   \     /
+    `-.-'           ____
+      |    /\     .'   /\
+    __|__  |K----;    |  |
+   `-----` \/     '.___*/
+
 int main()
 {
     printf("These test cases are written for the grid saved in shield_dump(sample).c\n");

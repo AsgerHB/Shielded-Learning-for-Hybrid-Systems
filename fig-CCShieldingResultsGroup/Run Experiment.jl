@@ -10,7 +10,7 @@ using ArgParse
 using Glob
 using Dates
 include("../Shared Code/ExperimentUtilities.jl")
-include("Get libccshield.jl")
+include("../Shared Code/Get libccshield.jl")
 
 s = ArgParseSettings()
 
@@ -35,7 +35,7 @@ s = ArgParseSettings()
 
         "--uppaal-dir"
             help="""Root directory of the UPPAAL STRATEGO 10 install."""
-            default=homedir() ⨝ "opt/uppaal-4.1.20-stratego-11-rc1-linux64/"
+            default=homedir() ⨝ "opt/uppaal-4.1.20-stratego-10-linux64/"
 
         "--julia-dir"
             help="""Root directory of the julia install. Used to locate the file <julia-dir>/share/julia/julia_config.jl"""
@@ -84,7 +84,7 @@ if !args["skip-experiment"]
     strategy_for_postshield = libccshield_working_dir ⨝ "postshieldme.strategy.json" # Path where strategies will be loaded by UPPAAL models and post-shielded. All Queries.py will copy strategies to here.
 
     postshield_notebook_path = abspath(figure_name ⨝ "PostShield Strategy.jl")
-    source_code_dir = figure_name ⨝ "libcc/"    # Destination of the C files used to compile the libcc binaries
+    source_code_dir = "../Shared Code/libccshield/"    # Destination of the C files used to compile the libcc binaries
 
     # Get the raw shield file first
     shield_file = get_shield(possible_shield_file, libccshield_working_dir, test=args["test"])
@@ -125,6 +125,7 @@ if !args["skip-experiment"]
     # I think it was because I knew how to use python's os.system() but not julia's run().
     # And as you can see, Julia's run() is kind of strange. https://docs.julialang.org/en/v1/manual/running-external-programs/
 
+    @assert isdir(args["uppaal-dir"])
     cmd = [
         "python3", figure_name ⨝ "All Queries.py", 
         "--results-dir", query_results_dir,
