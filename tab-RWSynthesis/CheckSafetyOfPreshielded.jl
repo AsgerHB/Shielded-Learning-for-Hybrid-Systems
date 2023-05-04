@@ -11,8 +11,10 @@ include("../Shared Code/Get librwshield.jl")
 
 function compile_all_librwshield(working_dir, lib_source_code_dir)
     created_files = String[]
+    skipped_files = String[]
     for shield_file in glob("*.shield", working_dir)
         if !shield_is_valid(robust_grid_deserialization(shield_file))
+            push!(skipped_files, shield_file)
             continue
         end
         librwshield_file = compile_librwshield(working_dir, shield_file, lib_source_code_dir)
@@ -23,7 +25,7 @@ function compile_all_librwshield(working_dir, lib_source_code_dir)
     # Cleanup all .c and .o files
     [rm(f) for f in glob("*.[oc]", working_dir)]
 
-    return created_files
+    return created_files, skipped_files
 end
 
 # "1 Samples 0.01 G.shield.so" => "1 Samples 0.01 G"
@@ -104,17 +106,37 @@ function read_query_results(shield_dirs, result_file)
             unsafe, total, smc_result = extract_result(query_results)
             fraction_unsafe = parse(Int, unsafe)/parse(Int, total)
             row = join([
-                "\"$shield_description\"",
-                "preshielded",
-                unsafe,
-                total,
-                fraction_unsafe,
-                "\"$smc_result\""],
+                    "\"$shield_description\"",
+                    "preshielded",
+                    unsafe,
+                    total,
+                    fraction_unsafe,
+                    "\"$smc_result\""],
                 ";")
 
             println(io, row)
         end
     end;
+end
+
+function append_skipped_shields(skipped_shields, result_file)
+    open(result_file, "a") do io
+        for skipped in skipped_shields
+            shield_description = replace(basename(skipped), ".shield" => "")
+            unsafe = total = fraction_unsafe = 1
+            smc_result = "\"-\""
+            row = join([
+                    shield_description,
+                    "skipped",
+                    unsafe,
+                    total,
+                    fraction_unsafe,
+                    smc_result],
+                ";")
+
+            println(io, row)
+        end
+    end
 end
 
 """
@@ -130,13 +152,11 @@ end
  - `just_print_the_commands` Don't actually run the queries, just set everything up and print the commands to do so in the console. Useful for putting the queries onto the cluster.
 """
 function check_safety_of_preshielded(;shields_dir, results_dir, lib_source_code_dir, blueprints_dir, uppaal_dir, test, just_print_the_commands=false)
-    # TODO: Skip shields if they are not valid
-    # TODO: Why in the world does the invalid shields appear to be safe?
-    compiled_shields = compile_all_librwshield(shields_dir, lib_source_code_dir)
-
+       
+    compiled_shields, skipped_shields = compile_all_librwshield(shields_dir, lib_source_code_dir)
     query_result_dirs = check_shields(compiled_shields, results_dir, blueprints_dir, uppaal_dir; test, just_print_the_commands)
-
     read_query_results(query_result_dirs, results_dir ⨝ "Evaluations.csv")
+    append_skipped_shields(skipped_shields, results_dir ⨝ "Evaluations.csv")
 end
 
 # Tests written during development. You'll have to comment in the usings to run them.

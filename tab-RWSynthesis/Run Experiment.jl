@@ -47,6 +47,7 @@ mkpath(shields_dir)
 evaluations_dir = joinpath(results_dir, "Evaluations")
 mkpath(evaluations_dir)
 uppaal_dir = args["uppaal-dir"]
+@assert isdir(uppaal_dir) uppaal_dir
 
 make_shields = !args["skip-synthesis"]
 test_shields = !args["skip-evaluation"]
@@ -55,6 +56,7 @@ test_shields = !args["skip-evaluation"]
 #########
 # Setup #
 #########
+
 
 include("../Shared Code/ExperimentUtilities.jl")
 include("CheckSafetyOfPreshielded.jl")
