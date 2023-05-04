@@ -2,7 +2,7 @@
 // HACK: Since this query file is only used for NoShield, I don't bother estimating the number of interventions. It will be zero, but I want to keep that number.
 
 /* formula 1 */
-strategy Deterrence1000 = minE (aov + number_deaths*1000 ) [<=120] {p} -> {t, v, l}: <> elapsed >= 120
+strategy Deterrence1000 = minE (aov + number_deaths*1000 ) [<=120] {p} -> {t, v}: <> elapsed >= 120
 
 /* formula 2 */
 saveStrategy("%resultsdir%/Deterrence1000.strategy.json", Deterrence1000)
@@ -17,7 +17,7 @@ E[<=120;%checks%] (max:(number_deaths > 0)) under Deterrence1000
 E[<=120;2] (max:0)
 
 /* formula 6 */
-strategy Deterrence100 = minE (aov + number_deaths*100 ) [<=120] {p} -> {t, v, l}: <> elapsed >= 120
+strategy Deterrence100 = minE (aov + number_deaths*100 ) [<=120] {p} -> {t, v}: <> elapsed >= 120
 
 /* formula 7 */
 saveStrategy("%resultsdir%/Deterrence100.strategy.json", Deterrence100)
@@ -32,7 +32,7 @@ E[<=120;%checks%] (max:(number_deaths > 0)) under Deterrence100
 E[<=120;2] (max:0)
 
 /* formula 11 */
-strategy Deterrence10 = minE (aov + number_deaths*10 ) [<=120] {p} -> {t, v, l}: <> elapsed >= 120
+strategy Deterrence10 = minE (aov + number_deaths*10 ) [<=120] {p} -> {t, v}: <> elapsed >= 120
 
 /* formula 12 */
 saveStrategy("%resultsdir%/Deterrence10.strategy.json", Deterrence10)
@@ -47,7 +47,7 @@ E[<=120;%checks%] (max:(number_deaths > 0)) under Deterrence10
 E[<=120;2] (max:0)
 
 /* formula 16 */
-strategy Deterrence0 = minE (aov + number_deaths*0 ) [<=120] {p} -> {t, v, l}: <> elapsed >= 120
+strategy Deterrence0 = minE (aov + number_deaths*0 ) [<=120] {p} -> {t, v}: <> elapsed >= 120
 
 /* formula 17 */
 saveStrategy("%resultsdir%/Deterrence0.strategy.json", Deterrence0)
