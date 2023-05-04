@@ -3,49 +3,65 @@ if !isfile("Project.toml")
 end
 import Pkg
 Pkg.activate(".")
-using Dates
 Pkg.instantiate()
-include("../Shared Code/ExperimentUtilities.jl")
+using ArgParse
+⨝ = joinpath # infix operator "\join" redefined to signify joinpath
 
 #########
 # Args  #
 #########
+s = ArgParseSettings()
 
-args = my_parse_args(ARGS)
-if haskey(args, "help")
-    print("""
-    --help              Display this help and exit.
-    --test              Test-mode. Produce potentially useless results, but fast.
-                        Useful for testing if everything is set up.
-    --results-dir       Results will be saved in an appropriately named subdirectory.
-                        Directory will be created if it does not exist.
-                        Default: '~/Results'
-    --skip-synthesis    Skip synthesis of shields.
-                        Useful if there are already shields saved in the results dir.
-    --skip-evaluation   Do not evaluate the strategies' safety after synthesis is done.
-    """)
-    exit()
+@add_arg_table s begin
+    "--test"
+        help="""Test-mode. Produce potentially useless results, but fast.
+                Useful for testing if everything is set up."""
+        action=:store_true
+
+    "--results-dir"
+        help="""Results will be saved in an appropriately named subdirectory.
+                Directory will be created if it does not exist."""
+        default=homedir() ⨝ "Results"
+
+    "--uppaal-dir"
+        help="""Root directory of the UPPAAL STRATEGO 10 install."""
+        default=homedir() ⨝ "opt/uppaal-4.1.20-stratego-10-linux64/"
+
+    "--skip-synthesis"
+        help="""Skip synthesis using barbaric reachability funciton."""
+        action=:store_true
+
+    "--skip-evaluation"
+        help="""Do not evaluate the strategies' safety after synthesis is done."""
+        action=:store_true
 end
-test = haskey(args, "test")
-results_dir = get(args, "results-dir", "$(homedir())/Results")
+
+args = parse_args(s)
+
+test = args["test"]
+results_dir = args["results-dir"]
 table_name = "tab-RWSynthesis"
 results_dir = joinpath(results_dir, table_name)
 shields_dir = joinpath(results_dir, "Exported Strategies")
 mkpath(shields_dir)
-evaluations_dir = joinpath(results_dir, "Safety Evaluations")
+evaluations_dir = joinpath(results_dir, "Evaluations")
 mkpath(evaluations_dir)
+uppaal_dir = args["uppaal-dir"]
 
-make_shields = !haskey(args, "skip-synthesis")
-test_shields = !haskey(args, "skip-evaluation")
+make_shields = !args["skip-synthesis"]
+test_shields = !args["skip-evaluation"]
 
-progress_update("Estimated total time to complete: 10 minutes. (2 minutes if run with --test)")
 
 #########
 # Setup #
 #########
 
+include("../Shared Code/ExperimentUtilities.jl")
+include("CheckSafetyOfPreshielded.jl")
 include("RW Synthesize Set of Shields.jl")
 include("RW Statistical Checking of Shield.jl")
+
+progress_update("Estimated total time to complete: 10 minutes. (2 minutes if run with --test)")
 
 if !test
     # HARDCODED: Parameters to generate shield. All variations will be used.
@@ -75,7 +91,7 @@ else
 end
 
 if test_shields
-    test_shields_and_save_results(shields_dir, evaluations_dir, random_agents_fast_chances, runs_per_shield)
+    check_safety_of_preshielded(;shields_dir, results_dir=evaluations_dir, lib_source_code_dir="Shared Code/librwshield", blueprints_dir="tab-RWSynthesis/Blueprints", uppaal_dir, test, just_print_the_commands=false)
 else
     progress_update("Skipping tests of shields")
 end
@@ -87,7 +103,7 @@ end
 
 NBPARAMS = Dict(
     "csv_synthesis_report" => joinpath(shields_dir, "Shields Synthesis Report.csv"),
-    "csv_safety_report" => joinpath(evaluations_dir, "Test of Shields.csv")
+    "csv_safety_report" => joinpath(evaluations_dir, "Evaluations.csv")
 )
 
 

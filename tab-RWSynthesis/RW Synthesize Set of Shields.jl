@@ -16,12 +16,12 @@ end
 
 # ╔═╡ 8617b0cb-b308-4fe2-9a23-d7b4823b2f9d
 begin
-	using Plots
 	using CSV
 	using Dates
+	using Plots
 	using PlutoUI
+	using Serialization
 	using ProgressLogging
-	using PlutoSerialization
 	include("../Shared Code/FlatUI.jl")
 	include("../Shared Code/RandomWalk.jl")
 	include("../Shared Code/RWSquares.jl")

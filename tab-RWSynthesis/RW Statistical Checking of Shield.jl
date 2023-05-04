@@ -24,8 +24,8 @@ begin
 	using Random
 	using PlutoUI
 	using StatsBase
+	using Serialization
 	using ProgressLogging
-	using PlutoSerialization
 	include("../Shared Code/FlatUI.jl")
 	include("../Shared Code/RandomWalk.jl")
 	include("../Shared Code/RWSquares.jl")
