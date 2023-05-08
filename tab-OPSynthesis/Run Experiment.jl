@@ -3,13 +3,13 @@ if !isfile("Project.toml")
 end
 import Pkg
 Pkg.activate(".")
-using Dates
 Pkg.instantiate()
-include("../Shared Code/ExperimentUtilities.jl")
+
 
 #########
 # Args  #
 #########
+
 
 using ArgParse
 s = ArgParseSettings()
@@ -28,7 +28,11 @@ s = ArgParseSettings()
                 Directory will be created if it does not exist."""            
         default=homedir() ⨝ "Results"
 
-    "--skip-shield-synthesis"
+    "--uppaal-dir"
+        help="""Root directory of the UPPAAL STRATEGO 10 install."""
+        default=homedir() ⨝ "opt/uppaal-4.1.20-stratego-10-linux64/"
+
+    "--skip-synthesis"
         help="""Skip synthesising shields. Presumes shields to be in the results dir already."""
         action=:store_true
 
@@ -44,18 +48,22 @@ table_name = "tab-OPSynthesis"
 results_dir = joinpath(results_dir, table_name)
 shields_dir = joinpath(results_dir, "Exported Strategies")
 mkpath(shields_dir)
-evaluations_dir = joinpath(results_dir, "Safety Evaluations")
+evaluations_dir = joinpath(results_dir, "Evaluations")
 mkpath(evaluations_dir)
-
-make_barbaric_shields = !args["skip-shield-synthesis"]
+uppaal_dir = args["uppaal-dir"]
+@assert isdir(uppaal_dir) uppaal_dir
+make_barbaric_shields = !args["skip-synthesis"]
 test_shields = !args["skip-evaluation"]
 
-progress_update("Estimated total time to commplete: 2 hours. (5 minutes if run with --test)")
 
 #########
 # Setup #
 #########
 
+
+using Dates
+include("../Shared Code/ExperimentUtilities.jl")
+include("CheckSafetyOfPreshielded.jl")
 include("OP Synthesize Set of Shields.jl")
 include("OP Statistical Checking of Shield.jl")
 
@@ -81,9 +89,11 @@ Gs = [ (G, G, 1, G) for G in Gs]
 
 m = OPMechanics()
 
+
 ##############
 # Mainmatter #
 ##############
+
 
 progress_update("Estimated total time to complete: 3 hours. (2 minutes if run with --test.)")
 
@@ -94,7 +104,7 @@ else
 end
 
 if test_shields
-    test_shields_and_save_results(m, shields_dir, evaluations_dir, runs_per_shield)
+    check_safety_of_preshielded(;shields_dir, results_dir=evaluations_dir, lib_source_code_dir="Shared Code/libopshield", blueprints_dir="tab-OPSynthesis/Blueprints", uppaal_dir, test, just_print_the_commands=false)
 else
     progress_update("Skipping tests of shields")
 end
@@ -104,9 +114,10 @@ end
 # Constructing Table #
 ######################
 
+
 NBPARAMS = Dict(
     "csv_synthesis_report" => joinpath(shields_dir, "Barbaric Shields Synthesis Report.csv"),
-    "csv_safety_report" => joinpath(evaluations_dir, "Test of Shields.csv")
+    "csv_safety_report" => joinpath(evaluations_dir, "Evaluations.csv")
 )
 
 
@@ -131,7 +142,6 @@ write(joinpath(results_dir, "macros.tex"),
 """\\newcommand{\\granularity}{G}
 \\newcommand{\\state}{s}
 \\newcommand{\\juliareach}{\\textsc{JuliaReach}\\xspace}""")
-
 
 progress_update("Saved $(exported_table_name)")
 

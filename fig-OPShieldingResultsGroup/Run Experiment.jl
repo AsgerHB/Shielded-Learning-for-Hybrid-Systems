@@ -9,7 +9,7 @@ using ArgParse
 using Glob
 using Dates
 include("../Shared Code/ExperimentUtilities.jl")
-include("Get libopshield.jl")
+include("../Shared Code/Get libopshield.jl")
 
 # infix operator "\join" redefined to signify joinpath
 ⨝ = joinpath

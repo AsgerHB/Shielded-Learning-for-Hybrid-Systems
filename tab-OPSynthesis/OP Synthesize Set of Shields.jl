@@ -23,7 +23,7 @@ begin
 	using Dates
 	using PlutoUI
 	using Setfield
-	using PlutoSerialization
+	using Serialization
 	TableOfContents()
 end
 

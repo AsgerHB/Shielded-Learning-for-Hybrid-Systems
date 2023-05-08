@@ -34,7 +34,7 @@ begin
 	using PlutoUI
 	using Setfield
 	using StatsBase
-	using PlutoSerialization
+	using Serialization
 	TableOfContents()
 end
 
