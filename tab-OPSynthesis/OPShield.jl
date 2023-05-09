@@ -20,16 +20,16 @@ begin
 	Pkg.activate("..")
 	Pkg.develop("GridShielding")
 	using GridShielding
-	
-	include("../Shared Code/OilPump.jl")
-	include("../Shared Code/OPShielding.jl")
-	include("../Shared Code/FlatUI.jl");
 	using Plots
 	using PlutoLinks
 	using PlutoUI
 	using Unzip
 	using Printf
 	using StatsBase
+	include("../Shared Code/PlotsDefaults.jl")
+	include("../Shared Code/OilPump.jl")
+	include("../Shared Code/OPShielding.jl")
+	include("../Shared Code/FlatUI.jl")
 	TableOfContents()
 end
 
@@ -358,21 +358,23 @@ let
 		legend=nothing, 
 		colors=opshieldcolors,
 		color_labels=opshieldlabels;
-		xlabel="time (s)", ylabel="volume (l)")
+		title="When \$pump~status=off\$",
+		titlefontsize=10,
+		xlabel="Time (s)", ylabel="Volume (l)")
 	
 	if show_tv
 		draw_barbaric_transition!(simulation_model, partition, action, slice)
 	end
 	plot!([], 
 		line=(3, colors.ASBESTOS),
-		label="consumption ")
+		label="Consumption ")
 	
 	#==# plot!(twinx(), t -> consumption_rate(abs(t%m.period)), 
 		line=(3, colorant"#717171"),
 		ylim=(0,3),
-		ylabel="consumption (l/s)",
+		ylabel="Consumption (l/s)",
 		label=nothing) #==#
-	plot!(size=(400, 240))
+	plot!(size=(halfpage, 240))
 end
 
 # ╔═╡ cacf2987-28ef-42a2-b6ff-26e512b84856
@@ -384,21 +386,23 @@ let
 		legend=:topleft, 
 		colors=opshieldcolors,
 		color_labels=opshieldlabels;
-		xlabel="time (s)", ylabel="volume (l)")
+		title="When \$pump~status=on\$",
+		titlefontsize=10,
+		xlabel="Time (s)", ylabel="Volume (l)")
 	
 	if show_tv
 		draw_barbaric_transition!(simulation_model, partition, action, slice)
 	end
 	plot!([], 
 		line=(3, colors.ASBESTOS),
-		label="consumption ")
+		label="Consum.")
 	
 	#==# plot!(twinx(), t -> consumption_rate(abs(t%m.period)), 
 		line=(3, colorant"#717171"),
 		ylim=(0,3),
-		ylabel="consumption (l/s)",
+		ylabel="Consumption (l/s)",
 		label=nothing) #==#
-	plot!(size=(400, 240))
+	plot!(size=(halfpage, 240))
 end
 
 # ╔═╡ b7d70793-92b5-4812-a6dd-7302ee9e6ae4
@@ -486,12 +490,12 @@ if check_safety_button > 0
 end
 
 # ╔═╡ 150d8707-e8ef-4476-9378-9dd1c63036bf
-if unsafe > 0
+if check_safety_button > 0 && unsafe > 0
 Markdown.parse("""
 !!! danger "Shield is Unsafe"
     There were $unsafe safety violations during the $total runs.
 """)
-else
+elseif check_safety_button > 0
 Markdown.parse("""
 !!! success "Shield is Safe"
     There were no safety violations during the $total runs.
@@ -620,8 +624,8 @@ end
 # ╠═5d0400fb-2ad5-4d07-9115-49024913c3fa
 # ╠═47fdca20-194d-4535-a4a3-25a7509324b5
 # ╟─caf38611-4ba4-4b10-99aa-d72252a8b60d
-# ╟─0a0285ca-a922-467f-ae91-b7a96ee43588
-# ╟─cacf2987-28ef-42a2-b6ff-26e512b84856
+# ╠═0a0285ca-a922-467f-ae91-b7a96ee43588
+# ╠═cacf2987-28ef-42a2-b6ff-26e512b84856
 # ╟─7692cddf-6b37-4be2-847f-afb6d34e44ab
 # ╠═b7d70793-92b5-4812-a6dd-7302ee9e6ae4
 # ╠═f6bab622-4b1d-41ec-ae54-61915fca3b2c

@@ -41,6 +41,7 @@ begin
 	include("../Shared Code/DC-DC Converter.jl")
 	include("../Shared Code/DCShielding.jl")
 	include("../Shared Code/FlatUI.jl")
+	include("../Shared Code/PlotsDefaults.jl")
 end
 
 # ╔═╡ 6f5584c1-ea5e-49ee-afc0-25abde4e295a
@@ -97,6 +98,9 @@ Total partitions: **$(length(grid.array))**
 
 Estimated time to compute reachability: $(round(1/405657 * length(grid.array), digits=2)) minutes
 """
+
+# ╔═╡ 8e311d52-1179-4cd1-815b-06e7a830acec
+@which get_dc_grid
 
 # ╔═╡ 33861602-0e64-4977-9c64-7ae42eb890d4
 grid.bounds
@@ -315,8 +319,8 @@ begin
 		colors=dcshieldcolors,
 		#show_grid=true,
 		color_labels=dcshieldlabels;
-		xlabel="Current", ylabel="Voltage")
-	plot!([], line=nothing, label="R=$R")
+		xlabel="Current (A)", ylabel="Voltage (V)")
+	plot!([], label=nothing, titlefontsize=10, title="When \$resistance=$R \\Omega \$")
 end
 
 # ╔═╡ 5d8cd954-3605-431a-bf85-1a03fa82497d
@@ -502,6 +506,7 @@ end
 # ╟─1687a47c-c3f6-4518-ac46-e97b240ad323
 # ╟─be055e02-7ef6-4a63-8c95-d6c2bfdc799a
 # ╠═3048a6f4-9a4a-488c-becc-6ab39d7894d1
+# ╠═8e311d52-1179-4cd1-815b-06e7a830acec
 # ╠═33861602-0e64-4977-9c64-7ae42eb890d4
 # ╟─cfe8387f-a127-4e46-88a6-40d9442fe4b1
 # ╠═d2300c36-906c-4351-952a-3a5176338649

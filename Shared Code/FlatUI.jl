@@ -43,19 +43,20 @@ opshieldcolors = [enby[4], enby[3], enby[1], enby[2]]
 dcshieldlabels = ["{}", "{off}", "{on}", "{on, off}"]
 dcshieldcolors = [enby[4], enby[3], enby[1], enby[2]]
 
-
 ccshieldcolors=[
-	colors.POMEGRANATE, # 000
-	colors.PETER_RIVER, # 001
-	colors.EMERALD, # 010
-	colors.CONCRETE, # 011
-	colors.SUNFLOWER, # 100
-	colors.TURQUOISE, # 101
-	colors.AMETHYST, # 110
-	colors.CLOUDS, # 111
+	enby[4],			# 000
+	enby[3],			# 001
+	colors.EMERALD, 	# 010 
+	enby[1],			# 011
+	colors.TURQUOISE, 	# 100
+	colors.CARROT, 		# 101
+	colors.PETER_RIVER, # 110
+	enby[2],			# 111
 ]
 
-ccshieldlabels=["No actions", "1 Action", "2 Actions", "All 3 Actions"]
+ccshieldlabels=["{}", "{forwards}", "{neutral}", "{neutral, forwards}", "{backwards}", "{backwards, forwards}", "{backwards, neutral}", "{backwards, neutral, forwards}"]
+
+ccshieldlabelsabbreviated = ["{}", "{backwards}", "{backwards, neutral}", "{backwards, neutral, forwards}"]
 
 # Used for shielding results figures.
 shielding_type_colors = (pre_shielded=colors.GREEN_SEA, no_shield=colors.BELIZE_HOLE, post_shielded=colors.SUNFLOWER, layabout=colors.MIDNIGHT_BLUE)

@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.19
+# v0.19.22
 
 using Markdown
 using InteractiveUtils
@@ -26,6 +26,7 @@ begin
 	using Measures
 	using Printf
 	include("../Shared Code/FlatUI.jl")
+    include("../Shared Code/PlotsDefaults.jl")
 	include("../Shared Code/ExperimentUtilities.jl")
 end
 
@@ -103,7 +104,13 @@ selected_file
 
 # ╔═╡ b842083d-b6c0-49bb-9243-e03b2a65bfe2
 cleandata = call() do
-	cleandata = rename(rawdata, :Avg_Crashes => :Avg_Deaths)
+	cleandata = rawdata
+	if names(cleandata) ∋ "Avg_Crashes"
+		cleandata = rename(cleandata, :Avg_Crashes => :Avg_Deaths)
+	end
+	if names(cleandata) ∋ "Death_Costs"
+		cleandata = rename(cleandata, :Death_Costs => :Deterrence)
+	end
 	
 	cleandata = select(cleandata, [:Experiment, :Deterrence, :Runs, :Avg_Cost, :Avg_Deaths, :Avg_Interventions])
 	cleandata = sort(cleandata, [:Experiment, :Deterrence, :Runs])

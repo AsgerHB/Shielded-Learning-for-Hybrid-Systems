@@ -25,6 +25,7 @@ begin
 	using NaturalSort
 	using Measures
 	include("../Shared Code/FlatUI.jl")
+    include("../Shared Code/PlotsDefaults.jl")
 	include("../Shared Code/ExperimentUtilities.jl")
 end
 
@@ -102,45 +103,6 @@ selected_file
 filter([:Experiment, :Deterrence] => 
 		(e, d) -> ((e == "NoShield" && d == "-") || (e == "PostShielded" && d == "-")),
 		rawdata)
-
-# ╔═╡ 701e4858-f8e4-4e74-a010-85b3ecbec252
-@bind learning_rate Select(rawdata[!, :Learning_Rate] |> unique)
-
-# ╔═╡ b842083d-b6c0-49bb-9243-e03b2a65bfe2
-cleandata = call() do
-
-	cleandata = rename(rawdata, :Avg_Swings => :Avg_Cost)
-	
-	cleandata = select(cleandata, [:Experiment, :Deterrence, :Runs, :Avg_Cost, :Avg_Deaths, :Avg_Interventions, :Learning_Rate])
-	cleandata = sort(cleandata, [:Experiment, :Deterrence, :Runs])
-	cleandata = sort(cleandata, [:Experiment], by=experiment_order)
-	
-	cleandata = filter(:Learning_Rate => 
-		(lr -> lr == learning_rate), 
-		cleandata)
-
-	# We don't care about unshielded with no deterrence
-	cleandata = filter([:Experiment, :Deterrence] => 
-		(e, d) -> !(e == "NoShield" && d == "0"), 
-		cleandata)
-
-	# See note on BB time-locks
-	cleandata = filter([:Experiment, :Deterrence] => 
-			(e, d) -> !((e == "NoShield" && d == "-") || (e == "PostShielded" && d == "-")),
-			cleandata)
-
-	# Turn number of interventions into % interventions
-	cleandata = transform(cleandata, :Avg_Interventions => x -> (x/120)*100, renamecols=false)
-	cleandata = transform(cleandata, :Avg_Deaths => x -> x*100, renamecols=false)
-
-	cleandata
-end
-
-# ╔═╡ 040e59d0-3beb-4552-9b00-5f320f954805
-min(cleandata[!, :Avg_Cost]...)
-
-# ╔═╡ 033989be-6592-4757-86d5-742e28b3ee8e
-"Dropped rows: $(nrow(rawdata) - nrow(cleandata))"
 
 # ╔═╡ 8da05256-b0d7-479e-bd42-2e03d521711c
 begin
@@ -221,36 +183,6 @@ call() do
 	end
 end
 
-# ╔═╡ 45500c97-b2a7-4669-ab37-579c75ca3002
-grouping = call() do
-	grouping =  groupby(cleandata, [:Experiment, :Deterrence, :Runs ])
-	
-	# Take at most 10 rows for each configuration. (Experiment, Deterrence, Runs)
-	take = min(combine(grouping, nrow)[!, :nrow]...) # Find the lowest number of rows for a configuration
-	take = min(take, 10)
-
-	grouping = combine(grouping, x -> x[1:take, :])
-	grouping =  groupby(grouping, [:Experiment, :Deterrence, :Runs ])
-end;
-
-# ╔═╡ 7904c209-eeea-4243-beb4-0e5a7fd47a56
-means = 
-call(() -> begin	
-	means = combine(grouping, 
-		:Avg_Cost => mean, :Avg_Deaths => mean, :Avg_Interventions => mean,
-		renamecols=false)
-end)
-
-# ╔═╡ e0444e2e-0e77-4e5a-ac1e-64db46f2558f
-standard_deviations = 
-call(() -> begin
-	df = combine(grouping, 
-		nrow => :Count,
-		:Avg_Cost => std, :Avg_Deaths => std, :Avg_Interventions => std,
-		renamecols=true)
-	df = sort(df, [:Experiment, :Deterrence, :Runs])
-end)
-
 # ╔═╡ 87e9c503-c0f2-451e-b654-11e39e4e8cd0
 std
 
@@ -281,6 +213,75 @@ md"""
 
 `layabout =` $(@bind layabout CheckBox(default=layabout_default))
 """
+
+# ╔═╡ 701e4858-f8e4-4e74-a010-85b3ecbec252
+@bind learning_rate Select(rawdata[!, :Learning_Rate] |> unique)
+
+# ╔═╡ b842083d-b6c0-49bb-9243-e03b2a65bfe2
+cleandata = call() do
+
+	cleandata = rename(rawdata, :Avg_Swings => :Avg_Cost)
+	
+	cleandata = select(cleandata, [:Experiment, :Deterrence, :Runs, :Avg_Cost, :Avg_Deaths, :Avg_Interventions, :Learning_Rate])
+	cleandata = sort(cleandata, [:Experiment, :Deterrence, :Runs])
+	cleandata = sort(cleandata, [:Experiment], by=experiment_order)
+	
+	cleandata = filter(:Learning_Rate => 
+		(lr -> lr == learning_rate), 
+		cleandata)
+
+	# We don't care about unshielded with no deterrence
+	cleandata = filter([:Experiment, :Deterrence] => 
+		(e, d) -> !(e == "NoShield" && d == "0"), 
+		cleandata)
+
+	# See note on BB time-locks
+	cleandata = filter([:Experiment, :Deterrence] => 
+			(e, d) -> !((e == "NoShield" && d == "-") || (e == "PostShielded" && d == "-")),
+			cleandata)
+
+	# Turn number of interventions into % interventions
+	cleandata = transform(cleandata, :Avg_Interventions => x -> (x/120)*100, renamecols=false)
+	cleandata = transform(cleandata, :Avg_Deaths => x -> x*100, renamecols=false)
+
+	cleandata
+end
+
+# ╔═╡ 040e59d0-3beb-4552-9b00-5f320f954805
+min(cleandata[!, :Avg_Cost]...)
+
+# ╔═╡ 033989be-6592-4757-86d5-742e28b3ee8e
+"Dropped rows: $(nrow(rawdata) - nrow(cleandata))"
+
+# ╔═╡ 45500c97-b2a7-4669-ab37-579c75ca3002
+grouping = call() do
+	grouping =  groupby(cleandata, [:Experiment, :Deterrence, :Runs ])
+	
+	# Take at most 10 rows for each configuration. (Experiment, Deterrence, Runs)
+	take = min(combine(grouping, nrow)[!, :nrow]...) # Find the lowest number of rows for a configuration
+	take = min(take, 10)
+
+	grouping = combine(grouping, x -> x[1:take, :])
+	grouping =  groupby(grouping, [:Experiment, :Deterrence, :Runs ])
+end;
+
+# ╔═╡ 7904c209-eeea-4243-beb4-0e5a7fd47a56
+means = 
+call(() -> begin	
+	means = combine(grouping, 
+		:Avg_Cost => mean, :Avg_Deaths => mean, :Avg_Interventions => mean,
+		renamecols=false)
+end)
+
+# ╔═╡ e0444e2e-0e77-4e5a-ac1e-64db46f2558f
+standard_deviations = 
+call(() -> begin
+	df = combine(grouping, 
+		nrow => :Count,
+		:Avg_Cost => std, :Avg_Deaths => std, :Avg_Interventions => std,
+		renamecols=true)
+	df = sort(df, [:Experiment, :Deterrence, :Runs])
+end)
 
 # ╔═╡ 4fd405a2-ef9e-4590-8af1-6f806724ef2c
 proper_experiment_name = Dict(
@@ -1777,8 +1778,8 @@ version = "0.9.1+5"
 # ╟─df65aac9-25df-48b5-a532-2bccde1ea8c0
 # ╠═6f5f5e08-199f-41a1-b477-fbd537885fd6
 # ╠═5a20bd30-e279-11ec-3f5e-ed9714dfcd32
-# ╟─d4cac18b-1bf1-477d-84e1-ace714fc9967
 # ╟─e0c5c3e6-7fbc-449a-96b2-aadd647728d9
+# ╟─d4cac18b-1bf1-477d-84e1-ace714fc9967
 # ╠═fe891915-8a47-4a2b-87bd-947e29a64df1
 # ╠═bba93717-6370-417d-8b12-01d006623c6a
 # ╠═2bb947a6-9927-4793-a9b1-ce19bd429624

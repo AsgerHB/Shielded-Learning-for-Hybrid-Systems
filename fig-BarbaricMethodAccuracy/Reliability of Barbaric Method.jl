@@ -13,6 +13,7 @@ begin
 	using StatsPlots
 	using NaturalSort
 	include("../Shared Code/ExperimentUtilities.jl")
+	include("../Shared Code/PlotsDefaults.jl")
 	include("../Shared Code/Ball.jl")
 	include("../Shared Code/BBSquares.jl")
 	include("../Shared Code/BBBarbaricReachabilityFunction.jl")
@@ -431,7 +432,7 @@ function plot_accuracies_spa(df, plotargs...)
 		xrotation=0,
 		size=figure_size,
 		label=labels,
-		xlabel="n", 
+		xlabel="\$n\$", 
 		ylabel="Accuracy",
 		legend=:bottomright,
 		margin=0mm,
@@ -514,7 +515,7 @@ function plot_accuracies_granularity(df, plotargs...)
 			size=figure_size,
 			label=labels[n],
 			color=colors′[i],
-			xlabel="γ", 
+			xlabel="\$\\gamma\$", 
 			ylabel="Accuracy",
 			legend=:bottomright,
 			#margin=1mm

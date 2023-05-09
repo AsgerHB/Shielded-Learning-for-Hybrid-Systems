@@ -25,6 +25,7 @@ begin
 	using NaturalSort
 	using Measures
 	include("../Shared Code/FlatUI.jl")
+    include("../Shared Code/PlotsDefaults.jl")
 	include("../Shared Code/ExperimentUtilities.jl")
 end
 

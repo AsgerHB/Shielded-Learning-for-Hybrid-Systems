@@ -39,18 +39,11 @@ end;
 call(f) = f()
 
 # ╔═╡ faf6e126-51f6-47ad-a02a-f673223b2600
-fast_color, slow_color = colors.PETER_RIVER, colors.CLOUDS
+fast_color, slow_color = enby[1], enby[3]
 
 # ╔═╡ 8894e942-b6f6-4893-bfea-ebaa2f9c58f0
 md"""
 ## Importing the policy:
-"""
-
-# ╔═╡ eeebe049-8b0b-4e3e-8cb2-4ee89e241273
-md"""
-**Exported UPPAAL STRATEGO strategy:** 
-
-`selected_strategy` = $(@bind selected_strategy PlutoUI.FilePicker([MIME("application/json")]))
 """
 
 # ╔═╡ c426cf95-81ed-4c70-96a1-d46e05e29ddb
@@ -75,9 +68,6 @@ imported_shield =
 	else
 		nothing
 	end
-
-# ╔═╡ 9a3af469-7dc0-4d29-a375-bdc79415e950
-jsondict = selected_strategy["data"] |> IOBuffer |> JSON.parse
 
 # ╔═╡ 534968b3-b361-41e0-8e2a-c3ec9e73eef4
 function show_strategy_info(s::Dict)
@@ -106,12 +96,12 @@ function show_strategy_info(s::Dict)
 	s["version"] != 1.0 && @error("Strategy version not supported")
 	
 	Markdown.parse("""
-	!!! info "Strategy { $pointvars } -> { $statevars }"
+	!!! info "Strategy { $statevars } -> { $pointvars }"
 
-		`pointvars`: $(statevars == "" ? "none" : statevars)
+		`statevars`: $(statevars == "" ? "none" : statevars)
 	
-		`statevars`: $(pointvars == "" ? "none" : pointvars)
-
+		`pointvars`: $(pointvars == "" ? "none" : pointvars)
+	
 		**Location names:**
 	
 	$(locationnames)
@@ -121,9 +111,6 @@ function show_strategy_info(s::Dict)
 	$actions
 	""")
 end
-
-# ╔═╡ 1c8b2b93-8a23-4717-99a1-6d0cd8fa56b1
-show_strategy_info(jsondict)
 
 # ╔═╡ b3e2a24a-fab6-414e-be8b-351a0e7d1b1c
 md"""
@@ -136,17 +123,11 @@ function get_action_names(file)
 	action_names = jsondict["actions"]
 end
 
-# ╔═╡ 84e98403-b4f7-45ed-9638-d2d5fefec26a
-get_action_names(selected_strategy)
-
 # ╔═╡ 1f8a4dda-3007-47bd-82da-bcc5463b0a23
 function get_variable_names(file)
 	jsondict = file["data"] |> IOBuffer |> JSON.parse
 	action_names = vcat(jsondict["pointvars"], jsondict["statevars"])
 end
-
-# ╔═╡ 7e58ef81-3242-4b21-8adc-c8f704954d80
-get_variable_names(selected_strategy)
 
 # ╔═╡ 5204d97e-6e04-4525-818b-a7ed642aec0d
 # Traverse the "simpletree" which makes a prediction on the continuous statevars for the regressor's action
@@ -183,26 +164,12 @@ function get_action(regressor, state)
 	parse(Int, cheapest_action)
 end
 
-# ╔═╡ 1a27105e-58d5-4dc2-bb7e-f7392a39c900
-function get_policy(file)
-	jsondict = file["data"] |> IOBuffer |> JSON.parse
-	regressor = jsondict["regressors"]["(1)"]["regressor"]
-
-	policy = (state) -> get_action(regressor, state)
-end
-
-# ╔═╡ 79fb04f7-2d45-454f-89c5-7312d4aeadde
-imported_policy = get_policy(selected_strategy)
-
 # ╔═╡ 29a9d1e2-b0d0-46f2-bbff-ba30f13d3ac0
 md"""
 ### Testing the policy
 
 Get policy from selected file, then apply it to a state.
 """
-
-# ╔═╡ c8b9241e-eb92-468d-9452-ee51585f5488
-test_policy = get_policy(selected_strategy)
 
 # ╔═╡ 47a9daed-792b-4b75-8208-3dcf46ede4c5
 md"""
@@ -256,60 +223,111 @@ function draw_expected(regressors, action, x_min, x_max, y_min, y_max, G; plotar
 			plotargs...)
 end
 
+# ╔═╡ db418782-45c3-4724-8b09-4e9ab151f882
+@bind p Select([0, 1])
+
+# ╔═╡ 1a27105e-58d5-4dc2-bb7e-f7392a39c900
+function get_policy(file)
+	jsondict = file["data"] |> IOBuffer |> JSON.parse
+	regressor = jsondict["regressors"]["($p)"]["regressor"]
+
+	policy = (state) -> get_action(regressor, state)
+end
+
+# ╔═╡ eeebe049-8b0b-4e3e-8cb2-4ee89e241273
+md"""
+**Exported UPPAAL STRATEGO strategy:** 
+
+`selected_strategy` = $(@bind selected_strategy PlutoUI.FilePicker([MIME("application/json")]))
+"""
+
+# ╔═╡ 79fb04f7-2d45-454f-89c5-7312d4aeadde
+imported_policy = get_policy(selected_strategy)
+
+# ╔═╡ 9a3af469-7dc0-4d29-a375-bdc79415e950
+jsondict = selected_strategy["data"] |> IOBuffer |> JSON.parse
+
+# ╔═╡ 1c8b2b93-8a23-4717-99a1-6d0cd8fa56b1
+show_strategy_info(jsondict)
+
+# ╔═╡ f0806bbf-7a71-4d96-81dc-436d009cc9de
+draw_expected′(action, title) = 
+	draw_expected(jsondict["regressors"]["($p)"]["regressor"], action, 
+		0, 20, 
+		4, 26,
+		0.05,
+		xlabel="t",
+		ylabel="v",
+		colorbar_title="expected cost",
+		clims=(100, 250),
+		color=cgrad(:roma, 10, categorical=true, scale=:linear),
+		title=title,
+		legend=:topleft)
+
+# ╔═╡ 84e98403-b4f7-45ed-9638-d2d5fefec26a
+get_action_names(selected_strategy)
+
+# ╔═╡ 7e58ef81-3242-4b21-8adc-c8f704954d80
+get_variable_names(selected_strategy)
+
+# ╔═╡ c8b9241e-eb92-468d-9452-ee51585f5488
+test_policy = get_policy(selected_strategy)
+
 # ╔═╡ 338a7dce-c680-421c-af11-716f6820e9b3
 begin
 	draw(test_policy, 0, 20, 4, 26, 0.1,
 		#size=(300, 200),
 		colors=[slow_color, fast_color],
 		actions=["off", "on"],
-		xlabel="x",
-		ylabel="t",
+		xlabel="t",
+		ylabel="v",
 		margin=2mm,
 		legend=:topleft)
 end
 
-# ╔═╡ f0806bbf-7a71-4d96-81dc-436d009cc9de
-draw_expected′(action, title) = 
-	draw_expected(jsondict["regressors"]["(1)"]["regressor"], action, 
-		0, 20, 
-		4, 26,
-		0.1,
-		xlabel="x",
-		ylabel="t",
-		colorbar_title="expected cost",
-		clims=(0, 20),
-		color=cgrad(:roma, 10, categorical=true, scale=:linear),
-		title=title,
-		legend=:topleft)
-
 # ╔═╡ 6dd7d4a4-e7df-4c82-bb48-edc0f8ff18ab
-draw_expected′("0", "off")
+begin
+	draw_expected′("0", "off")
+	plot!(x -> consumption_rate(x)*5 + 5, line=(2, colors.CLOUDS))
+end
 
 # ╔═╡ 14fe97ea-97fb-42bc-b0e3-4162b4a48b71
-draw_expected′("1", "on")
+begin
+	draw_expected′("1", "on")
+	plot!(x -> consumption_rate(x)*5 + 5, line=(2, colors.CLOUDS))
+end
 
 # ╔═╡ 596dfcee-99dc-44c6-affe-c5ddef76d90c
 md"""
 # Shielding the Policy
 """
 
+# ╔═╡ 0856b055-2c75-47d6-8bfb-db2d4a2cf885
+imported_shield
+
 # ╔═╡ 2283f773-d6c8-4cf8-b7ab-f1e30b0bb8dd
 begin
-	shielded_policy(s) = shielded(imported_shield, test_policy)(s)
-	shielded_policy(x, t) = shielded_policy((x, t, 0, 0))
+	shielded_policy_raw = shielded(imported_shield, x -> PumpStatus(test_policy(x)))
+	shielded_policy(s) = begin
+		t, v = s
+		shielded_policy_raw((t, v, p, -0.00001))
+	end
 end
 
-# ╔═╡ db418782-45c3-4724-8b09-4e9ab151f882
-
+# ╔═╡ 7d3699f3-94ba-4c38-b4fb-d985e7326595
+test_policy(initial_state)
 
 # ╔═╡ 910e8fb3-c026-4b7d-9408-7eb88989268f
-shielded_policy(1, 10)
+shielded_policy(initial_state)
 
 # ╔═╡ 825720f8-186c-4f11-996b-b7ee2f476629
 m = OPMechanics()
 
 # ╔═╡ a848cce7-f2f9-41a2-8dd7-82383287e793
+# ╠═╡ disabled = true
+#=╠═╡
 begin
+	error("Cannot show trace for this experiment. The pump-status p is constant for shielded_policy. This works for creating a visualisation, but not for simulating a concrete trace. ")
 	plot()
 	trace = simulate_trace(
 		m, initial_state, 
@@ -319,15 +337,19 @@ begin
 		label="trace",
 		line=(3, colors.WET_ASPHALT))
 end
+  ╠═╡ =#
+
+# ╔═╡ 545132b9-ba7c-40dc-ae44-8551113c18dd
+
 
 # ╔═╡ 9e62968a-eaa0-48d9-9842-40df2849a108
 begin
-	draw(s -> (shielded_policy(s...) |> Int), 0, 20, 4, 26, 0.1,
+	draw(s -> (shielded_policy(s) |> Int), 0, 20, 4, 26, 0.1,
 		#size=(300, 200),
 		colors=[slow_color, fast_color],
 		actions=["off", "on"],
-		xlabel="x",
-		ylabel="t",
+		xlabel="t",
+		ylabel="v",
 		margin=2mm,
 		legend=:topleft)
 end
@@ -338,13 +360,12 @@ end
 # ╠═faf6e126-51f6-47ad-a02a-f673223b2600
 # ╟─8894e942-b6f6-4893-bfea-ebaa2f9c58f0
 # ╟─c870988d-96aa-4114-9901-35472f341d16
-# ╟─eeebe049-8b0b-4e3e-8cb2-4ee89e241273
 # ╟─c426cf95-81ed-4c70-96a1-d46e05e29ddb
 # ╟─f334b30a-7963-4314-8a26-4f8e0c493ce9
 # ╠═79fb04f7-2d45-454f-89c5-7312d4aeadde
 # ╠═9a3af469-7dc0-4d29-a375-bdc79415e950
 # ╟─534968b3-b361-41e0-8e2a-c3ec9e73eef4
-# ╠═1c8b2b93-8a23-4717-99a1-6d0cd8fa56b1
+# ╟─1c8b2b93-8a23-4717-99a1-6d0cd8fa56b1
 # ╟─b3e2a24a-fab6-414e-be8b-351a0e7d1b1c
 # ╠═1a27105e-58d5-4dc2-bb7e-f7392a39c900
 # ╟─cadb990a-483b-4745-aad2-38ec784fbed4
@@ -356,16 +377,20 @@ end
 # ╟─29a9d1e2-b0d0-46f2-bbff-ba30f13d3ac0
 # ╠═c8b9241e-eb92-468d-9452-ee51585f5488
 # ╟─47a9daed-792b-4b75-8208-3dcf46ede4c5
-# ╠═f969579d-e392-4dce-88ba-6a5da83b599f
+# ╟─f969579d-e392-4dce-88ba-6a5da83b599f
+# ╟─338a7dce-c680-421c-af11-716f6820e9b3
 # ╟─a68cfc1d-e3fd-43aa-8eea-97615713e0a4
-# ╠═338a7dce-c680-421c-af11-716f6820e9b3
 # ╠═f0806bbf-7a71-4d96-81dc-436d009cc9de
+# ╠═db418782-45c3-4724-8b09-4e9ab151f882
+# ╟─eeebe049-8b0b-4e3e-8cb2-4ee89e241273
 # ╠═6dd7d4a4-e7df-4c82-bb48-edc0f8ff18ab
 # ╠═14fe97ea-97fb-42bc-b0e3-4162b4a48b71
-# ╠═596dfcee-99dc-44c6-affe-c5ddef76d90c
+# ╟─596dfcee-99dc-44c6-affe-c5ddef76d90c
+# ╠═0856b055-2c75-47d6-8bfb-db2d4a2cf885
 # ╠═2283f773-d6c8-4cf8-b7ab-f1e30b0bb8dd
-# ╠═db418782-45c3-4724-8b09-4e9ab151f882
+# ╠═7d3699f3-94ba-4c38-b4fb-d985e7326595
 # ╠═910e8fb3-c026-4b7d-9408-7eb88989268f
 # ╠═825720f8-186c-4f11-996b-b7ee2f476629
 # ╠═a848cce7-f2f9-41a2-8dd7-82383287e793
+# ╠═545132b9-ba7c-40dc-ae44-8551113c18dd
 # ╠═9e62968a-eaa0-48d9-9842-40df2849a108

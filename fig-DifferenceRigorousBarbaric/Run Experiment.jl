@@ -47,6 +47,7 @@ using Plots
 using Dates
 using Serialization
 include("../Shared Code/FlatUI.jl")
+include("../Shared Code/PlotsDefaults.jl")
 include("../Shared Code/ExperimentUtilities.jl")
 include("../Shared Code/BBSquares.jl")
 
@@ -89,9 +90,11 @@ name2 = get_descriptor(args["shield2"])
 
 p1 = draw_diff(shield1, shield2, diffcolors, bbshieldcolors, bbshieldlabels; name1, name2,
     # plotargs
-    xlabel="v", ylabel="p", legend_position=:outertop)
+    xlabel="Velocity (m/s)", ylabel="Position (m)", legend_position=:outertop)
 
-plot!(size=(300, 300), xlims=(-10, 7), ylims=(3, 7.5))
+plot!(size=(300, 300), 
+    xlims=(-10, 7), 
+    ylims=(3, 7.5))
 
 const name = "DifferenceRigorousBarbaric"
 
