@@ -84,7 +84,7 @@ if !args["skip-experiment"]
     strategy_for_postshield = libccshield_working_dir ⨝ "postshieldme.strategy.json" # Path where strategies will be loaded by UPPAAL models and post-shielded. All Queries.py will copy strategies to here.
 
     postshield_notebook_path = abspath(figure_name ⨝ "PostShield Strategy.jl")
-    source_code_dir = "../Shared Code/libccshield/"    # Destination of the C files used to compile the libcc binaries
+    source_code_dir = "Shared Code/libccshield/"    # Destination of the C files used to compile the libcc binaries
 
     # Get the raw shield file first
     shield_file = get_shield(possible_shield_file, libccshield_working_dir, test=args["test"])
