@@ -38,7 +38,7 @@ function get_shield(possible_shield_file, working_dir; test)
         samples_per_axis = 1
     else
         grid = get_cc_grid(0.5, ccmechanics)
-        samples_per_axis = 5
+        samples_per_axis = 4
     end
 
     number_of_grid_points = length(grid_points(box(grid, [1, 1, 1]), samples_per_axis))
