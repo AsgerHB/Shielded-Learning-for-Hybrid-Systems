@@ -35,6 +35,10 @@ s = ArgParseSettings()
             help="""Skip synthesis using rigorous reachability funciton."""
             action=:store_true
 
+        "--skip-synthesis"
+            help="""Skip shield synthesis entirely. Equivalent to --skip-barbaric --skip-rigorous"""
+            action=:store_true
+
         "--skip-evaluation"
             help="""Do not evaluate the strategies' safety after synthesis is done."""
             action=:store_true
@@ -52,8 +56,8 @@ mkpath(shields_dir)
 evaluations_dir = joinpath(results_dir, "Evaluations")
 mkpath(evaluations_dir)
 
-make_barbaric_shields = !args["skip-barbaric"]
-make_rigorous_shields = !args["skip-rigorous"]
+make_barbaric_shields = !args["skip-barbaric"] && !args["skip-synthesis"]
+make_rigorous_shields = !args["skip-rigorous"] && !args["skip-synthesis"]
 test_shields = !args["skip-evaluation"]
 
 #########
@@ -131,7 +135,7 @@ else
 end
 
 if test_shields
-    check_safety_of_preshielded(;shields_dir, results_dir=evaluations_dir, lib_source_code_dir="Shared Code/libbbshield",  blueprints_dir="tab-BBSynthesis/Blueprints", uppaal_dir, test)
+    check_safety_of_preshielded(;shields_dir, results_dir=evaluations_dir, lib_source_code_dir="Shared Code/libbbshield",  blueprints_dir="tab-BBSynthesis/Blueprints", uppaal_dir, test, just_print_the_commands=false)
 else
     progress_update("Skipping tests of shields")
 end
