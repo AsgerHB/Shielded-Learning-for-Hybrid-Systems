@@ -69,7 +69,7 @@ function compile_libccpreshield(working_dir, shield_dir, source_dir)
 
     # Bake it into the C-library. 
     # Make a copy first so we don't overwrite the original files
-    for file in glob(source_dir ⨝ "*.c")
+    for file in glob("*.c", source_dir)
         cp(file, working_dir ⨝ basename(file), force=true)
     end
     
@@ -103,7 +103,7 @@ function compile_libccpostshield(working_dir, shield_dir, source_dir, julia_conf
 
     # Bake it into the C-library. 
     # Make a copy first so we don't overwrite the original files
-    for file in glob(source_dir ⨝ "*.c")
+    for file in glob("*.c", source_dir)
         cp(file, working_dir ⨝ basename(file), force=true)
     end
 
@@ -130,7 +130,6 @@ function compile_libccpostshield(working_dir, shield_dir, source_dir, julia_conf
 end
 
 function get_libccshield(possible_shield_file, source_dir; preshield_destination, postshield_destination, working_dir, julia_config_dir, test=false)
-    
     # Getting shield
     shield_dir = get_shield(possible_shield_file, working_dir; test)
 
