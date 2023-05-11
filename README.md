@@ -32,19 +32,21 @@ The package has not yet beed added to the Julia packages repository, and so has 
 	git clone https://github.com/AsgerHB/GridShielding.jl GridShielding
 	
 
-### Install UPPAAL STRATEGO 10 and Activate License
+### Install UPPAAL STRATEGO 10 and 11, and Activate License
 If the following wget request is denied, please visit uppaal.org and follow download instructions.
 
 	mkdir ~/opt
 	cd ~/opt
 	wget https://download.uppaal.org/uppaal-4.1.20-stratego/stratego-10/uppaal-4.1.20-stratego-10-linux64.zip
 	unzip uppaal-4.1.20-stratego-10-linux64.zip
+	wget https://download.uppaal.org/uppaal-4.1.20-stratego/stratego-11/uppaal-4.1.20-stratego-11-linux64.zip
+	unzip uppaal-4.1.20-stratego-11-linux64.zip
 
 Retrieve a license from https://uppaal.veriaal.dk/academic.html or alternatively visit uppaal.org for more info. Once you have your license, activate it by running 
 
-	~/opt/uppaal-4.1.20-stratego-10-linux64/uppaal
+	~/opt/uppaal-4.1.20-stratego-10-linux64/bin/verifyta.sh --key YOUR-LICENSE-KEY
+	~/opt/uppaal-4.1.20-stratego-11-linux64/bin/verifyta.sh --key YOUR-LICENSE-KEY
 
-Enter your license when prompted.
 
 ## How to run
 

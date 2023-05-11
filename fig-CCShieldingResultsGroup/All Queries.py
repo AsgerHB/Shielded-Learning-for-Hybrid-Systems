@@ -5,7 +5,7 @@ parser = argparse.ArgumentParser()
 
 parser.add_argument("--results-dir", help="Warning: Contents of this folder will be moved to an Experiments Backup folder, overwriting that folder's previous content.")
 parser.add_argument("--queries-models-dir", help="Directory containing the appropriate UPPAAL queries and associated models.")
-parser.add_argument("--uppaal-dir", default="~/opt/uppaal-4.1.20-stratego-10-linux64/")
+parser.add_argument("--uppaal-dir", default="~/opt/uppaal-4.1.20-stratego-11-linux64/")
 parser.add_argument("--strategy-for-postshield", help="Full path to file where the strategy should be saved which will be post-shielded.")
 parser.add_argument("--test", action="store_true")
 args = parser.parse_args()
