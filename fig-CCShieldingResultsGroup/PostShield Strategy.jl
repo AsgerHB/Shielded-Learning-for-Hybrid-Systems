@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.14
+# v0.19.22
 
 using Markdown
 using InteractiveUtils
@@ -33,6 +33,33 @@ call(f) = f()
 
 # ╔═╡ c2d7aa5e-70b3-4c9c-8196-7f07959e9802
 strategycolors=[colors.GREEN_SEA, colors.WET_ASPHALT, colors.BELIZE_HOLE]
+
+# ╔═╡ 5660755c-7418-4ffd-9e57-0f1a5d168fef
+md"""
+# The resulting functions:
+
+This notebook provides the functions `get_shielded_strategy_int` and `get_intervention_checker` to the file `postshield.c`
+
+	deterministic_shielded_strategy = get_shielded_strategy_int(strategy_path, shield_path, true)
+
+	nondeterministic_shielded_strategy = get_shielded_strategy_int(strategy_path, shield_path, false)
+
+	intervened = get_intervention_checker(strategy_path, shield_path)
+"""
+
+# ╔═╡ 93288f99-4efd-46c8-ab2b-93432a4ddd06
+#=╠═╡
+md"""
+`v_ego =` $(@bind v_ego NumberField(-10:2:20, default=0))
+
+`v_front =`  $(@bind v_front NumberField(-10:2:20, default=0))
+
+`distance =` $(@bind distance NumberField(-1:1:201, default=10))
+"""
+  ╠═╡ =#
+
+# ╔═╡ 2dde1bfc-f79d-4936-9a82-6006c550e2ee
+[(actions_to_int(CCAction, [x]), x) for x in [backwards, neutral, forwards]]
 
 # ╔═╡ c41edb3e-7051-4ea6-a1cd-636f89fe9483
 md"""
@@ -240,17 +267,6 @@ function draw(policy::Function, x_min, x_max, y_min, y_max, G, slice; plotargs..
 end
   ╠═╡ =#
 
-# ╔═╡ 93288f99-4efd-46c8-ab2b-93432a4ddd06
-#=╠═╡
-md"""
-`v_ego =` $(@bind v_ego NumberField(-10:2:20, default=0))
-
-`v_front =`  $(@bind v_front NumberField(-10:2:20, default=0))
-
-`distance =` $(@bind distance NumberField(-1:1:201, default=10))
-"""
-  ╠═╡ =#
-
 # ╔═╡ ea49493a-9061-4c2e-95f4-a554cd46b616
 md"""
 ## Importing the Shield:
@@ -412,6 +428,25 @@ begin
 	end
 end
 
+# ╔═╡ 3e77c1a7-6337-4c81-a8b1-e4a1da4e9595
+#=╠═╡
+# Deterministic strategy returns only one action for each state: The safe action which has the lowest Q-value
+
+deterministic_shielded_strategy = get_shielded_strategy(selected_file, shield_file, true)
+  ╠═╡ =#
+
+# ╔═╡ ec36b03b-87e8-45e3-a72e-e6598c82735c
+#=╠═╡
+actions_to_int(CCAction, deterministic_shielded_strategy((v_ego, v_front, distance)))
+  ╠═╡ =#
+
+# ╔═╡ 98e22a5e-4745-44ba-81ea-a5372bd8e5ea
+#=╠═╡
+# Nondeterministic strategy may return multiple actions. If the action with the lowest Q-value overall is safe, that one is returned. Otherwise, it returns all allowed actions.
+
+nondeterministic_shielded_strategy = get_shielded_strategy(selected_file, shield_file, false)
+  ╠═╡ =#
+
 # ╔═╡ c276f624-eae7-4da1-acab-fd27290e009a
 #=╠═╡
 shielded_strategy = get_shielded_strategy(selected_file, shield_file, false)
@@ -440,11 +475,6 @@ call() do
 
 	 scatter!([], [], markeralpha=0, label="v_ego=$v_ego")
 end
-  ╠═╡ =#
-
-# ╔═╡ 6b068420-4854-4198-bf8f-9ca0e4b6301e
-#=╠═╡
-deterministic_shielded_strategy = get_shielded_strategy(selected_file, shield_file, true)
   ╠═╡ =#
 
 # ╔═╡ f176f029-dd07-4fdd-bdd5-d4491e5382a3
@@ -789,7 +819,7 @@ uuid = "6e34b625-4abd-537c-b88f-471c36dfa7a0"
 version = "1.0.8+0"
 
 [[deps.Cairo_jll]]
-deps = ["Artifacts", "Bzip2_jll", "Fontconfig_jll", "FreeType2_jll", "Glib_jll", "JLLWrappers", "LZO_jll", "Libdl", "Pixman_jll", "Pkg", "Xorg_libXext_jll", "Xorg_libXrender_jll", "Zlib_jll", "libpng_jll"]
+deps = ["Artifacts", "Bzip2_jll", "CompilerSupportLibraries_jll", "Fontconfig_jll", "FreeType2_jll", "Glib_jll", "JLLWrappers", "LZO_jll", "Libdl", "Pixman_jll", "Pkg", "Xorg_libXext_jll", "Xorg_libXrender_jll", "Zlib_jll", "libpng_jll"]
 git-tree-sha1 = "4b859a208b2397a7a623a03449e4636bdb17bcf2"
 uuid = "83423d85-b0ee-5818-9007-b63ccbeb887a"
 version = "1.16.1+1"
@@ -1723,6 +1753,12 @@ version = "1.4.1+0"
 # ╠═bdb61d68-2ac9-11ed-1b20-9dc154fc45d0
 # ╠═12556d17-f66f-4db3-8718-3576b8a2c8dc
 # ╠═c2d7aa5e-70b3-4c9c-8196-7f07959e9802
+# ╟─5660755c-7418-4ffd-9e57-0f1a5d168fef
+# ╠═3e77c1a7-6337-4c81-a8b1-e4a1da4e9595
+# ╠═98e22a5e-4745-44ba-81ea-a5372bd8e5ea
+# ╠═ec36b03b-87e8-45e3-a72e-e6598c82735c
+# ╟─93288f99-4efd-46c8-ab2b-93432a4ddd06
+# ╠═2dde1bfc-f79d-4936-9a82-6006c550e2ee
 # ╟─c41edb3e-7051-4ea6-a1cd-636f89fe9483
 # ╟─c870988d-96aa-4114-9901-35472f341d16
 # ╟─eeebe049-8b0b-4e3e-8cb2-4ee89e241273
@@ -1730,7 +1766,6 @@ version = "1.4.1+0"
 # ╟─fd0135aa-78c8-49cb-9ee5-dc1599881d16
 # ╠═57c21c05-6563-4456-a29b-ef024d533eef
 # ╠═c276f624-eae7-4da1-acab-fd27290e009a
-# ╠═6b068420-4854-4198-bf8f-9ca0e4b6301e
 # ╠═73167c7e-9203-4cc3-93d5-db88854ff760
 # ╠═95a3046c-cfba-41f0-92ee-bd346ed63727
 # ╠═885642a9-1043-4ed8-95fd-f8af3f50afad
@@ -1761,7 +1796,6 @@ version = "1.4.1+0"
 # ╠═e9d84aba-2b52-4b28-a1ba-c4887bb07a07
 # ╠═f969579d-e392-4dce-88ba-6a5da83b599f
 # ╟─338a7dce-c680-421c-af11-716f6820e9b3
-# ╟─93288f99-4efd-46c8-ab2b-93432a4ddd06
 # ╟─ea49493a-9061-4c2e-95f4-a554cd46b616
 # ╠═25ce53a0-eebd-4fd6-9d26-3101b7789cb5
 # ╠═1b55a282-6ece-4d54-862d-b7d792af7233
