@@ -3,6 +3,7 @@ from os.path import exists
 
 parser = argparse.ArgumentParser()
 
+# OBS: These default-values are NOT used in the experiment. The defaults are actually set in Run Experiment.jl
 parser.add_argument("--results-dir", help="Warning: Contents of this folder will be moved to an Experiments Backup folder, overwriting that folder's previous content.")
 parser.add_argument("--queries-models-dir", help="Directory containing the appropriate UPPAAL queries and associated models.")
 parser.add_argument("--uppaal-dir", default="~/opt/uppaal-4.1.20-stratego-11-linux64/")

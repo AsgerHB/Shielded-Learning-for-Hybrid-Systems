@@ -33,20 +33,23 @@ The package has not yet beed added to the Julia packages repository, and so has 
 	
 
 ### Install UPPAAL STRATEGO 10 and 11, and Activate License
-If the following wget request is denied, please visit uppaal.org and follow download instructions.
+
+**Stratego 10 has a bug related to the Cruise-control example, while the final release of Stratego 11 has a bug that prevents running models with .q files in CLI.**
+For all other versions, stratego 10 is fine. Versions beyond Stratego 11 may also work, when the .q-file bug is fixed.
+
+If the following `wget` request is denied, please visit uppaal.org and follow download instructions.
 
 	mkdir ~/opt
 	cd ~/opt
 	wget https://download.uppaal.org/uppaal-4.1.20-stratego/stratego-10/uppaal-4.1.20-stratego-10-linux64.zip
 	unzip uppaal-4.1.20-stratego-10-linux64.zip
-	wget https://download.uppaal.org/uppaal-4.1.20-stratego/stratego-11/uppaal-4.1.20-stratego-11-linux64.zip
-	unzip uppaal-4.1.20-stratego-11-linux64.zip
+	wget https://people.cs.aau.dk/~marius/beta/old/uppaal-4.1.20-stratego-11-rc1-linux64.zip
+	unzip uppaal-4.1.20-stratego-11-rc1-linux64.zip
 
 Retrieve a license from https://uppaal.veriaal.dk/academic.html or alternatively visit uppaal.org for more info. Once you have your license, activate it by running 
 
 	~/opt/uppaal-4.1.20-stratego-10-linux64/bin/verifyta.sh --key YOUR-LICENSE-KEY
 	~/opt/uppaal-4.1.20-stratego-11-linux64/bin/verifyta.sh --key YOUR-LICENSE-KEY
-
 
 ## How to run
 

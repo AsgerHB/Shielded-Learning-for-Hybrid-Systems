@@ -34,8 +34,9 @@ s = ArgParseSettings()
             default=nothing
 
         "--uppaal-dir"
-            help="""Root directory of the UPPAAL STRATEGO 10 install."""
-            default=homedir() ⨝ "opt/uppaal-4.1.20-stratego-10-linux64/"
+            help="""Root directory of the UPPAAL STRATEGO 11 install."""
+            # Stratego 10 has a bug related to the Cruise-control example, while the final release of Stratego 11 has a bug that prevents running models with .q files in CLI.
+            default=homedir() ⨝ "opt/uppaal-4.1.20-stratego-11-rc1-linux64/"
 
         "--julia-dir"
             help="""Root directory of the julia install. Used to locate the file <julia-dir>/share/julia/julia_config.jl"""
