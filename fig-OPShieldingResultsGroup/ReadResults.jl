@@ -91,8 +91,8 @@ end
 # ╔═╡ 74c5ce02-5171-425a-9bbd-14eb60c77504
 begin
 	avg_cost_description = "Average cost per run"
-	avg_deaths_description = "Percent unsafe runs"
-	avg_interventions_description = "Percent interventions"
+	avg_deaths_description = "% unsafe runs"
+	avg_interventions_description = "% interventions"
 end
 
 # ╔═╡ 5dc4f261-5e46-4914-948b-0c45b9443a44
@@ -286,27 +286,27 @@ end)
 # ╔═╡ 4fd405a2-ef9e-4590-8af1-6f806724ef2c
 proper_experiment_name = Dict(
 	"Layabout" => "Layabout",
-	"PreShielded" => "Pre-shielded",
-	"PostShielded" => "Post-shielded",
-	"PostShieldedRandomChoice" => "Post-shielded (random choice)",
-	"PostShieldedPolicyPreferred" => "Post-shielded (strategy preferred)",
-	"PostShieldedInterventionMinimized" => "Post-shielded (min interventions)",
-	"PostShieldedCostMinimized" => "Post-shielded (min cost)",
+	"PreShielded" => "Pre-shield",
+	"PostShielded" => "Post-shield",
+	"PostShieldedRandomChoice" => "Post-shield (random choice)",
+	"PostShieldedPolicyPreferred" => "Post-shield (strategy preferred)",
+	"PostShieldedInterventionMinimized" => "Post-shield (min interventions)",
+	"PostShieldedCostMinimized" => "Post-shield (min cost)",
 	"NoShield" => "No shield"
 )
 
 # ╔═╡ b11d7a45-2e55-4ccb-82f8-d09cb669719b
 average_cost = call(() -> begin
-	legend_position = :outertop
+	legend_position = :outerright
 	
-	plot(size=(300,500),
+	plot(size=(320,320),
 		#xlims=(1500, 12000),
 		legend_position=legend_position,
 		xlabel="Episodes",
 		ylabel=avg_cost_description)
 
 	
-	make_label(experiment, d) = "$(proper_experiment_name[experiment]) d=$d"
+	make_label(experiment, d) = "d=$d"
 
 	## Pre-shielded ##
 	if pre_shielded
@@ -333,6 +333,8 @@ average_cost = call(() -> begin
 		rename!(df, :Experiment_Deterrence => :Label)
 		sort!(df, :Runs)
 		transform!(df, :Runs => r -> string.(r), renamecols=false)
+		plot!(Float64[], Float64[], label="Post-shield:", line=nothing)
+		
 		p1 = @df df plot!(:Runs, :Avg_Cost, 
 			group=:Label,
 			markershape=[:circle :utriangle :diamond :pentagon],
@@ -352,6 +354,8 @@ average_cost = call(() -> begin
 		rename!(df, :Experiment_Deterrence => :Label)
 		sort!(df, :Runs)
 		transform!(df, :Runs => r -> string.(r), renamecols=false)
+		plot!(Float64[], Float64[], label="No shield:", line=nothing)
+		
 		p1 = @df df plot!(:Runs, :Avg_Cost, 
 			group=:Label,
 			markershape=[:utriangle :diamond :pentagon],
@@ -377,7 +381,7 @@ average_cost = call(() -> begin
 end)
 
 # ╔═╡ 1724e32a-be5c-4784-8b32-615e26160235
-make_label(experiment, d) = "$(proper_experiment_name[experiment]) d=$d"
+make_label(experiment, d) = "d=$d"
 
 # ╔═╡ e47b5ba0-3a9d-4d73-9ec8-00adb42ee2fe
 # HACK: Spaces inserted to fix lexicographical sorting 
@@ -399,15 +403,13 @@ average_interventions = call(() -> begin
 	transform!(df, [:Experiment, :Deterrence] => ByRow(make_label) => :Label)
 	transform!(df, :Runs => fix_bad_sorting, renamecols=false)
 	
-	
 	@df df groupedbar(:Runs, :Avg_Interventions, 
-		size=(300,220),
+		size=(300,140),
 		group=:Label,
 		color=interventions_colors,
 		linecolor=interventions_colors,
-		legend=:outertop,
+		legend=:outerright,
 		xlabel="Episodes",
-		margin=0mm,
 		ylabel=avg_interventions_description)
 end)
 
@@ -422,13 +424,12 @@ average_interventions_no_d0 = call(() -> begin
 	
 	
 	@df df groupedbar(:Runs, :Avg_Interventions, 
-		size=(300,220),
+		size=(300,140),
 		group=:Label,
 		color=interventions_colors,
 		linecolor=interventions_colors,
-		legend=:outertop,
+		legend=:outerright,
 		xlabel="Episodes",
-		margin=0mm,
 		ylabel=avg_interventions_description)
 end)
 
@@ -443,13 +444,12 @@ average_deaths = call(() -> begin
 	transform!(df, :Runs => fix_bad_sorting, renamecols=false)
 	
 	@df df groupedbar(:Runs, :Avg_Deaths, 
-		size=(300,220),
+		size=(300,140),
 		group=:Label,
 		color=deaths_colors,
 		linecolor=deaths_colors,
-		legend=:outertop,
+		legend=:outerright,
 		xlabel="Episodes",
-		margin=0mm,
 		ylabel=avg_deaths_description)
 end)
 
@@ -1801,7 +1801,7 @@ version = "0.9.1+5"
 # ╠═b9c5b5e8-7c3c-4cb1-850d-937e928c8090
 # ╠═701e4858-f8e4-4e74-a010-85b3ecbec252
 # ╠═b11d7a45-2e55-4ccb-82f8-d09cb669719b
-# ╟─4fd405a2-ef9e-4590-8af1-6f806724ef2c
+# ╠═4fd405a2-ef9e-4590-8af1-6f806724ef2c
 # ╠═1724e32a-be5c-4784-8b32-615e26160235
 # ╠═e47b5ba0-3a9d-4d73-9ec8-00adb42ee2fe
 # ╠═61bd91fc-6b0f-4fa5-a3dc-ea0f87c06cf1

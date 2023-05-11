@@ -95,8 +95,8 @@ end
 # ╔═╡ 74c5ce02-5171-425a-9bbd-14eb60c77504
 begin
 	avg_cost_description = "Average cost per run"
-	avg_deaths_description = "Percent unsafe runs"
-	avg_interventions_description = "Percent interventions"
+	avg_deaths_description = "% unsafe runs"
+	avg_interventions_description = "% interventions"
 end
 
 # ╔═╡ 5dc4f261-5e46-4914-948b-0c45b9443a44
@@ -229,11 +229,12 @@ md"""
 
 # ╔═╡ b3b5a749-3c56-493c-8e80-d7b79f31e8fd
 postshieldcolors = Dict(
+	"PreShielded" => colors.NEPHRITIS,
 	"PostShielded" => shielding_type_colors.post_shielded,
 	"PostShieldedRandomChoice" => shielding_type_colors.post_shielded,
 	"PostShieldedPolicyPreferred" => colors.PUMPKIN, 
 	"PostShieldedInterventionMinimized" => colors.CARROT, 
-	"PostShieldedCostMinimized" => colors.ORANGE
+	"PostShieldedCostMinimized" => colors.ORANGE,
 )
 
 # ╔═╡ 50f696fa-e0f2-4670-83c2-811331f379f8
@@ -242,25 +243,25 @@ postshieldcolor = postshieldcolors[post_shield_type]
 # ╔═╡ 4fd405a2-ef9e-4590-8af1-6f806724ef2c
 proper_experiment_name = Dict(
 	"Layabout" => "Layabout",
-	"PreShielded" => "Pre-shielded",
-	"PostShielded" => "Post-shielded",
-	"PostShieldedRandomChoice" => "Post-shielded",
-	"PostShieldedPolicyPreferred" => "Post-shielded (strategy preferred)",
-	"PostShieldedInterventionMinimized" => "Post-shielded (min interventions)",
-	"PostShieldedCostMinimized" => "Post-shielded (min cost)",
+	"PreShielded" => "Pre-shield",
+	"PostShielded" => "Post-shield",
+	"PostShieldedRandomChoice" => "Post-shield",
+	"PostShieldedPolicyPreferred" => "Post-shield (strategy preferred)",
+	"PostShieldedInterventionMinimized" => "Post-shield (min interventions)",
+	"PostShieldedCostMinimized" => "Post-shield (min cost)",
 	"NoShield" => "No shield"
 )
 
 # ╔═╡ cc642bf5-aa5d-419b-b582-ca16042e07bd
 function make_label(experiment::AbstractString, d) 
-	"$(proper_experiment_name[experiment]) d=$d"
+	"d=$d"
 end
 
 # ╔═╡ b11d7a45-2e55-4ccb-82f8-d09cb669719b
 average_cost = call(() -> begin
-	legend_position = :outertop
+	legend_position = :outerright
 	
-	plot(size=(300,500),
+	plot(size=(320,320),
 		legend_position=legend_position,
 		xlabel="Episodes",
 		ylabel=avg_cost_description)
@@ -287,6 +288,8 @@ average_cost = call(() -> begin
 		filter!(:Experiment => e -> e == post_shield_type, df)
 		transform!(df, [:Experiment, :Deterrence] => ByRow(make_label) => :Label)
 		transform!(df, :Runs => r -> string.(r), renamecols=false)
+		plot!(Float64[], Float64[], label="Post-shield:", line=nothing)
+		
 		p1 = @df df plot!(:Runs, :Avg_Cost, 
 			group=:Label,
 			markershape=[:circle :utriangle :diamond :pentagon],
@@ -304,6 +307,8 @@ average_cost = call(() -> begin
 		transform!(df, [:Experiment, :Deterrence] => ByRow(make_label), renamecols=false)
 		rename!(df, :Experiment_Deterrence => :Label)
 		transform!(df, :Runs => r -> string.(r), renamecols=false)
+		plot!(Float64[], Float64[], label="No shield:", line=nothing)
+		
 		p1 = @df df plot!(:Runs, :Avg_Cost, 
 			group=:Label,
 			markershape=[:utriangle :diamond :pentagon],
@@ -338,11 +343,11 @@ average_interventions = call(() -> begin
 	
 	
 	@df df groupedbar(:Runs, :Avg_Interventions, 
-		size=(300, 220),
+		size=(300,140),
 		group=:Label,
 		color=interventions_colors,
 		linecolor=interventions_colors,
-		legend=:outertop,
+		legend=:outerright,
 		xlabel="Episodes",
 		ylabel=avg_interventions_description)
 end)
@@ -358,11 +363,11 @@ average_deaths = call(() -> begin
 	transform!(df, :Runs => fix_bad_sorting, renamecols=false)
 	
 	@df df groupedbar(:Runs, :Avg_Deaths, 
-		size=(300, 220),
+		size=(300,140),
 		group=:Label,
 		color=deaths_colors,
 		linecolor=deaths_colors,
-		legend=:outertop,
+		legend=:outerright,
 		xlabel="Episodes",
 		ylabel=avg_deaths_description)
 end)
@@ -460,18 +465,23 @@ post_shield_variance = call() do
 	test = nrow(filter(:Runs => ==(12000), df)) == 0
 
 	if !test
-		df = filter(:Experiment => e -> occursin("PostShield", e), df)
+		df = filter(:Experiment => 
+			e -> occursin("PostShield", e) || e == "PreShielded", df)
+		
 		df = filter(:Runs => ==(12000), df)
-		df = filter(:Deterrence => ==("10"), df)
+		df = filter(:Deterrence => d -> d == "10" || d == "-", df)
 	else
-		df = filter(:Experiment => e -> occursin("PostShield", e), df)
+		df = filter(:Experiment => 
+			e -> occursin("PostShield", e) || e == "PreShielded", df)
+		
 		df = filter(:Runs => ==(20), df)
-		df = filter(:Deterrence => ==("10"), df)
+		df = filter(:Deterrence => d -> d == "10" || d == "-", df)
 	end
 end
 
 # ╔═╡ 60885198-7b1f-4f66-b5d2-dad390403dcc
 variants_names = Dict(
+	"PreShielded" => "Pre-shielded",
 	"PostShieldedRandomChoice" => "Random Choice",
 	"PostShieldedPolicyPreferred" => "Agent Preference",
 	"PostShieldedInterventionMinimized" => "Min Interventions",
