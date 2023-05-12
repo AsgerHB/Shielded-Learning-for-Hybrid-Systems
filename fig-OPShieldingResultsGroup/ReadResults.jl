@@ -303,6 +303,7 @@ average_cost = call(() -> begin
 		#xlims=(1500, 12000),
 		legend_position=legend_position,
 		xlabel="Episodes",
+		yrotation=90,
 		ylabel=avg_cost_description)
 
 	

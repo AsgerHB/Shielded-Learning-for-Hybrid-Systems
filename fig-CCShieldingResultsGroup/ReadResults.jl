@@ -123,6 +123,11 @@ cleandata = call() do
 	# Turn number of interventions into % interventions
 	cleandata = transform(cleandata, :Avg_Interventions => x -> (x/120)*100, renamecols=false)
 
+	# Special for CC: Multiply cost with 1000
+	# I don't remember why I divided it by 1000 in the UPPAAL queries.
+	# There is no good reason
+	cleandata = transform(cleandata, :Avg_Cost => x -> x*1000, renamecols=false)
+
 	cleandata
 end
 
@@ -264,6 +269,8 @@ average_cost = call(() -> begin
 	plot(size=(320,320),
 		legend_position=legend_position,
 		xlabel="Episodes",
+		yrotation=90,
+		formatter=:plain,
 		ylabel=avg_cost_description)
 
 	## Pre-shielded ##
