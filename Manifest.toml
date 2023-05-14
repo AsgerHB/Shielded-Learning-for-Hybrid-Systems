@@ -710,7 +710,9 @@ version = "2.50.0+1"
 
 [[deps.GridShielding]]
 deps = ["Distributions", "Plots", "Serialization", "StatsBase"]
-path = "/home/asger/.julia/dev/GridShielding"
+git-tree-sha1 = "d2d7d46e89149b4e6b1214d688ceeaffacd39aea"
+repo-rev = "c37bc2b"
+repo-url = "https://github.com/AsgerHB/GridShielding.jl"
 uuid = "d6812381-bd27-4ab8-a35f-a1c7ba1f8c22"
 version = "1.0.0"
 
