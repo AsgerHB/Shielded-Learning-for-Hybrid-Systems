@@ -20,17 +20,8 @@ Make sure you have the following packages installed on your system:
 Download dependencies for this repository. Note that the `]` key activates the package manager interface.
 
 	cd /path/to/this/repository
-	julia
+	julia --project=.
 	] instantiate
-
-### Install the GridShielding Package
-
-The package has not yet beed added to the Julia packages repository, and so has to be downloaded manually from GitHub.
-
-	mkdir -p ~/.julia/dev
-	cd .julia/dev
-	git clone https://github.com/AsgerHB/GridShielding.jl GridShielding
-	
 
 ### Install UPPAAL STRATEGO 10 and 11, and Activate License
 
@@ -56,7 +47,7 @@ Retrieve a license from https://uppaal.veriaal.dk/academic.html or alternatively
 Create figures by running their corresponding experiment. Shown here for fig-BarbaricMethodAccuracy
 
 	cd path/to/ReproducibilityPackage
-	julia "fig-BarbaricMethodAccuracy/Run Experiment.jl" --results-dir ~/Results
+	julia --project=. "fig-BarbaricMethodAccuracy/Run Experiment.jl" --results-dir ~/Results
 
 # Scratchpad and remarks
 
