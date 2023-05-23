@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.5//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_5.dtd'>
+<!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.6//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_6.dtd'>
 <nta>
 	<declaration>// State
 clock l, t;    // minimum switching Latency, cycle Time
@@ -359,119 +359,131 @@ system Controller, Pump, Machine, Fluctuation, AccumulatedVolume, SafetyMonitor;
 		<option key="--eval-runs" value="1000"/>
 		<option key="--runs-pr-state" value="1000"/>
 		<query>
-			<formula>simulate[&lt;=60] {c + f}</formula>
+			<formula>/* formula 1 */</formula>
 			<comment/>
 		</query>
 		<query>
-			<formula>simulate[&lt;=120;5] {v, c + f, number_deaths}</formula>
+			<formula>strategy Deterrence1000 = loadStrategy {p} -&gt; {t, v}("%resultsdir%/Deterrence1000.strategy.json")</formula>
 			<comment/>
 		</query>
 		<query>
-			<formula/>
+			<formula>/* formula 2 */</formula>
 			<comment/>
 		</query>
 		<query>
-			<formula/>
+			<formula>E[&lt;=120;%checks%] (max:aov) under Deterrence1000</formula>
 			<comment/>
 		</query>
 		<query>
-			<formula/>
-			<comment>Post-shielded Agent</comment>
-		</query>
-		<query>
-			<formula/>
+			<formula>/* formula 3 */</formula>
 			<comment/>
 		</query>
 		<query>
-			<formula>strategy LowVolume = minE (aov) [&lt;=120] {p} -&gt; {t, v}: &lt;&gt; elapsed &gt;= 120</formula>
+			<formula>E[&lt;=120;%checks%] (max:(number_deaths &gt; 0)) under Deterrence1000</formula>
 			<comment/>
 		</query>
 		<query>
-			<formula>strategy SmartSwitching = minE (aov/120 + switches/2) [&lt;=120] {p} -&gt; {t, v}: &lt;&gt; elapsed &gt;= 120</formula>
+			<formula>/* formula 4 */</formula>
 			<comment/>
 		</query>
 		<query>
-			<formula>Pr[&lt;=120;100000]([] 4.9 &lt; v &amp;&amp; v &lt; 25.1)</formula>
+			<formula>E[&lt;=120;%checks%] (max:interventions) under Deterrence1000</formula>
 			<comment/>
 		</query>
 		<query>
-			<formula>Pr[&lt;=120;100000](&lt;&gt; 4.9 &lt; v &amp;&amp; v &lt; 25.1) under LowVolume</formula>
+			<formula>/* formula 5 */</formula>
 			<comment/>
 		</query>
 		<query>
-			<formula>Pr[&lt;=120;100000](&lt;&gt; 4.9 &lt; v &amp;&amp; v &lt; 25.1) under SmartSwitching</formula>
+			<formula>strategy Deterrence100 = loadStrategy {p} -&gt; {t, v}("%resultsdir%/Deterrence100.strategy.json")</formula>
 			<comment/>
 		</query>
 		<query>
-			<formula>E[&lt;=120;1000] (max:aov/120 + switches/2)</formula>
+			<formula>/* formula 6 */</formula>
 			<comment/>
 		</query>
 		<query>
-			<formula>E[&lt;=120;1000] (max:aov/120 + switches/2) under LowVolume</formula>
+			<formula>E[&lt;=120;%checks%] (max:aov) under Deterrence100</formula>
 			<comment/>
 		</query>
 		<query>
-			<formula>E[&lt;=120;1000] (max:aov/120) under LowVolume</formula>
+			<formula>/* formula 7 */</formula>
 			<comment/>
 		</query>
 		<query>
-			<formula>E[&lt;=120;1000] (max:aov)</formula>
+			<formula>E[&lt;=120;%checks%] (max:(number_deaths &gt; 0)) under Deterrence100</formula>
 			<comment/>
 		</query>
 		<query>
-			<formula>E[&lt;=120;1000] (max:aov/120 + switches/2) under SmartSwitching</formula>
+			<formula>/* formula 8 */</formula>
 			<comment/>
 		</query>
 		<query>
-			<formula>simulate[&lt;=120;5] {v, v_min, v_max}</formula>
+			<formula>E[&lt;=120;%checks%] (max:interventions) under Deterrence100</formula>
 			<comment/>
 		</query>
 		<query>
-			<formula>simulate[&lt;=120;5] {v, v_min, v_max} under LowVolume</formula>
+			<formula>/* formula 9 */</formula>
 			<comment/>
 		</query>
 		<query>
-			<formula>simulate[&lt;=120;5] {v, v_min, v_max} under SmartSwitching</formula>
+			<formula>strategy Deterrence10 = loadStrategy {p} -&gt; {t, v}("%resultsdir%/Deterrence10.strategy.json")</formula>
 			<comment/>
 		</query>
 		<query>
-			<formula/>
+			<formula>/* formula 10 */</formula>
 			<comment/>
 		</query>
 		<query>
-			<formula/>
+			<formula>E[&lt;=120;%checks%] (max:aov) under Deterrence10</formula>
 			<comment/>
 		</query>
 		<query>
-			<formula/>
+			<formula>/* formula 11 */</formula>
 			<comment/>
 		</query>
 		<query>
-			<formula>saveStrategy("Results/Misc/LowVolume.strategy.json", LowVolume)</formula>
+			<formula>E[&lt;=120;%checks%] (max:(number_deaths &gt; 0)) under Deterrence10</formula>
 			<comment/>
 		</query>
 		<query>
-			<formula>saveStrategy("Results/Misc/SmartSwitching.strategy.json", SmartSwitching)</formula>
+			<formula>/* formula 12 */</formula>
 			<comment/>
 		</query>
 		<query>
-			<formula/>
+			<formula>E[&lt;=120;%checks%] (max:interventions) under Deterrence10</formula>
 			<comment/>
 		</query>
 		<query>
-			<formula/>
+			<formula>/* formula 13 */</formula>
 			<comment/>
 		</query>
 		<query>
-			<formula/>
+			<formula>strategy Deterrence0 = loadStrategy {p} -&gt; {t, v}("%resultsdir%/Deterrence0.strategy.json")</formula>
 			<comment/>
 		</query>
 		<query>
-			<formula/>
+			<formula>/* formula 14 */</formula>
 			<comment/>
 		</query>
 		<query>
-			<formula/>
+			<formula>E[&lt;=120;%checks%] (max:aov) under Deterrence0</formula>
+			<comment/>
+		</query>
+		<query>
+			<formula>/* formula 15 */</formula>
+			<comment/>
+		</query>
+		<query>
+			<formula>E[&lt;=120;%checks%] (max:(number_deaths &gt; 0)) under Deterrence0</formula>
+			<comment/>
+		</query>
+		<query>
+			<formula>/* formula 16 */</formula>
+			<comment/>
+		</query>
+		<query>
+			<formula>E[&lt;=120;%checks%] (max:interventions) under Deterrence0</formula>
 			<comment/>
 		</query>
 	</queries>

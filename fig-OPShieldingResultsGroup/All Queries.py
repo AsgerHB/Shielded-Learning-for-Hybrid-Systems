@@ -29,7 +29,7 @@ def clear_results():
     os.system(f"mkdir '{backupdir}'") 
     os.system(f"mv '{resultsdir}/'* '{backupdir}'")
 
-    header = "Experiment;Runs;Deterrence;Learning Rate;Avg. Swings;Avg. Deaths;Avg. Interventions"
+    header = "Experiment;Runs;Deterrence;Avg. Swings;Avg. Deaths;Avg. Interventions"
     print(header)
     os.system(f"echo '{header}' > '{resultsdir}/Results.csv'")
 
@@ -37,18 +37,18 @@ def clear_results():
 # As you can see in clear_results, a row consists of the experiment done, the number of runs, the cost of death and then the results: average swings, deaths and interventions.
 # A query file will either have a non-applicable cost of death, or it will spit out results for all three variations at once.
 # So if I get 9 values, that means its the results for the 3 tiers of what a death costs. 
-def append_results(experiment, runs, learning_rate, values, deterrence="-"):
+def append_results(experiment, runs, values, deterrence="-"):
     if len(values) == 4*3:
-        append_results(experiment, runs, learning_rate, values[0:3], deterrence="1000")
-        append_results(experiment, runs, learning_rate, values[3:6], deterrence="100")
-        append_results(experiment, runs, learning_rate, values[6:9], deterrence="10")
-        append_results(experiment, runs, learning_rate, values[9:12], deterrence="0")
+        append_results(experiment, runs, values[0:3], deterrence="1000")
+        append_results(experiment, runs, values[3:6], deterrence="100")
+        append_results(experiment, runs, values[6:9], deterrence="10")
+        append_results(experiment, runs, values[9:12], deterrence="0")
         return
     elif len(values) != 3:
         print(f"DROPPED INCONSISTENT ROW: {','.join(values)}")
         return
     
-    row = [experiment, runs, deterrence, learning_rate, *values]
+    row = [experiment, runs, deterrence, *values]
     results_csv = ";".join(row)
     print(results_csv)
     os.system(f"echo '{results_csv}' >> '{resultsdir}/Results.csv'")
@@ -59,24 +59,21 @@ re_aborted = re.compile("EXCEPTION: |is time-locked.|-- Aborted.")
 def get_savedir(experiment, runs, iteration):
     return f"{resultsdir}/{iteration}/{experiment}/{runs}Runs" if runs != None else f"{resultsdir}/{iteration}/{experiment}"
 
-def run_experiment(experiment, model, queries, runs, learning_rate, iteration):
+def run_experiment(experiment, model, runs, iteration):
     abspath_model = f"{qmdir}/{model}"
-    abspath_queries = f"{qmdir}/{queries}"
     savedir = get_savedir(experiment, runs, iteration)
     runs = runs or 0
     os.system(f"mkdir -p '{savedir}'")
     
     # Command to run UPPAAL verifier
-    command = f"{uppaaldir}/bin/verifyta -s --epsilon 0.001 --max-iterations 1 --good-runs {runs} --total-runs {runs} --runs-pr-state {runs} --qlearning-alpha {learning_rate} '{abspath_model}' '{abspath_queries}'"
+    command = f"{uppaaldir}/bin/verifyta -s --epsilon 0.001 --max-iterations 1 --good-runs {runs} --total-runs {runs} --runs-pr-state {runs} '{abspath_model}'"
 
     progress_update(f"Running: {command}")
 
     queryresults = f"{savedir}/{experiment}.queryresults.txt"
 
-    # Save the query so we know what we just ran
-    os.system(f"cat '{abspath_queries}' > '{queryresults}'")
     # Run the command and save append it to the queryresults file.
-    os.system(f"{command} >> '{queryresults}' 2>&1") 
+    os.system(f"{command} > '{queryresults}' 2>&1") 
 
     # Do regex on the queryresults and save the mean values using append_results.
     # Some kind of time lock occurs which messes up the results. If a time lock happens, I have to discard that query
@@ -89,7 +86,7 @@ def run_experiment(experiment, model, queries, runs, learning_rate, iteration):
                 arbort = True
                 break
     if not arbort:
-        append_results(experiment, str(runs), str(learning_rate), extracted_queryresults)
+        append_results(experiment, str(runs), extracted_queryresults)
     else:
         progress_update("QUERY ABORTED; DROPPED ROW. (Probably that bloody time-lock.)")
 
@@ -123,38 +120,29 @@ if __name__ == "__main__":
         # No learning occurs in the Layabout model, so it is only run once.
         run_experiment( experiment = "Layabout",
                         model = "OP__ShieldedLayabout.xml",          # shield_enabled = true; layabout = true
-                        queries = "ShieldedLayabout.q",    # Run the three queries without a strategy.
                         runs = None,
-                        learning_rate = 2,
                         iteration = i)
 
-        for learning_rate in [2]:
-            for runs in  learning_runs:
+        for runs in  learning_runs:
 
-                run_experiment( experiment = "PreShielded",
-                                model = "OP__PreShielded.xml",      # shield_enabled = true
-                                queries = "PreShielded.q", # Train a strategy, save it, then evaluate it.
-                                runs = runs,
-                                learning_rate = learning_rate,
-                                iteration = i)
+            run_experiment( experiment = "PreShielded",
+                            model = "OP__PreShielded.xml",      # shield_enabled = true
+                            runs = runs,
+                            iteration = i)
 
-                cleanup_strategies("PreShielded", runs, i)
-                
-                run_experiment( experiment = "NoShield",
-                                model = "OP__Unshielded.xml",    # shield_enabled = false
-                                queries = "Unshielded.q", # Train a strategy, save it, then evaluate it.
-                                runs = runs,
-                                learning_rate = learning_rate,
-                                iteration = i)
+            cleanup_strategies("PreShielded", runs, i)
+            
+            run_experiment( experiment = "NoShield",
+                            model = "OP__Unshielded.xml",    # shield_enabled = false
+                            runs = runs,
+                            iteration = i)
 
-                run_experiment( experiment = "PostShielded",
-                                model = "OP__PostShielded.xml",      # shield_enabled = true
-                                queries = "PostShielded.q",      # Load the previous strategy, then evaluate it.
-                                runs = runs,
-                                learning_rate = learning_rate,
-                                iteration = i)
+            run_experiment( experiment = "PostShielded",
+                            model = "OP__PostShielded.xml",      # shield_enabled = true
+                            runs = runs,
+                            iteration = i)
 
-                cleanup_strategies("NoShield", runs, i)
+            cleanup_strategies("NoShield", runs, i)
 
 
     progress_update("All done.")

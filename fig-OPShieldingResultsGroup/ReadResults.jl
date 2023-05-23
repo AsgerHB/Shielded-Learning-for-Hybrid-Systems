@@ -214,21 +214,16 @@ md"""
 `layabout =` $(@bind layabout CheckBox(default=layabout_default))
 """
 
-# ╔═╡ 701e4858-f8e4-4e74-a010-85b3ecbec252
-@bind learning_rate Select(rawdata[!, :Learning_Rate] |> unique)
+
 
 # ╔═╡ b842083d-b6c0-49bb-9243-e03b2a65bfe2
 cleandata = call() do
 
 	cleandata = rename(rawdata, :Avg_Swings => :Avg_Cost)
 	
-	cleandata = select(cleandata, [:Experiment, :Deterrence, :Runs, :Avg_Cost, :Avg_Deaths, :Avg_Interventions, :Learning_Rate])
+	cleandata = select(cleandata, [:Experiment, :Deterrence, :Runs, :Avg_Cost, :Avg_Deaths, :Avg_Interventions])
 	cleandata = sort(cleandata, [:Experiment, :Deterrence, :Runs])
 	cleandata = sort(cleandata, [:Experiment], by=experiment_order)
-	
-	cleandata = filter(:Learning_Rate => 
-		(lr -> lr == learning_rate), 
-		cleandata)
 
 	# We don't care about unshielded with no deterrence
 	cleandata = filter([:Experiment, :Deterrence] => 
@@ -1800,7 +1795,6 @@ version = "0.9.1+5"
 # ╟─d13faa16-897a-4d01-9b14-ff6d03f4a592
 # ╟─0f8633b1-af76-4fb7-9822-7abd90a35a06
 # ╠═b9c5b5e8-7c3c-4cb1-850d-937e928c8090
-# ╠═701e4858-f8e4-4e74-a010-85b3ecbec252
 # ╠═b11d7a45-2e55-4ccb-82f8-d09cb669719b
 # ╠═4fd405a2-ef9e-4590-8af1-6f806724ef2c
 # ╠═1724e32a-be5c-4784-8b32-615e26160235
