@@ -66,6 +66,7 @@ def run_experiment(experiment, model, runs, iteration):
     os.system(f"mkdir -p '{savedir}'")
     
     # Command to run UPPAAL verifier
+    # Note that the queries to be executed are saved directly in the model (xml) files.
     command = f"{uppaaldir}/bin/verifyta -s --epsilon 0.001 --max-iterations 1 --good-runs {runs} --total-runs {runs} --runs-pr-state {runs} '{abspath_model}'"
 
     progress_update(f"Running: {command}")
