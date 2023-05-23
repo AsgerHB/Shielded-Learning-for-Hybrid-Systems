@@ -434,6 +434,91 @@ cost(mechanics, trace)
 cost(mechanics, (_...) -> rand([on off]), run_duration=120, runs=1000)
   ╠═╡ =#
 
+# ╔═╡ e6d57abc-bd7d-4aee-81b6-89e94c572c6c
+md"""
+# Try it Out
+"""
+
+# ╔═╡ d8967a89-9409-418e-aa23-e789512bf70d
+#=╠═╡
+@bind reset_button Button("Reset")
+  ╠═╡ =#
+
+# ╔═╡ d8a8bc85-bd75-4bf6-9b75-e960fe999777
+#=╠═╡
+@bind resistance NumberField(30:200)
+  ╠═╡ =#
+
+# ╔═╡ 7f7b0611-8058-417f-bb3d-4e4a5024267a
+#=╠═╡
+reset_button, resistance; md"""
+$(@bind on_button CounterButton("On"))
+$(@bind off_button CounterButton("Off"))
+"""
+  ╠═╡ =#
+
+# ╔═╡ e9ff68fd-2340-40fb-b533-7b4758d92816
+#=╠═╡
+reset_button; reactive_trace = DCTrace([initial_state[1]], [initial_state[2]], [initial_state[3]], [0], [])
+  ╠═╡ =#
+
+# ╔═╡ ae53ebb6-3d1e-4b19-884f-ddcfb4e734de
+#=╠═╡
+reset_button, on_button, off_button; md"""
+NB: Randomly fluctuating R not implemented
+
+Cost: $(round(cost(mechanics, reactive_trace), digits=2))
+
+Elapsed: $(reactive_trace.elapsed[end])
+"""
+  ╠═╡ =#
+
+# ╔═╡ 5e6f34fe-40d6-4da0-ad2f-5b461874f0e7
+#=╠═╡
+reset_button, on_button, off_button, resistance; let
+	plot(reactive_trace.x1s, reactive_trace.x2s, label="trace")
+	hline!([mechanics.x2_ref], label="x2 ref")
+	
+	(;x1s, x2s, Rs) = reactive_trace
+	x1, x2, R = x1s[end], x2s[end], Rs[end]
+	x1, x2, R = simulate_point(mechanics, (x1, x2, R),  off, [resistance])
+	scatter!([x1], [x2], label="off")
+	x1, x2, R = x1s[end], x2s[end], Rs[end]
+	x1, x2, R = simulate_point(mechanics, (x1, x2, R),  on, [resistance])
+	scatter!([x1], [x2], label="on")
+end
+  ╠═╡ =#
+
+# ╔═╡ 6e9df94e-34a1-4fce-8de9-af4039862c2f
+#=╠═╡
+if on_button > 0 let
+	(;x1s, x2s, Rs) = reactive_trace
+	x1, x2, R = x1s[end], x2s[end], Rs[end]
+	x1, x2, R = simulate_point(mechanics, (x1, x2, R),  on, [resistance])
+	push!(reactive_trace.x1s, x1)
+	push!(reactive_trace.x2s, x2)
+	push!(reactive_trace.Rs, R)
+	push!(reactive_trace.elapsed, reactive_trace.elapsed[end] + mechanics.time_step)
+	push!(reactive_trace.actions, on)
+	"On action taken"
+end end
+  ╠═╡ =#
+
+# ╔═╡ 91c40d61-17c5-474c-81c2-efd2fb5e5668
+#=╠═╡
+if off_button > 0 let
+	(;x1s, x2s, Rs) = reactive_trace
+	x1, x2, R = x1s[end], x2s[end], Rs[end]
+	x1, x2, R = simulate_point(mechanics, (x1, x2, R),  off, [resistance])
+	push!(reactive_trace.x1s, x1)
+	push!(reactive_trace.x2s, x2)
+	push!(reactive_trace.Rs, R)
+	push!(reactive_trace.elapsed, reactive_trace.elapsed[end] + mechanics.time_step)
+	push!(reactive_trace.actions, off)
+	"Off action taken"
+end end
+  ╠═╡ =#
+
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
@@ -1453,5 +1538,14 @@ version = "1.4.1+0"
 # ╠═675538d0-5291-4069-9363-57464ba1012f
 # ╠═9830b7bd-4561-4dcb-9ca5-2b32da5ef132
 # ╠═98c3de3f-9d27-4a5d-acb5-02c5b6f42f97
+# ╠═e6d57abc-bd7d-4aee-81b6-89e94c572c6c
+# ╟─d8967a89-9409-418e-aa23-e789512bf70d
+# ╠═7f7b0611-8058-417f-bb3d-4e4a5024267a
+# ╠═d8a8bc85-bd75-4bf6-9b75-e960fe999777
+# ╠═e9ff68fd-2340-40fb-b533-7b4758d92816
+# ╟─ae53ebb6-3d1e-4b19-884f-ddcfb4e734de
+# ╠═5e6f34fe-40d6-4da0-ad2f-5b461874f0e7
+# ╠═6e9df94e-34a1-4fce-8de9-af4039862c2f
+# ╠═91c40d61-17c5-474c-81c2-efd2fb5e5668
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
