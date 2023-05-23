@@ -44,7 +44,7 @@ function get_shield(possible_shield_file, working_dir; test)
     number_of_grid_points = length(grid_points(box(grid, [1, 1, 1]), samples_per_axis))
     
     progress_update("Synthesising shield: $number_of_grid_points samples $(grid.G) G")
-    progress_update("Estimated time to synthesise: 50 minutes (3 minutes if run with --test)")
+    progress_update("Estimated time to synthesise: 35 minutes (3 minutes if run with --test)")
 
     shield_dir = working_dir ⨝ "$number_of_grid_points samples $(grid.G) G.shield"
     

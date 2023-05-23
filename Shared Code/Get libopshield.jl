@@ -43,7 +43,7 @@ function get_shield(possible_shield_file, working_dir; test)
     simulation_model = SimulationModel(get_simulation_function(m), get_randomness_space(m), samples_per_axis)
     
     progress_update("Synthesising shield: $(prod(samples_per_axis)) samples $(grid.granularity) G")
-    progress_update("Estimated time to synthesise: 16 minutes (2 minutes if run with --test)")
+    progress_update("Estimated time to synthesise: 5 hours (a few seconds if run with --test)")
 
     shield_dir = working_dir ⨝ "$(prod(samples_per_axis)) samples $(grid.granularity) G.shield"
     
