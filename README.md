@@ -1,4 +1,8 @@
 # ReproducibilityPackage
+Sample results are available as a [Release](https://github.com/AsgerHB/Shielded-Learning-for-Hybrid-Systems/releases/tag/Results). 
+
+The longest-running experiment is around 80 hours. No graphics acceleration is required.
+
 
 ## Installation Instructions
 
