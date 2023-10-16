@@ -10,7 +10,6 @@ begin
 	if isdefined(Main, :PlutoRunner) # Check if run as notebook
 		Pkg.activate("..")
 	end
-	Pkg.develop("GridShielding")
 	using GridShielding
 
 	include("../Shared Code/DC-DC Converter.jl")

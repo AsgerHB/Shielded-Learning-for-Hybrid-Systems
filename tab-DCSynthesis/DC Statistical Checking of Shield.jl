@@ -20,7 +20,6 @@ begin
 	if isdefined(Main, :PlutoRunner)
 		Pkg.activate("..")
 	end
-	Pkg.develop("GridShielding")
 	using GridShielding
 
 	include("../Shared Code/DC-DC Converter.jl")

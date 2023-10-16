@@ -18,7 +18,6 @@ end
 begin
 	using Pkg
 	Pkg.activate("..")
-	Pkg.develop("GridShielding")
 	using GridShielding
 	
 	using JSON

@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.22
+# v0.19.27
 
 using Markdown
 using InteractiveUtils
@@ -18,7 +18,6 @@ end
 begin
 	using Pkg
 	Pkg.activate("..")
-	Pkg.develop("GridShielding")
 	using GridShielding
 	using Plots
 	using PlutoLinks

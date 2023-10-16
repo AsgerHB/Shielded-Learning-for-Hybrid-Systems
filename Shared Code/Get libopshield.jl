@@ -1,7 +1,6 @@
 # Plots required by BBShieldSynthesis. fml.
 using Plots
 using Serialization
-Pkg.develop("GridShielding")
 using GridShielding
 include("../Shared Code/ExperimentUtilities.jl")
 include("../Shared Code/OilPump.jl")
