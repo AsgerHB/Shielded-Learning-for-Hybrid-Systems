@@ -1,5 +1,24 @@
 # ReproducibilityPackage
-Sample results are available as a [Release](https://github.com/AsgerHB/Shielded-Learning-for-Hybrid-Systems/releases/tag/Results). 
+Sample results are available as a [Release](https://github.com/AsgerHB/Shielded-Learning-for-Hybrid-Systems/releases/tag/Results).
+To cite the work, you can use:
+
+```
+@inproceedings{BrorholtJLLS24,
+  author       = {Asger Horn Brorholt and
+                  Peter Gj{\o}l Jensen and
+                  Kim Guldstrand Larsen and
+                  Florian Lorber and
+                  Christian Schilling},
+  title        = {Shielded reinforcement learning for hybrid systems},
+  booktitle    = {{(A)ISoLA}},
+  series       = {LNCS},
+  volume       = {14380},
+  publisher    = {Springer},
+  year         = {2024},
+  url          = {https://doi.org/10.1007/978-3-031-46002-9\_3},
+  doi          = {10.1007/978-3-031-46002-9\_3}
+}
+```
 
 The longest-running experiment is around 80 hours. No graphics acceleration is required.
 
