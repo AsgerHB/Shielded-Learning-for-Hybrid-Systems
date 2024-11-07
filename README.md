@@ -1,5 +1,13 @@
-# ReproducibilityPackage
-Sample results are available as a [Release](https://github.com/AsgerHB/Shielded-Learning-for-Hybrid-Systems/releases/tag/Results).
+# Reproducibility Package for the Paper "Shielded Reinforcement Learning for Hybrid Systems"
+
+This repsitory contains supplementary code for the paper 
+*Shielded Reinforcement Learning for Hybrid Systems*
+by Asger Horn Brorholt, Peter Gjøl Jensen, Kim Guldstrand Larsen, Florian Lorber and Christian Schilling. ([doi](https://doi.org/10.1007/978-3-031-46002-9_3), [arxiv](https://arxiv.org/abs/2308.14424))
+This paper was published in 
+*Bridging the Gap Between AI and Reality - 1st International Conference* and presented at the AISoLA conference in 2023.
+
+
+Sample results are available as a [Release](https://github.com/AsgerHB/Shielded-Learning-for-Hybrid-Systems/releases/tag/Results). 
 To cite the work, you can use:
 
 ```
